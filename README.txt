@@ -9,6 +9,7 @@ I will mostly limit the refactoring to the following:
 - Removing null objects/null with Option
 - Rearrangement/pruning of member variables
 - Freedom to alter lookup table implementation
+- Wrapping existing types with newtypes for expressiveness
 
 The following will be preserved:
 - Duplication of different files that are essentially the same
