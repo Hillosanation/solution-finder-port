@@ -60,8 +60,9 @@ const VALUE_LIST: [Piece; PIECE_COUNT] = [
 
 /// Porting note: casting replaces getNumber
 impl Piece {
-    // Panics if number is out of range.
-    pub fn get_block(number: u8) -> Self {
+    /// Porting note: replaces getBlock
+    /// Panics if number is out of range.
+    pub fn new(number: u8) -> Self {
         VALUE_LIST[number as usize]
     }
 
@@ -164,13 +165,13 @@ mod tests {
 
     #[test]
     fn get_block() {
-        assert_eq!(Piece::get_block(0), Piece::T);
-        assert_eq!(Piece::get_block(1), Piece::I);
-        assert_eq!(Piece::get_block(2), Piece::L);
-        assert_eq!(Piece::get_block(3), Piece::J);
-        assert_eq!(Piece::get_block(4), Piece::S);
-        assert_eq!(Piece::get_block(5), Piece::Z);
-        assert_eq!(Piece::get_block(6), Piece::O);
+        assert_eq!(Piece::new(0), Piece::T);
+        assert_eq!(Piece::new(1), Piece::I);
+        assert_eq!(Piece::new(2), Piece::L);
+        assert_eq!(Piece::new(3), Piece::J);
+        assert_eq!(Piece::new(4), Piece::S);
+        assert_eq!(Piece::new(5), Piece::Z);
+        assert_eq!(Piece::new(6), Piece::O);
     }
 
     #[test]
