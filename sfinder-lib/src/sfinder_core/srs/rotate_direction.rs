@@ -1,6 +1,6 @@
 /// Porting note: changed enum naming to make the rotation more explicit
 #[derive(Debug, Clone, Copy)]
-enum RotateDirection {
+pub enum RotateDirection {
     Clockwise,
     CounterClockwise,
     Rotate180,
