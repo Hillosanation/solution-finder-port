@@ -13,4 +13,4 @@ I will mostly limit the refactoring to the following:
 
 The following will be preserved:
 - Duplication of different files that are essentially the same
-- All Interface APIs
+- All interface APIs (naming may be different, but functionality should stay the same)
