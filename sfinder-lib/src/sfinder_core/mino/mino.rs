@@ -14,7 +14,7 @@ pub struct Mino {
     mask: u64,
     /// Porting note: combined all bounds
     bounds: MinMaxBounds,
-    /// TODO: this doesn't seem to be used in hotspots, prune from Mino and generate on demand?
+    /// TODO (#2): this doesn't seem to be used in hotspots, prune from Mino and generate on demand?
     positions: Positions,
 }
 
@@ -159,6 +159,7 @@ impl HashCode for Mino {
     type Output = u8;
 
     fn hash_code(&self) -> Self::Output {
+        // TODO (#1): use non-colliding hash for Mino instead?
         self.piece.hash_code() ^ self.rotate.hash_code()
     }
 }
