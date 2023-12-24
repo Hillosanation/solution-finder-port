@@ -1,4 +1,6 @@
 //! Porting note: min/max functions used in the original function are now precalculated. Their validity is checked in test cases, and they look the same outside the module.
+//! Items marked as pub(super) are shared with mino.rs
+
 use crate::common::datastore::coordinate::Coordinate;
 use std::fmt::Display;
 
@@ -14,11 +16,12 @@ pub enum Piece {
     O,
 }
 
-struct MinMaxBounds {
-    min_x: i8,
-    max_x: i8,
-    min_y: i8,
-    max_y: i8,
+#[derive(Debug)]
+pub(super) struct MinMaxBounds {
+    pub(super) min_x: i8,
+    pub(super) max_x: i8,
+    pub(super) min_y: i8,
+    pub(super) max_y: i8,
 }
 
 const PIECE_COUNT: usize = 7;

@@ -2,7 +2,7 @@ use crate::sfinder_core::srs::rotate_direction::RotateDirection;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Rotate {
+pub enum Rotate {
     Spawn = 0,
     Right,
     Reverse,
