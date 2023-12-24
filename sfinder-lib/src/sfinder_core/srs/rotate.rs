@@ -1,7 +1,7 @@
 use crate::{extras::hash_code::HashCode, sfinder_core::srs::rotate_direction::RotateDirection};
 
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Rotate {
     Spawn = 0,
     Right,

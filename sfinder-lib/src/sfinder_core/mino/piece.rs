@@ -6,7 +6,7 @@ use crate::extras::hash_code::HashCode;
 use std::fmt::Display;
 
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Piece {
     T = 0,
     I,
