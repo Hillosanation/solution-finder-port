@@ -27,9 +27,11 @@ pub(super) struct MinMaxBounds {
 const PIECE_COUNT: usize = 7;
 const CELL_COUNT: usize = 4;
 
+pub(super) type Positions = [Coordinate; CELL_COUNT];
+
 /// Indexed by Piece
 #[rustfmt::skip]
-const POSITION_MAP: [[Coordinate; CELL_COUNT]; PIECE_COUNT] = [
+const POSITION_MAP: [Positions; PIECE_COUNT] = [
     // Porting note: Reuse Coordinate here to make it more explicit
     [Coordinate::new(0, 0), Coordinate::new(-1, 0), Coordinate::new(1, 0), Coordinate::new(0, 1)],
     [Coordinate::new(0, 0), Coordinate::new(-1, 0), Coordinate::new(1, 0), Coordinate::new(2, 0)],
@@ -75,6 +77,10 @@ impl Piece {
 
     pub fn get_size() -> usize {
         PIECE_COUNT
+    }
+
+    pub fn get_positions(self) -> Positions {
+        POSITION_MAP[self as usize]
     }
 
     pub fn min_x(self) -> i8 {
