@@ -2,6 +2,7 @@
 //! Items marked as pub(super) are shared with mino.rs
 
 use crate::common::datastore::coordinate::Coordinate;
+use crate::extras::hash_code::HashCode;
 use std::fmt::Display;
 
 #[repr(u8)]
@@ -99,6 +100,22 @@ impl Piece {
         MINMAX_MAP[self as usize].max_y
     }
 }
+
+impl HashCode for Piece {
+    type Output = u8;
+
+    fn hash_code(&self) -> Self::Output {
+        *self as u8
+    }
+}
+
+impl std::hash::Hash for Piece {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u8(self.hash_code())
+    }
+}
+
+impl nohash::IsEnabled for Piece {}
 
 /// Porting note: This replaces getName
 impl Display for Piece {

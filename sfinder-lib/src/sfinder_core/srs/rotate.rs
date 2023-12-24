@@ -1,4 +1,4 @@
-use crate::sfinder_core::srs::rotate_direction::RotateDirection;
+use crate::{extras::hash_code::HashCode, sfinder_core::srs::rotate_direction::RotateDirection};
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -69,6 +69,22 @@ impl Rotate {
         }
     }
 }
+
+impl HashCode for Rotate {
+    type Output = u8;
+
+    fn hash_code(&self) -> Self::Output {
+        *self as u8
+    }
+}
+
+impl std::hash::Hash for Rotate {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u8(self.hash_code())
+    }
+}
+
+impl nohash::IsEnabled for Rotate {}
 
 #[cfg(test)]
 mod tests {
