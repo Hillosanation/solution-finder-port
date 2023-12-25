@@ -41,12 +41,12 @@ const KEY_MASKS: [u64; 25] = [
 // y行上のブロックは対象に含まない
 // TODO: Make a better type wrapper for Keys
 /// Crashes if y > 24
-pub fn get_mask_for_key_below_y(y: u8) -> u64 {
+pub const fn get_mask_for_key_below_y(y: u8) -> u64 {
     KEY_MASKS[y as usize]
 }
 
 // y行上のブロックは対象に含む
-pub fn get_mask_for_key_above_y(y: u8) -> u64 {
+pub const fn get_mask_for_key_above_y(y: u8) -> u64 {
     repeat_rows(0b0000001111) - get_mask_for_key_below_y(y)
 }
 
@@ -128,14 +128,14 @@ pub fn bit_to_y_from_key(key: u64) -> u8 {
     );
 
     if let low @ 1.. = key & repeat_rows(0b0000000001) {
-        todo!()
+        bit_operators::bit_to_y(low)
     } else if let mid_low @ 1.. = key & repeat_rows(0b0000000010) {
-        todo!()
+        bit_operators::bit_to_y(mid_low >> 1) + 6
     } else if let mid_high @ 1.. = key & repeat_rows(0b0000000100) {
-        todo!()
+        bit_operators::bit_to_y(mid_high >> 2) + 6 * 2
     } else {
         let high = key & repeat_rows(0b0000001000);
-        todo!()
+        bit_operators::bit_to_y(high >> 3) + 6 * 3
     }
 }
 
@@ -183,7 +183,145 @@ pub fn to_bit_key(column_key: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        sfinder_core::field::{field::Field, small_field::SmallField},
+        sfinder_lib::boolean_walker,
+    };
+
     use super::*;
+    use rand::{thread_rng, Rng};
 
     // todo, implement BitOperators first
+
+    #[test]
+    fn test_get_delete_key() {
+        let mut rngs = thread_rng();
+
+        for booleans in boolean_walker::walk(6) {
+            let mut field = SmallField::new();
+            let mut expect_delete_key = 0;
+
+            for y in 0..booleans.len() as u8 {
+                if booleans[y as usize] {
+                    // ラインを全て埋める
+                    for x in 0..10 {
+                        field.set_block(x, y);
+                    }
+                    expect_delete_key += get_delete_bit_key(y);
+                } else {
+                    // ラインを全て埋めない
+                    for x in 0..10 {
+                        if rngs.gen_bool(0.8) {
+                            field.set_block(x, y);
+                        }
+                    }
+                    field.remove_block(rngs.gen_range(0..10), y);
+                }
+
+                let board = field.get_x_board();
+                let delete_key = get_delete_key(board);
+                assert_eq!(delete_key, expect_delete_key)
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_mask_for_key_below_y() {
+        for y in 0..=24 {
+            let mask = get_mask_for_key_below_y(y);
+
+            // y行より下の行が含まれることを確認
+            for line in 0..y {
+                assert_ne!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+            }
+
+            // y行を含めた上の行が含まれないことを確認
+            for line in y..24 {
+                assert_eq!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_mask_for_key_above_y() {
+        for y in 0..=24 {
+            let mask = get_mask_for_key_above_y(y);
+            // println!("{mask:0b}");
+
+            // y行より下の行が含まれないことを確認
+            for line in 0..y {
+                assert_eq!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+            }
+
+            // y行を含めた上の行が含まれることを確認
+            for line in y..24 {
+                assert_ne!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_delete_bit_key() {
+        for y in 0..24 {
+            assert_eq!(get_delete_bit_key(y), 1 << ((y % 6) * 10 + (y / 6)));
+        }
+    }
+
+    #[test]
+    fn mirror_sample_case() {
+        assert_eq!(
+            mirror(0b001111100011111000001101010001),
+            0b000111110000000111111000101011
+        );
+    }
+
+    #[test]
+    fn test_bit_to_y_from_key() {
+        for y in 0..24 {
+            let key = get_bit_key(y);
+            assert_eq!(bit_to_y_from_key(key), y);
+        }
+    }
+
+    #[test]
+    fn test_extract_lower_bit() {
+        let mut rngs = thread_rng();
+
+        for y in 0..24 {
+            let key = get_bit_key(y);
+
+            let mut current = key;
+            for dy in y + 1..24 {
+                if rngs.gen_bool(0.5) {
+                    current |= get_bit_key(dy);
+                }
+            }
+
+            assert_eq!(extract_lower_bit(current), key);
+        }
+    }
+
+    #[test]
+    fn test_get_column_key() {
+        assert_eq!(get_column_key(0), 0b1);
+        assert_eq!(get_column_key(1), 0b10);
+        assert_eq!(get_column_key(2), 0b100);
+        assert_eq!(get_column_key(10), 0b10000000000);
+    }
+
+    #[test]
+    fn test_to_column_key() {
+        for y in 0..24 {
+            let bit_key = get_bit_key(y);
+            assert_eq!(to_column_key(bit_key), get_column_key(y));
+        }
+    }
+
+    #[test]
+    fn test_to_bit_key() {
+        for y in 0..24 {
+            let column_key = get_column_key(y);
+            assert_eq!(to_bit_key(column_key), get_bit_key(y));
+        }
+    }
 }
