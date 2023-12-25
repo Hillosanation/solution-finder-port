@@ -1,3 +1,3 @@
-// mod field;
+mod field;
 mod mino;
 mod srs;
