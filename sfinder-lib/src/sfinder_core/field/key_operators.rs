@@ -1,11 +1,6 @@
-/// Helper function to writing repeating a bit pattern for all rows on a board. This should be evaluated at compile time.
-const fn repeat_rows(row_mask: u64) -> u64 {
-    // assert cannot be used in const fn
-    if row_mask & !0x3ff != 0 {
-        panic!("invalid row mask");
-    }
-    row_mask | row_mask << 10 | row_mask << 20 | row_mask << 30 | row_mask << 40 | row_mask << 50
-}
+use crate::sfinder_core::field::bit_operators;
+
+use super::bit_operators::repeat_rows;
 
 /// Folds each row in the board to signify which rows are completely filled.
 pub const fn get_delete_key(board: u64) -> u64 {
