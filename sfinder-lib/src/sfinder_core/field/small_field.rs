@@ -19,11 +19,11 @@ impl SmallField {
     }
 
     fn get_x_mask(x: u8, y: u8) -> u64 {
-        1 << x + y * FIELD_WIDTH
+        1 << (x + y * FIELD_WIDTH)
     }
 
     fn get_row_mask(y: u8) -> u64 {
-        0x3ff << y * FIELD_WIDTH
+        0x3ff << (y * FIELD_WIDTH)
     }
 }
 
@@ -100,7 +100,7 @@ impl Field for SmallField {
     }
 
     fn exists_above_row(&self, y: u8) -> bool {
-        let mask = VALID_BOARD_RANGE << y * FIELD_WIDTH;
+        let mask = VALID_BOARD_RANGE << (y * FIELD_WIDTH);
         y < MAX_FIELD_HEIGHT && (self.0 & mask) != 0
     }
 
@@ -128,11 +128,11 @@ impl Field for SmallField {
     }
 
     fn get_block_count_in_row(&self, y: u8) -> u32 {
-        (self.0 & (0x3ff << y * FIELD_WIDTH)).count_ones()
+        (self.0 & 0x3ff << (y * FIELD_WIDTH)).count_ones()
     }
 
     fn exists_block_in_row(&self, y: u8) -> bool {
-        (self.0 & (0x3ff << y * FIELD_WIDTH)) != 0
+        (self.0 & 0x3ff << (y * FIELD_WIDTH)) != 0
     }
 
     fn get_num_of_all_blocks(&self) -> u32 {
