@@ -1,0 +1,278 @@
+use super::field::{BoardCount, Field};
+use crate::{extras::hash_code::HashCode, sfinder_core::mino::mino::Mino};
+
+const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
+const FIELD_WIDTH: u8 = 10;
+const MAX_FIELD_HEIGHT: u8 = 6;
+
+/// Porting note: clone replaces copy constructor
+#[derive(Clone)]
+pub struct SmallField(u64);
+
+impl SmallField {
+    pub fn new() -> Self {
+        Self(0)
+    }
+
+    pub fn get_x_board(&self) -> u64 {
+        self.0
+    }
+
+    fn get_x_mask(x: u8, y: u8) -> u64 {
+        1 << x + y * FIELD_WIDTH
+    }
+
+    fn get_row_mask(y: u8) -> u64 {
+        0x3ff << y * FIELD_WIDTH
+    }
+}
+
+impl From<u64> for SmallField {
+    fn from(value: u64) -> Self {
+        Self(value)
+    }
+}
+
+impl Field for SmallField {
+    fn get_max_field_height(&self) -> u8 {
+        MAX_FIELD_HEIGHT
+    }
+
+    fn get_board_count(&self) -> BoardCount {
+        BoardCount::Small
+    }
+
+    fn set_block(&mut self, x: u8, y: u8) {
+        self.0 |= Self::get_x_mask(x, y);
+    }
+
+    fn remove_block(&mut self, x: u8, y: u8) {
+        self.0 &= !Self::get_x_mask(x, y);
+    }
+
+    fn put(&mut self, mino: &Mino, x: u8, y: u8) {
+        self.0 |= mino.get_mask(x, y as i8);
+    }
+
+    fn put_piece(&mut self, piece: super::field::OriginalPiece) {
+        todo!()
+    }
+
+    fn can_put(&self, mino: &Mino, x: u8, y: u8) -> bool {
+        MAX_FIELD_HEIGHT + 2 <= y || self.0 & mino.get_mask(x, y as i8) == 0
+    }
+
+    fn can_put_piece(&self, piece: super::field::OriginalPiece) -> bool {
+        todo!()
+    }
+
+    fn remove(&mut self, mino: &Mino, x: u8, y: u8) {
+        self.0 &= !mino.get_mask(x, y as i8);
+    }
+
+    fn remove_piece(&mut self, piece: super::field::OriginalPiece) {
+        todo!()
+    }
+
+    fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8 {
+        let min = -mino.get_min_y() as u8;
+        (min..start_y)
+            .rev()
+            .find(|&y| !self.can_put(mino, x, y))
+            .map(|y| y + 1)
+            .unwrap_or(min)
+    }
+
+    fn can_reach_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> bool {
+        (start_y + 1..MAX_FIELD_HEIGHT - mino.get_min_y() as u8).all(|y| self.can_put(mino, x, y))
+    }
+
+    fn can_reach_on_harddrop_piece(&self, piece: super::field::OriginalPiece) -> bool {
+        todo!()
+    }
+
+    fn is_empty_block(&self, x: u8, y: u8) -> bool {
+        self.0 & Self::get_x_mask(x, y) == 0
+    }
+
+    fn exists_block(&self, x: u8, y: u8) -> bool {
+        !self.is_empty_block(x, y)
+    }
+
+    fn exists_above_row(&self, y: u8) -> bool {
+        let mask = VALID_BOARD_RANGE << y * FIELD_WIDTH;
+        y < MAX_FIELD_HEIGHT && (self.0 & mask) != 0
+    }
+
+    fn is_empty(&self) -> bool {
+        self.0 == 0
+    }
+
+    fn is_filled_in_column(&self, x: u8, max_y: u8) -> bool {
+        if max_y == 0 {
+            return true;
+        }
+        todo!();
+    }
+
+    fn is_wall_between_left(&self, x: u8, max_y: u8) -> bool {
+        todo!()
+    }
+
+    fn is_on_ground(&self, mino: &Mino, x: u8, y: u8) -> bool {
+        y <= -mino.get_min_y() as u8 || !self.can_put(mino, x, y - 1)
+    }
+
+    fn get_block_count_in_column(&self, x: u8, max_y: u8) -> u8 {
+        todo!()
+    }
+
+    fn get_block_count_in_row(&self, y: u8) -> u32 {
+        (self.0 & (0x3ff << y * FIELD_WIDTH)).count_ones()
+    }
+
+    fn exists_block_in_row(&self, y: u8) -> bool {
+        (self.0 & (0x3ff << y * FIELD_WIDTH)) != 0
+    }
+
+    fn get_num_of_all_blocks(&self) -> u32 {
+        self.0.count_ones()
+    }
+
+    fn clear_filled_rows(&mut self) -> u32 {
+        self.clear_filled_rows_return_key().count_ones()
+    }
+
+    fn clear_filled_rows_return_key(&mut self) -> u64 {
+        let delete_key = self.get_filled_rows_key();
+
+        self.delete_rows_with_key(delete_key);
+
+        delete_key
+    }
+
+    fn get_filled_rows_key(&self) -> u64 {
+        todo!()
+    }
+
+    fn get_using_key(&self) -> u64 {
+        todo!()
+    }
+
+    fn insert_blank_row_with_key(&mut self, delete_key: u64) {
+        todo!()
+    }
+
+    fn insert_filled_row_with_key(&mut self, delete_key: u64) {
+        todo!()
+    }
+
+    fn delete_rows_with_key(&mut self, delete_key: u64) {
+        todo!()
+    }
+
+    fn fill_row(&mut self, y: u8) {
+        self.0 |= Self::get_row_mask(y);
+    }
+
+    fn get_board(&self, index: u8) -> u64 {
+        if index == 0 {
+            self.0
+        } else {
+            0
+        }
+    }
+
+    fn prune(&self, max_height: u8) -> Box<dyn Field> {
+        Box::new(self.clone())
+    }
+
+    fn merge(&mut self, other: &dyn Field) {
+        self.0 |= other.get_board(0);
+    }
+
+    fn can_merge(&self, other: &dyn Field) -> bool {
+        self.0 & other.get_board(0) == 0
+    }
+
+    fn reduce(&mut self, other: &dyn Field) {
+        self.0 &= !other.get_board(0);
+    }
+
+    fn get_upper_y_with_4_blocks(&self) -> u8 {
+        todo!()
+    }
+
+    fn get_lower_y(&self) -> u8 {
+        todo!()
+    }
+
+    fn slide_left(&mut self, slide: u8) {
+        todo!()
+    }
+
+    fn slide_right(&mut self, slide: u8) {
+        todo!()
+    }
+
+    fn slide_down_one(&mut self) {
+        self.0 >>= FIELD_WIDTH;
+    }
+
+    fn slide_down(&mut self, slide: u8) {
+        self.0 >>= slide * FIELD_WIDTH;
+    }
+
+    fn slide_up_with_filled_row(&mut self, slide: u8) {
+        self.0 <<= slide * FIELD_WIDTH;
+    }
+
+    fn slide_up_with_empty_row(&mut self, slide: u8) {
+        let count = slide * FIELD_WIDTH;
+        self.0 = (self.0 << count) | ((1 << count) - 1);
+    }
+
+    fn get_min_x(&self) -> Option<u8> {
+        (!self.is_empty()).then_some(todo!())
+    }
+
+    fn contains(&self, child: &dyn Field) -> bool {
+        // prevents Large from ever running
+        assert!(child.get_board_count() <= BoardCount::Middle);
+
+        let child_board_low = child.get_board(0);
+
+        match child.get_board_count() {
+            BoardCount::Small => self.0 & child_board_low == child_board_low,
+            BoardCount::Middle => {
+                self.0 & child_board_low == child_board_low && child.get_board(1) == 0
+            }
+            BoardCount::Large => {
+                self.0 & child_board_low == child_board_low
+                    && child.get_board(1) == 0
+                    && child.get_board(2) == 0
+                    && child.get_board(3) == 0
+            }
+        }
+    }
+
+    fn invert(&mut self) {
+        self.0 = !self.0 & VALID_BOARD_RANGE;
+    }
+
+    fn mirror(&mut self) {
+        todo!()
+    }
+
+    fn mask(&mut self, mask_field: &dyn Field) {
+        self.0 &= mask_field.get_board(0);
+    }
+}
+
+impl HashCode for SmallField {
+    type Output = u64;
+
+    fn hash_code(&self) -> Self::Output {
+        self.0 ^ self.0 >> 32
+    }
+}

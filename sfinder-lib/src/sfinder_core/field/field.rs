@@ -9,7 +9,7 @@ pub trait Field /* : PartialOrd */ {
     // Porting note: This function is used in conjunction with getBoard to be able to access
     // the other Field's data even when they may be different concrete types
     // 6列分のフィールドを表現するボードの個数を返却
-    fn get_board_count(&self) -> u8;
+    fn get_board_count(&self) -> BoardCount;
 
     // TODO: Bundle coordinates with Coordinate struct
     // 指定した位置にブロックをおく
@@ -19,28 +19,28 @@ pub trait Field /* : PartialOrd */ {
     fn remove_block(&mut self, x: u8, y: u8);
 
     // 指定した位置にミノの形にブロックをおく
-    fn put(&mut self, mino: Mino, x: u8, y: u8);
+    fn put(&mut self, mino: &Mino, x: u8, y: u8);
 
     // 指定した位置にピースの形にブロックをおく
     fn put_piece(&mut self, piece: OriginalPiece);
 
     // 指定した位置にミノを置くことができるとき true を返却
-    fn can_put(&self, mino: Mino, x: u8, y: u8) -> bool;
+    fn can_put(&self, mino: &Mino, x: u8, y: u8) -> bool;
 
     // 指定した位置にピースをおくことができるか（足場は確認しない）
     fn can_put_piece(&self, piece: OriginalPiece) -> bool;
 
     // 指定した位置のミノの形でブロックを消す
-    fn remove(&mut self, mino: Mino, x: u8, y: u8);
+    fn remove(&mut self, mino: &Mino, x: u8, y: u8);
 
     // 指定した位置のピースの形でブロックを消す
     fn remove_piece(&mut self, piece: OriginalPiece);
 
     // 指定した位置からミノをharddropしたとき、接着するyを返却
-    fn get_y_on_harddrop(&self, mino: Mino, x: u8, y: u8) -> u8;
+    fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8;
 
     // 一番上からharddropで指定した位置を通過するとき true を返却
-    fn can_reach_on_harddrop(&self, mino: Mino, x: u8, y: u8) -> bool;
+    fn can_reach_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> bool;
 
     // 一番上からharddropで指定した位置を通過するとき true を返却
     fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool;
@@ -65,7 +65,7 @@ pub trait Field /* : PartialOrd */ {
     fn is_wall_between_left(&self, x: u8, max_y: u8) -> bool;
 
     // 指定した位置のミノが接着できるとき true を返却
-    fn is_on_ground(&self, mino: Mino, x: u8, y: u8) -> bool;
+    fn is_on_ground(&self, mino: &Mino, x: u8, y: u8) -> bool;
 
     // Porting note: replaces getBlockCountBelowOnX, altered name to match is_filled_in_column
     // x列上で、maxY行より下にあるブロックの個数を返却 （maxY行上のブロックは対象に含まない）
@@ -73,17 +73,17 @@ pub trait Field /* : PartialOrd */ {
 
     // Porting note: replaces getBlockCountBelowOnY, altered name to match is_filled_in_column
     // y行上にあるブロックの個数を返却
-    fn get_block_count_in_row(&self, y: u8) -> u8;
+    fn get_block_count_in_row(&self, y: u8) -> u32;
 
     // y行上にブロックがあるとき true を返却
     fn exists_block_in_row(&self, y: u8) -> bool;
 
     // すべてのブロックの個数を返却
-    fn get_num_of_all_blocks(&self) -> u8;
+    fn get_num_of_all_blocks(&self) -> u32;
 
     // Porting note: replaces clearLine
     // ブロックがそろった行を削除し、削除した行数を返却
-    fn clear_filled_rows(&mut self) -> u8;
+    fn clear_filled_rows(&mut self) -> u32;
 
     // TODO: wrap in newtype for functions that return a Key representing the cleared rows
 
@@ -155,10 +155,10 @@ pub trait Field /* : PartialOrd */ {
     fn slide_down(&mut self, slide: u8);
 
     // フィールドを上に指定したブロック分スライドさせる。空のラインを追加する
-    fn slide_up_with_filled_row(&mut self, slide: u8);
+    fn slide_up_with_empty_row(&mut self, slide: u8);
 
     // フィールドを上に指定したブロック分スライドさせる。ブロックで埋まったラインを追加する
-    fn slide_up_with_empty_row(&mut self, slide: u8);
+    fn slide_up_with_filled_row(&mut self, slide: u8);
 
     // Porting note: use Option instead
     // 最も小さいx座標を取得。ブロックが存在しないとき -1 を返却
@@ -179,7 +179,7 @@ pub trait Field /* : PartialOrd */ {
 }
 
 pub trait FieldHelper {
-    fn is_in(mino: Mino, x: i8, y: i8) -> bool {
+    fn is_in(mino: &Mino, x: i8, y: i8) -> bool {
         let min_x = x + mino.get_min_x();
         let max_x = x + mino.get_max_x();
         let min_y = y + mino.get_min_y();
@@ -189,6 +189,13 @@ pub trait FieldHelper {
 }
 
 impl FieldHelper for dyn Field {}
+
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub enum BoardCount {
+    Small = 1,
+    Middle = 2,
+    Large = 4,
+}
 
 // temp struct
 pub struct OriginalPiece {}
