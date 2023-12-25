@@ -62,7 +62,7 @@ pub fn get_bit_keys(ys: &[u8]) -> u64 {
         .fold(0, std::ops::BitOr::bitor)
 }
 
-// TODO: inline this function
+// TODO (#3): inline this function
 pub fn get_delete_bit_key(y: u8) -> u64 {
     get_bit_key(y)
 }
@@ -94,7 +94,7 @@ const BIT_KEY_MASKS: [u64; 24] = [
     0b0000001000_0000000000_0000000000_0000000000_0000000000_0000000000,
 ];
 
-// TODO: check if using 1 << (y % 6 * 10 + y / 6) instead is good enough
+// TODO (#4): check if using 1 << (y % 6 * 10 + y / 6) instead is good enough
 /// Panics if y > 23
 pub fn get_bit_key(y: u8) -> u64 {
     BIT_KEY_MASKS[y as usize]
