@@ -1,7 +1,7 @@
 use super::action::action::Action;
 use crate::sfinder_core::mino::piece::Piece;
 
-pub trait Operation<Coord>: Action<Coord = Coord>
+pub trait Operation<Coord>: Action<Coord>
 where
     u32: From<Coord>,
     u64: From<Coord>,

@@ -6,5 +6,5 @@ where
     u32: From<Coord>,
     u64: From<Coord>,
 {
-    fn get_mino(&self) -> Mino;
+    fn get_mino(&self) -> &Mino;
 }

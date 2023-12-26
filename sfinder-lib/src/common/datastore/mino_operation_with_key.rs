@@ -25,13 +25,7 @@ where
     }
 }
 
-impl<Coord> PartialEq for dyn MinoOperation<Coord>
-where
-    dyn MinoOperation<Coord>: MinoOperationWithKey<Coord>,
-    u32: From<Coord>,
-    u64: From<Coord>,
-    Coord: PartialEq,
-{
+impl<'a> PartialEq for dyn MinoOperationWithKey<u8> + 'a {
     fn eq(&self, other: &Self) -> bool {
         self.get_x() == other.get_x()
             && self.get_y() == other.get_y()
