@@ -255,13 +255,124 @@ fn insert_empty_row_inner(x: u64, mask: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use rand::thread_rng;
-
     use super::*;
+    use crate::{
+        sfinder_core::field::{
+            field::Field,
+            key_operators::{get_delete_bit_key, get_delete_key},
+            small_field::SmallField,
+        },
+        sfinder_lib::boolean_walker,
+    };
+    use rand::{thread_rng, Rng};
 
     #[test]
     fn test_delete_line() {
         let mut rngs = thread_rng();
-        todo!("Needs BooleanWalker");
+        for booleans in boolean_walker::walk(6) {
+            let mut field = SmallField::new();
+            let mut expect = SmallField::new();
+
+            let mut expect_y = 0;
+            for (y, &boolean) in booleans.iter().enumerate() {
+                if boolean {
+                    // ラインを全て埋める
+                    for x in 0..10 {
+                        field.set_block(x, y as u8);
+                    }
+                } else {
+                    // ラインを全て埋めない
+                    for x in 0..10 {
+                        if rngs.gen_bool(0.8) {
+                            field.set_block(x, y as u8);
+                            expect.set_block(x, expect_y);
+                        }
+                    }
+
+                    let remove_x = rngs.gen_range(0..10);
+                    field.remove_block(remove_x, y as u8);
+                    expect.remove_block(remove_x, expect_y);
+
+                    expect_y += 1;
+                }
+            }
+
+            let board = field.get_x_board();
+            let delete_key = get_delete_key(board);
+            assert_eq!(delete_line(board, delete_key), expect.get_x_board());
+        }
+    }
+
+    #[test]
+    fn test_insert_filled_row() {
+        let mut rngs = thread_rng();
+        for booleans in boolean_walker::walk(6) {
+            let mut field = SmallField::new();
+            let mut expect = SmallField::new();
+            let mut delete_key = 0;
+
+            let mut expect_y = 0;
+            for (y, &boolean) in booleans.iter().enumerate() {
+                if boolean {
+                    // ラインを全て埋める
+                    for x in 0..10 {
+                        expect.set_block(x, y as u8);
+                    }
+                    delete_key |= get_delete_bit_key(y as u8);
+                } else {
+                    // ラインを全て埋めない
+                    for x in 0..10 {
+                        if rngs.gen_bool(0.8) {
+                            expect.set_block(x, y as u8);
+                            field.set_block(x, expect_y);
+                        }
+                    }
+
+                    let remove_x = rngs.gen_range(0..10);
+                    expect.remove_block(remove_x, y as u8);
+                    field.remove_block(remove_x, expect_y);
+
+                    expect_y += 1;
+                }
+            }
+
+            let board = field.get_x_board();
+            assert_eq!(insert_filled_row(board, delete_key), expect.get_x_board());
+        }
+    }
+
+    #[test]
+    fn test_insert_empty_row() {
+        let mut rngs = thread_rng();
+        for booleans in boolean_walker::walk(6) {
+            let mut expect = SmallField::new();
+            let mut field = SmallField::new();
+            let mut delete_key = 0;
+
+            let mut expect_y = 0;
+            for (y, &boolean) in booleans.iter().enumerate() {
+                if boolean {
+                    // ラインを空白にする
+                    delete_key |= get_delete_bit_key(y as u8);
+                } else {
+                    // ラインを全て埋めない
+                    for x in 0..10 {
+                        if rngs.gen_bool(0.8) {
+                            expect.set_block(x, y as u8);
+                            field.set_block(x, expect_y);
+                        }
+                    }
+
+                    let remove_x = rngs.gen_range(0..10);
+                    expect.remove_block(remove_x, y as u8);
+                    field.remove_block(remove_x, expect_y);
+
+                    expect_y += 1;
+                }
+            }
+
+            let board = field.get_x_board();
+            assert_eq!(insert_empty_row(board, delete_key), expect.get_x_board());
+        }
     }
 }
