@@ -18,15 +18,7 @@ fn parse_to_key(left_flags: BoolRows) -> u64 {
 }
 
 fn create_left_flags(pattern: u8) -> BoolRows {
-    // std::array::from_fn(|i| (pattern & (1 << i)) != 0)
-    let mut booleans = [false; 6];
-    let mut value = pattern;
-    for i in 0..6 {
-        booleans[i] = (value & 1) != 0;
-        value >>= 1;
-    }
-
-    booleans
+    std::array::from_fn(|i| (pattern & (1 << i)) != 0)
 }
 
 fn create_operation_insert(
@@ -336,23 +328,62 @@ mod tests {
 
     // test function to check intuition
     fn running() {
-        println!("{:0b}", legacy_parse_to_key(create_left_flags(0b011111)));
-        println!("{:0b}", legacy_parse_to_key(create_left_flags(0b101111)));
-        println!("{:0b}", legacy_parse_to_key(create_left_flags(0b110111)));
-        println!("{:0b}", legacy_parse_to_key(create_left_flags(0b111011)));
-        println!("{:0b}", legacy_parse_to_key(create_left_flags(0b111101)));
-        println!("{:0b}", legacy_parse_to_key(create_left_flags(0b111110)));
+        println!(
+            "{:0b}",
+            legacy_parse_to_key(legacy_create_left_flags(0b011111))
+        );
+        println!(
+            "{:0b}",
+            legacy_parse_to_key(legacy_create_left_flags(0b101111))
+        );
+        println!(
+            "{:0b}",
+            legacy_parse_to_key(legacy_create_left_flags(0b110111))
+        );
+        println!(
+            "{:0b}",
+            legacy_parse_to_key(legacy_create_left_flags(0b111011))
+        );
+        println!(
+            "{:0b}",
+            legacy_parse_to_key(legacy_create_left_flags(0b111101))
+        );
+        println!(
+            "{:0b}",
+            legacy_parse_to_key(legacy_create_left_flags(0b111110))
+        );
     }
 
     // Should be equivalent to column keys, except for it folding the 6 columns into 3.
     #[test]
     fn parse_to_key_agrees() {
         for i in 0..64 {
-            let left_flags = create_left_flags(i);
+            let left_flags = legacy_create_left_flags(i);
             let key = legacy_parse_to_key(left_flags);
             let key2 = parse_to_key(left_flags);
 
             assert_eq!(key, key2, "{key:0b}, {key2:0b}");
+        }
+    }
+
+    fn legacy_create_left_flags(pattern: u8) -> BoolRows {
+        let mut booleans = [false; 6];
+        let mut value = pattern;
+        for i in 0..6 {
+            booleans[i] = (value & 1) != 0;
+            value >>= 1;
+        }
+
+        booleans
+    }
+
+    #[test]
+    fn create_left_flags_agrees() {
+        for pattern in 0..1 << 6 {
+            assert_eq!(
+                create_left_flags(pattern),
+                legacy_create_left_flags(pattern)
+            );
         }
     }
 }
