@@ -1,9 +1,14 @@
 use super::wrapper::wrapper;
 use crate::sfinder_core::field::key_operators::get_bit_key;
 
-const IS_FILLED_ON_DELETE_ROW: bool = true;
-
 type BoolRows = [bool; 6];
+
+#[derive(Clone, Copy)]
+enum GenerationMode {
+    InsertFilled,
+    InsertBlank,
+    Delete,
+}
 
 fn parse_to_key(left_flags: BoolRows) -> u64 {
     let bitkey = left_flags
@@ -21,19 +26,11 @@ fn create_left_flags(pattern: u8) -> BoolRows {
     std::array::from_fn(|i| (pattern & (1 << i)) == 0)
 }
 
-fn create_operation_insert(
-    left_start: &[u8],
-    left_rows: &[u8],
-    left_flags: BoolRows,
-) -> Vec<String> {
-    create_operation(left_start, left_rows, left_flags, true)
-}
-
 fn create_operation(
     left_start: &[u8],
     left_rows: &[u8],
     left_flags: BoolRows,
-    insert: bool, // insert, else delete
+    mode: GenerationMode,
 ) -> Vec<String> {
     let mut operations = Vec::new();
 
@@ -50,16 +47,19 @@ fn create_operation(
         } else {
             let slide = (new_start - src_start) * 10;
 
-            if insert {
-                operations.push(format!("(x & {mask:#x}) << {slide}"));
-            } else {
-                operations.push(format!("(x >> {slide:#x}) & {mask}"));
+            match mode {
+                GenerationMode::InsertFilled | GenerationMode::InsertBlank => {
+                    operations.push(format!("(x & {mask:#x}) << {slide}"));
+                }
+                GenerationMode::Delete => {
+                    operations.push(format!("(x >> {slide:#x}) & {mask}"));
+                }
             }
         }
     }
 
     // 消えたブロックを復元させる
-    if insert && IS_FILLED_ON_DELETE_ROW {
+    if matches!(mode, GenerationMode::InsertFilled) {
         operations.push(format!(
             "{:#x}",
             left_flags
@@ -79,7 +79,7 @@ fn create_operation(
 }
 
 // no need to use map, the keys wont collide
-fn create_bit_operation_map() -> Vec<(u64, String)> {
+fn create_bit_operation_map(mode: GenerationMode) -> Vec<(u64, String)> {
     (0..1 << 6)
         .map(|pattern| {
             let left_flags = create_left_flags(pattern);
@@ -111,7 +111,7 @@ fn create_bit_operation_map() -> Vec<(u64, String)> {
             // println!("start: {left_start:?}\nrow: {left_rows:?}");
 
             // ビット操作に変換する
-            let operation = create_operation_insert(&left_start, &left_rows, left_flags);
+            let operation = create_operation(&left_start, &left_rows, left_flags, mode);
 
             // flagsからkeyに変換
             let key = parse_to_key(left_flags);
@@ -121,9 +121,9 @@ fn create_bit_operation_map() -> Vec<(u64, String)> {
         .collect()
 }
 
-fn run() {
+fn run(mode: GenerationMode) {
     println!("match x {{");
-    for (key, operation) in create_bit_operation_map() {
+    for (key, operation) in create_bit_operation_map(mode) {
         println!("    {:#024b} => {operation},", key);
     }
     println!("    _ => unreachable!(),");
@@ -132,7 +132,7 @@ fn run() {
 
 #[test]
 fn a() {
-    run()
+    run(GenerationMode::InsertBlank);
 }
 
 #[cfg(test)]
