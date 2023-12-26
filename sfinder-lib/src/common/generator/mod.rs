@@ -1,2 +1,2 @@
-mod insert_map_generator;
+mod map_generator;
 pub mod wrapper;
