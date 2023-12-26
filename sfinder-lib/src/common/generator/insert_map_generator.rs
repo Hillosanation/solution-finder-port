@@ -47,27 +47,27 @@ fn create_operation(
 
     // 残ったブロックを移動させる
     for (index, (&new_start, row)) in left_start.iter().zip(left_rows.iter()).enumerate() {
-        let src_start = left_rows[0..index].iter().sum::<u8>();
+        let src_start = if index == 0 { 0 } else { left_rows[index - 1] };
         let slide = (new_start - src_start) * 10;
         let mask = ((1u64 << (row * 10)) - 1) << (src_start * 10);
 
         // dbg!(new_start, src_start, slide, mask);
-        if insert {
-            if new_start + row == 6 && new_start == 0 {
-                operations.push("x".to_owned());
-            } else if slide == 0 {
-                // equivalent to slide?
-                operations.push(format!("x & {mask:#x}"));
-            } else {
-                operations.push(format!("(x & {mask:#x}) << {slide}"));
-            }
+        if new_start + row == 6 && new_start == 0 {
+            operations.push("x".to_owned());
         } else {
-            if new_start + row == 6 && new_start == 0 {
-                operations.push("x".to_owned());
-            } else if new_start == 0 {
-                operations.push(format!("x & {mask:#x}"));
+            if insert {
+                if slide == 0 {
+                    operations.push(format!("x & {mask:#x}"));
+                } else {
+                    operations.push(format!("(x & {mask:#x}) << {slide}"));
+                }
             } else {
-                operations.push(format!("(x & {mask:#x}) >> {slide}"));
+                if new_start == 0 {
+                    // equivalent to slide?
+                    operations.push(format!("x & {mask:#x}"));
+                } else {
+                    operations.push(format!("(x & {mask:#x}) >> {slide}"));
+                }
             }
         }
     }
@@ -111,7 +111,7 @@ fn create_bit_operation_map() -> Vec<(u64, String)> {
                 } else {
                     if count != 0 {
                         // always push prefix sum here, instead of just getting the count
-                        left_rows.push(count);
+                        left_rows.push(left_rows.last().unwrap_or(&0) + count);
                     }
                     count = 0;
                 }
