@@ -91,30 +91,6 @@ fn create_operation(
     return operations;
 }
 
-fn create_operation_delete(left_start: &[u8], left_rows: &[u8], _: BoolRows) -> Vec<String> {
-    let mut operations = Vec::new();
-
-    for (index, (&new_start, row)) in left_start.iter().zip(left_rows.iter()).enumerate() {
-        let src_start = left_rows[0..index].iter().sum::<u8>();
-        let slide = (new_start - src_start) * 10;
-        let mask = ((1u64 << (row * 10)) - 1) << (src_start * 10);
-
-        if new_start + row == 6 && new_start == 0 {
-            operations.push("x".to_owned());
-        } else if new_start == 0 {
-            operations.push(format!("x & {mask:#x}"));
-        } else {
-            operations.push(format!("(x & {mask:#x}) >> {slide}"));
-        }
-    }
-
-    if operations.is_empty() {
-        operations.push("0".to_string());
-    }
-
-    operations
-}
-
 // no need to use map, the keys wont collide
 fn create_bit_operation_map() -> Vec<(u64, String)> {
     (0..1 << 6)
@@ -125,6 +101,7 @@ fn create_bit_operation_map() -> Vec<(u64, String)> {
             let mut left_start = Vec::new();
             let mut left_rows = Vec::new();
             let mut count = 0;
+
             for (i, &flag) in left_flags.iter().enumerate() {
                 if flag {
                     if count == 0 {
