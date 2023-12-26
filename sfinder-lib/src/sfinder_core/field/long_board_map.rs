@@ -13,7 +13,7 @@ const fn rm(filled: u8, bottom_empty: u8) -> u64 {
     row_mask(filled, bottom_empty)
 }
 
-pub fn delete_line(x: u64, mask: u64) -> u64 {
+pub fn delete_row(x: u64, mask: u64) -> u64 {
     delete_line_inner(x, wrapper(mask))
 }
 
@@ -177,11 +177,11 @@ fn insert_filled_row_inner(x: u64, mask: u64) -> u64 {
     }
 }
 
-pub fn insert_empty_row(x: u64, mask: u64) -> u64 {
-    insert_empty_row_inner(x, wrapper(mask))
+pub fn insert_blank_row(x: u64, mask: u64) -> u64 {
+    insert_blank_row_inner(x, wrapper(mask))
 }
 
-fn insert_empty_row_inner(x: u64, mask: u64) -> u64 {
+fn insert_blank_row_inner(x: u64, mask: u64) -> u64 {
     match mask {
         0b1100000000110000000011 => 0,
         0b1100000000110000000010 => x & rm(1, 0),
@@ -267,7 +267,7 @@ mod tests {
     use rand::{thread_rng, Rng};
 
     #[test]
-    fn test_delete_line() {
+    fn test_delete_row() {
         let mut rngs = thread_rng();
         for booleans in boolean_walker::walk(6) {
             let mut field = SmallField::new();
@@ -299,7 +299,7 @@ mod tests {
 
             let board = field.get_x_board();
             let delete_key = get_delete_key(board);
-            assert_eq!(delete_line(board, delete_key), expect.get_x_board());
+            assert_eq!(delete_row(board, delete_key), expect.get_x_board());
         }
     }
 
@@ -342,7 +342,7 @@ mod tests {
     }
 
     #[test]
-    fn test_insert_empty_row() {
+    fn test_insert_blank_row() {
         let mut rngs = thread_rng();
         for booleans in boolean_walker::walk(6) {
             let mut expect = SmallField::new();
@@ -372,7 +372,7 @@ mod tests {
             }
 
             let board = field.get_x_board();
-            assert_eq!(insert_empty_row(board, delete_key), expect.get_x_board());
+            assert_eq!(insert_blank_row(board, delete_key), expect.get_x_board());
         }
     }
 }
