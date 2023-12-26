@@ -46,12 +46,11 @@ fn create_operation(
     let mut operations = Vec::new();
 
     // 残ったブロックを移動させる
-    for (index, (&new_start, row)) in left_start.iter().zip(left_rows.iter()).enumerate() {
-        let src_start = if index == 0 { 0 } else { left_rows[index - 1] };
+    for (&new_start, row) in left_start.iter().zip(left_rows.iter()) {
+        let src_start = row;
         let slide = (new_start - src_start) * 10;
         let mask = ((1u64 << (row * 10)) - 1) << (src_start * 10);
 
-        // dbg!(new_start, src_start, slide, mask);
         if new_start + row == 6 && new_start == 0 {
             operations.push("x".to_owned());
         } else {
@@ -99,7 +98,7 @@ fn create_bit_operation_map() -> Vec<(u64, String)> {
 
             // ブロックで残し始めるインデックスと行数
             let mut left_start = Vec::new();
-            let mut left_rows = Vec::new();
+            let mut left_rows = vec![0]; // prefix sum
             let mut count = 0;
 
             for (i, &flag) in left_flags.iter().enumerate() {
@@ -111,7 +110,7 @@ fn create_bit_operation_map() -> Vec<(u64, String)> {
                 } else {
                     if count != 0 {
                         // always push prefix sum here, instead of just getting the count
-                        left_rows.push(left_rows.last().unwrap_or(&0) + count);
+                        left_rows.push(left_rows.last().unwrap() + count);
                     }
                     count = 0;
                 }
