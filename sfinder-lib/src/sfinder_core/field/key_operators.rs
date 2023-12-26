@@ -324,4 +324,17 @@ mod tests {
             assert_eq!(to_bit_key(column_key), get_bit_key(y));
         }
     }
+
+    #[test]
+    fn masks_agree() {
+        // Equivalence retrieved from common/generator/DeleteBitKeyGenerator.java
+        for y in 0..24 {
+            let delete_key = get_delete_bit_key(y);
+            assert_eq!(delete_key.count_ones(), 1);
+            assert_eq!(
+                delete_key,
+                get_mask_for_key_above_y(y) & get_mask_for_key_below_y(y + 1)
+            );
+        }
+    }
 }
