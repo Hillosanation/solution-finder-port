@@ -52,7 +52,7 @@ fn create_operation(
                     operations.push(format!("(x & {mask:#x}) << {slide}"));
                 }
                 GenerationMode::Delete => {
-                    operations.push(format!("(x >> {slide:#x}) & {mask}"));
+                    operations.push(format!("(x >> {slide}) & {mask:#x}"));
                 }
             }
         }
@@ -122,7 +122,7 @@ fn create_bit_operation_map(mode: GenerationMode) -> Vec<(u64, String)> {
 }
 
 fn run(mode: GenerationMode) {
-    println!("match x {{");
+    println!("match mask {{");
     for (key, operation) in create_bit_operation_map(mode) {
         println!("    {:#024b} => {operation},", key);
     }
@@ -130,14 +130,14 @@ fn run(mode: GenerationMode) {
     println!("}}");
 }
 
-#[test]
-fn a() {
-    run(GenerationMode::InsertBlank);
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a() {
+        run(GenerationMode::Delete);
+    }
 
     fn legacy_parse_to_key(left_flags: BoolRows) -> u64 {
         let mut key = 0;
