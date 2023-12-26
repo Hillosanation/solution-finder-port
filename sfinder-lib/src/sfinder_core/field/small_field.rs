@@ -63,7 +63,7 @@ impl Field for SmallField {
     }
 
     fn put_piece(&mut self, piece: OriginalPiece) {
-        todo!()
+        self.merge(piece.get_mino_field())
     }
 
     fn can_put(&self, mino: &Mino, x: u8, y: u8) -> bool {
@@ -71,7 +71,7 @@ impl Field for SmallField {
     }
 
     fn can_put_piece(&self, piece: OriginalPiece) -> bool {
-        todo!()
+        self.can_merge(piece.get_mino_field())
     }
 
     fn remove(&mut self, mino: &Mino, x: u8, y: u8) {
@@ -79,7 +79,7 @@ impl Field for SmallField {
     }
 
     fn remove_piece(&mut self, piece: OriginalPiece) {
-        todo!()
+        self.reduce(piece.get_mino_field())
     }
 
     fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8 {
@@ -96,7 +96,7 @@ impl Field for SmallField {
     }
 
     fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool {
-        todo!()
+        self.can_merge(piece.get_harddrop_collider())
     }
 
     fn is_empty_block(&self, x: u8, y: u8) -> bool {

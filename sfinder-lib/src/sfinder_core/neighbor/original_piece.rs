@@ -23,11 +23,11 @@ impl OriginalPiece<'_> {
         todo!("FieldFactory");
     }
 
-    fn get_mino_field(&self) -> &dyn Field {
+    pub fn get_mino_field(&self) -> &dyn Field {
         self.mino_field.as_ref()
     }
 
-    fn get_harddrop_collider(&self) -> &dyn Field {
+    pub fn get_harddrop_collider(&self) -> &dyn Field {
         self.harddrop_collider.as_ref()
     }
 }
