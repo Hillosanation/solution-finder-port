@@ -33,6 +33,7 @@ fn create_operation(
     mode: GenerationMode,
 ) -> Vec<String> {
     let mut operations = Vec::new();
+    // dbg!(left_start, left_rows, left_flags);
 
     // 残ったブロックを移動させる
     for (&new_start, rows_window) in left_start.iter().zip(left_rows.windows(2)) {
@@ -79,7 +80,7 @@ fn create_operation(
         operations.push("0".to_owned());
     }
 
-    return operations;
+    operations
 }
 
 // no need to use map, the keys wont collide
