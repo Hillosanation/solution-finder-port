@@ -40,24 +40,25 @@ fn create_operation(
         let src_start = rows_window[0];
         let row = rows_window[1] - rows_window[0];
 
-        let mask = ((1u64 << (row * 10)) - 1) << (src_start * 10);
+        // see LongBoardMap::row_mask
+        let row_mask = format!("rm({row}, {src_start})");
         // dbg!(src_start, row, mask);
 
         if new_start == 0 {
             if new_start + src_start == 6 {
                 operations.push("x".to_owned());
             } else {
-                operations.push(format!("x & {mask:#x}"));
+                operations.push(format!("x & {row_mask}"));
             }
         } else {
             let slide = (new_start - src_start) * 10;
 
             match mode {
                 GenerationMode::InsertFilled | GenerationMode::InsertBlank => {
-                    operations.push(format!("(x & {mask:#x}) << {slide}"));
+                    operations.push(format!("(x & {row_mask}) << {slide}"));
                 }
                 GenerationMode::Delete => {
-                    operations.push(format!("(x >> {slide}) & {mask:#x}"));
+                    operations.push(format!("(x >> {slide}) & {row_mask}"));
                 }
             }
         }
