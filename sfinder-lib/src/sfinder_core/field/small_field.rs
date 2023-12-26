@@ -4,7 +4,9 @@ use super::{
 };
 use crate::{
     extras::hash_code::HashCode,
-    sfinder_core::{field::bit_operators, mino::mino::Mino},
+    sfinder_core::{
+        field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
+    },
 };
 
 const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
@@ -60,7 +62,7 @@ impl Field for SmallField {
         self.0 |= mino.get_mask(x, y as i8);
     }
 
-    fn put_piece(&mut self, piece: super::field::OriginalPiece) {
+    fn put_piece(&mut self, piece: OriginalPiece) {
         todo!()
     }
 
@@ -68,7 +70,7 @@ impl Field for SmallField {
         MAX_FIELD_HEIGHT + 2 <= y || self.0 & mino.get_mask(x, y as i8) == 0
     }
 
-    fn can_put_piece(&self, piece: super::field::OriginalPiece) -> bool {
+    fn can_put_piece(&self, piece: OriginalPiece) -> bool {
         todo!()
     }
 
@@ -76,7 +78,7 @@ impl Field for SmallField {
         self.0 &= !mino.get_mask(x, y as i8);
     }
 
-    fn remove_piece(&mut self, piece: super::field::OriginalPiece) {
+    fn remove_piece(&mut self, piece: OriginalPiece) {
         todo!()
     }
 
@@ -93,7 +95,7 @@ impl Field for SmallField {
         (start_y + 1..MAX_FIELD_HEIGHT - mino.get_min_y() as u8).all(|y| self.can_put(mino, x, y))
     }
 
-    fn can_reach_on_harddrop_piece(&self, piece: super::field::OriginalPiece) -> bool {
+    fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool {
         todo!()
     }
 

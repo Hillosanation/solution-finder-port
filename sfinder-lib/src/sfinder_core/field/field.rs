@@ -1,4 +1,5 @@
 use crate::sfinder_core::mino::mino::Mino;
+use crate::sfinder_core::neighbor::original_piece::OriginalPiece;
 
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
@@ -197,6 +198,3 @@ pub enum BoardCount {
     Middle = 2,
     Large = 4,
 }
-
-// temp struct
-pub struct OriginalPiece {}
