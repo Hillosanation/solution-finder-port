@@ -9,7 +9,7 @@ fn parse_to_key(left_flags: BoolRows) -> u64 {
     let bitkey = left_flags
         .iter()
         .enumerate()
-        .filter(|(_, flag)| !*flag)
+        .filter(|(_, &flag)| flag)
         // .inspect(|(i, _)| println!("inspect {i}"))
         .map(|(i, _)| get_bit_key(i as u8))
         .fold(0, std::ops::BitOr::bitor);
@@ -18,7 +18,7 @@ fn parse_to_key(left_flags: BoolRows) -> u64 {
 }
 
 fn create_left_flags(pattern: u8) -> BoolRows {
-    std::array::from_fn(|i| (pattern & (1 << i)) != 0)
+    std::array::from_fn(|i| (pattern & (1 << i)) == 0)
 }
 
 fn create_operation_insert(
@@ -65,8 +65,9 @@ fn create_operation(
             left_flags
                 .iter()
                 .enumerate()
-                .filter_map(|(i, flag)| (!flag).then_some(0x3ffu64 << (10 * i)))
-                .fold(0, std::ops::BitOr::bitor)
+                .filter(|(_, &flag)| flag)
+                .map(|(i, _)| 0x3ffu64 << (10 * i))
+                .fold(0, std::ops::BitOr::bitor),
         ));
     }
 
@@ -90,16 +91,16 @@ fn create_bit_operation_map() -> Vec<(u64, String)> {
 
             for (i, &flag) in left_flags.iter().enumerate() {
                 if flag {
-                    if count == 0 {
-                        left_start.push(i as u8);
-                    }
-                    count += 1;
-                } else {
                     if count != 0 {
                         // always push prefix sum here, instead of just getting the count
                         left_rows.push(left_rows.last().unwrap() + count);
                     }
                     count = 0;
+                } else {
+                    if count == 0 {
+                        left_start.push(i as u8);
+                    }
+                    count += 1;
                 }
             }
             if count != 0 {
@@ -358,9 +359,8 @@ mod tests {
     #[test]
     fn parse_to_key_agrees() {
         for i in 0..64 {
-            let left_flags = legacy_create_left_flags(i);
-            let key = legacy_parse_to_key(left_flags);
-            let key2 = parse_to_key(left_flags);
+            let key = legacy_parse_to_key(legacy_create_left_flags(i));
+            let key2 = parse_to_key(create_left_flags(i));
 
             assert_eq!(key, key2, "{key:0b}, {key2:0b}");
         }
@@ -380,10 +380,12 @@ mod tests {
     #[test]
     fn create_left_flags_agrees() {
         for pattern in 0..1 << 6 {
-            assert_eq!(
-                create_left_flags(pattern),
-                legacy_create_left_flags(pattern)
-            );
+            for i in 0..6 {
+                assert_ne!(
+                    create_left_flags(pattern)[i],
+                    legacy_create_left_flags(pattern)[i]
+                );
+            }
         }
     }
 }
