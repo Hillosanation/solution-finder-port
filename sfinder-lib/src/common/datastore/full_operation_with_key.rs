@@ -11,6 +11,7 @@ use crate::{
     },
 };
 
+// TODO: the lifetime of Mino should be static, elide this lifetime
 pub struct FullOperationWithKey<'m> {
     mino: &'m Mino,
     x: u8,
@@ -49,10 +50,6 @@ impl<'a> FullOperationWithKey<'a> {
             need_deleted_key,
             using_key,
         }
-    }
-
-    pub fn equal(&self, other: &Self) -> bool {
-        self as &dyn MinoOperationWithKey<u8> == other as &_
     }
 }
 
@@ -99,5 +96,11 @@ impl HashCode for FullOperationWithKey<'_> {
 
     fn hash_code(&self) -> Self::Output {
         MinoOperationWithKey::default_hash(self)
+    }
+}
+
+impl PartialEq for FullOperationWithKey<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self as &dyn MinoOperationWithKey<u8> == other as &_
     }
 }
