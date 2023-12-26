@@ -69,7 +69,7 @@ pub trait Field /* : PartialOrd */ {
 
     // Porting note: replaces getBlockCountBelowOnX, altered name to match is_filled_in_column
     // x列上で、maxY行より下にあるブロックの個数を返却 （maxY行上のブロックは対象に含まない）
-    fn get_block_count_in_column(&self, x: u8, max_y: u8) -> u8;
+    fn get_block_count_in_column(&self, x: u8, max_y: u8) -> u32;
 
     // Porting note: replaces getBlockCountBelowOnY, altered name to match is_filled_in_column
     // y行上にあるブロックの個数を返却
@@ -105,10 +105,10 @@ pub trait Field /* : PartialOrd */ {
     //       28********
     //       17********
     // 最下位 06********
-    fn insert_blank_row_with_key(&mut self, delete_key: u64);
+    fn insert_filled_row_with_key(&mut self, delete_key: u64);
 
     // ブロックがそろった行を空白の状態で復元する
-    fn insert_filled_row_with_key(&mut self, delete_key: u64);
+    fn insert_blank_row_with_key(&mut self, delete_key: u64);
 
     // 指定された行を削除する
     fn delete_rows_with_key(&mut self, delete_key: u64);
@@ -138,8 +138,13 @@ pub trait Field /* : PartialOrd */ {
     // フィールド内には必ず4ブロックだけ存在している前提のもと、最も高い位置にあるブロックのY座標を取得
     fn get_upper_y_with_4_blocks(&self) -> u8;
 
+    // Porting note: use Option instead
+    // 最も小さいx座標を取得。ブロックが存在しないとき -1 を返却
+    fn get_min_x(&self) -> Option<u8>;
+
+    // Porting note: replaces getLowerY
     // 最も低い位置にあるブロックのY座標を取得
-    fn get_lower_y(&self) -> u8;
+    fn get_min_y(&self) -> Option<u8>;
 
     // フィールドを左に指定したブロック分スライドさせる
     fn slide_left(&mut self, slide: u8);
@@ -159,10 +164,6 @@ pub trait Field /* : PartialOrd */ {
 
     // フィールドを上に指定したブロック分スライドさせる。ブロックで埋まったラインを追加する
     fn slide_up_with_filled_row(&mut self, slide: u8);
-
-    // Porting note: use Option instead
-    // 最も小さいx座標を取得。ブロックが存在しないとき -1 を返却
-    fn get_min_x(&self) -> Option<u8>;
 
     // childの全てのブロックが、フィールド内の同じ位置にブロックがあればtrue
     fn contains(&self, child: &dyn Field) -> bool;
