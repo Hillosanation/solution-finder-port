@@ -46,27 +46,22 @@ fn create_operation(
     let mut operations = Vec::new();
 
     // 残ったブロックを移動させる
-    for (&new_start, row) in left_start.iter().zip(left_rows.iter()) {
-        let src_start = row;
-        let slide = (new_start - src_start) * 10;
-        let mask = ((1u64 << (row * 10)) - 1) << (src_start * 10);
+    for (&new_start, src_start) in left_start.iter().zip(left_rows.iter()) {
+        let mask = ((1u64 << (src_start * 10)) - 1) << (src_start * 10);
 
-        if new_start + row == 6 && new_start == 0 {
-            operations.push("x".to_owned());
-        } else {
-            if insert {
-                if slide == 0 {
-                    operations.push(format!("x & {mask:#x}"));
-                } else {
-                    operations.push(format!("(x & {mask:#x}) << {slide}"));
-                }
+        if new_start == 0 {
+            if new_start + src_start == 6 {
+                operations.push("x".to_owned());
             } else {
-                if new_start == 0 {
-                    // equivalent to slide?
-                    operations.push(format!("x & {mask:#x}"));
-                } else {
-                    operations.push(format!("(x & {mask:#x}) >> {slide}"));
-                }
+                operations.push(format!("x & {mask:#x}"));
+            }
+        } else {
+            let slide = (new_start - src_start) * 10;
+
+            if insert {
+                operations.push(format!("(x & {mask:#x}) << {slide}"));
+            } else {
+                operations.push(format!("(x >> {slide:#x}) & {mask}"));
             }
         }
     }
