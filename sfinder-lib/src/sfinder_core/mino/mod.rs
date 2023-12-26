@@ -1,2 +1,2 @@
 pub mod mino;
-mod piece;
+pub mod piece;
