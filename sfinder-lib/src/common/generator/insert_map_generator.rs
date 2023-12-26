@@ -35,8 +35,12 @@ fn create_operation(
     let mut operations = Vec::new();
 
     // 残ったブロックを移動させる
-    for (&new_start, src_start) in left_start.iter().zip(left_rows.iter()) {
-        let mask = ((1u64 << (src_start * 10)) - 1) << (src_start * 10);
+    for (&new_start, rows_window) in left_start.iter().zip(left_rows.windows(2)) {
+        let src_start = rows_window[0];
+        let row = rows_window[1] - rows_window[0];
+
+        let mask = ((1u64 << (row * 10)) - 1) << (src_start * 10);
+        // dbg!(src_start, row, mask);
 
         if new_start == 0 {
             if new_start + src_start == 6 {
@@ -104,7 +108,11 @@ fn create_bit_operation_map(mode: GenerationMode) -> Vec<(u64, String)> {
                 }
             }
             if count != 0 {
-                left_rows.push(count);
+                left_rows.push(left_rows.last().unwrap() + count);
+            }
+
+            for window in left_rows.windows(2) {
+                debug_assert!(window[0] <= window[1]);
             }
 
             // println!("pattern: {:#06b}", pattern);
