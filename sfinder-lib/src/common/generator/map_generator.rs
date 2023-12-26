@@ -1,7 +1,5 @@
 use super::wrapper::wrapper;
-use crate::sfinder_core::field::key_operators::get_bit_key;
-
-type BoolRows = [bool; 6];
+use crate::{sfinder_core::field::key_operators::get_bit_key, sfinder_lib::boolean_walker};
 
 #[derive(Clone, Copy)]
 enum GenerationMode {
@@ -10,7 +8,7 @@ enum GenerationMode {
     Delete,
 }
 
-fn parse_to_key(left_flags: BoolRows) -> u64 {
+fn parse_to_key(left_flags: &[bool]) -> u64 {
     let bitkey = left_flags
         .iter()
         .enumerate()
@@ -22,14 +20,10 @@ fn parse_to_key(left_flags: BoolRows) -> u64 {
     wrapper(bitkey)
 }
 
-fn create_left_flags(pattern: u8) -> BoolRows {
-    std::array::from_fn(|i| (pattern & (1 << i)) == 0)
-}
-
 fn create_operation(
     left_start: &[u8],
     left_rows: &[u8],
-    left_flags: BoolRows,
+    left_flags: &[bool],
     mode: GenerationMode,
 ) -> Vec<String> {
     let mut operations = Vec::new();
@@ -86,10 +80,8 @@ fn create_operation(
 
 // no need to use map, the keys wont collide
 fn create_bit_operation_map(mode: GenerationMode) -> Vec<(u64, String)> {
-    (0..1 << 6)
-        .map(|pattern| {
-            let left_flags = create_left_flags(pattern);
-
+    boolean_walker::walk(6)
+        .map(|left_flags| {
             // ブロックで残し始めるインデックスと行数
             let mut left_start = Vec::new();
             let mut left_rows = vec![0]; // prefix sum
@@ -121,10 +113,10 @@ fn create_bit_operation_map(mode: GenerationMode) -> Vec<(u64, String)> {
             // println!("start: {left_start:?}\nrow: {left_rows:?}");
 
             // ビット操作に変換する
-            let operation = create_operation(&left_start, &left_rows, left_flags, mode);
+            let operation = create_operation(&left_start, &left_rows, &left_flags, mode);
 
             // flagsからkeyに変換
-            let key = parse_to_key(left_flags);
+            let key = parse_to_key(&left_flags);
 
             (key, operation.join(" | "))
         })
@@ -149,7 +141,7 @@ mod tests {
         run(GenerationMode::Delete);
     }
 
-    fn legacy_parse_to_key(left_flags: BoolRows) -> u64 {
+    fn legacy_parse_to_key(left_flags: Vec<bool>) -> u64 {
         let mut key = 0;
 
         for i in (0..left_flags.len()).rev() {
@@ -163,6 +155,10 @@ mod tests {
         let lower_mask = (1 << 30) - 1;
 
         (key >> (30 - 1)) | (key & lower_mask)
+    }
+
+    fn create_left_flags(pattern: u8) -> Vec<bool> {
+        (0..6).map(|i| (pattern & (1 << i)) == 0).collect()
     }
 
     // test function to check intuition
@@ -180,13 +176,13 @@ mod tests {
     fn parse_to_key_agrees() {
         for i in 0..64 {
             let key = legacy_parse_to_key(legacy_create_left_flags(i));
-            let key2 = parse_to_key(create_left_flags(i));
+            let key2 = parse_to_key(&create_left_flags(i));
 
             assert_eq!(key, key2, "{key:0b}, {key2:0b}");
         }
     }
 
-    fn legacy_create_left_flags(pattern: u8) -> BoolRows {
+    fn legacy_create_left_flags(pattern: u8) -> Vec<bool> {
         let mut booleans = [false; 6];
         let mut value = pattern;
         for i in 0..6 {
@@ -194,7 +190,7 @@ mod tests {
             value >>= 1;
         }
 
-        booleans
+        booleans.to_vec()
     }
 
     #[test]

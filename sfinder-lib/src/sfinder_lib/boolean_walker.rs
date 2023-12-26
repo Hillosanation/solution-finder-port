@@ -1,4 +1,3 @@
-#[cfg(test)]
 pub fn walk(size: u8) -> impl Iterator<Item = Vec<bool>> {
     (0..(1 << size)).map(move |val| (0..size).map(move |i| val & (1 << i) == 0).collect())
 }
