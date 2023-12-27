@@ -139,13 +139,14 @@ pub fn bit_to_y_from_key(key: u64) -> u8 {
     }
 }
 
+// reused in Field implementations
+pub(super) const fn get_lowest_bit(x: u64) -> u64 {
+    // compiles down to the same thing as x & -x, getting the least significant bit, in -O
+    (x as i64 & -(x as i64)) as u64
+}
+
 // keyのうち、最も低い行のbitを取り出す
 pub fn extract_lower_bit(key: u64) -> u64 {
-    pub const fn get_lowest_bit(x: u64) -> u64 {
-        // compiles down to the same thing as x & -x in -O
-        (x as i64 & -(x as i64)) as u64
-    }
-
     assert!(
         (key & repeat_rows(0b0000001111)).count_ones() >= 1,
         "{key:0b}"
