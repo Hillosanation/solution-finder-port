@@ -8,6 +8,7 @@ use crate::{
 };
 
 // Porting note: EMPTY_COLLIDER_PIECE, (and the empty constructor) was used as a null check and is removed.
+#[derive(Debug)]
 pub struct OriginalPiece<'m> {
     operation_with_key: FullOperationWithKey<'m>,
     harddrop_collider: Box<dyn Field>,

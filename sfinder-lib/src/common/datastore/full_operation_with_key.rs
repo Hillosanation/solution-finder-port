@@ -12,6 +12,7 @@ use crate::{
 };
 
 // TODO: the lifetime of Mino should be static, elide this lifetime
+#[derive(Debug)]
 pub struct FullOperationWithKey<'m> {
     mino: &'m Mino,
     x: u8,

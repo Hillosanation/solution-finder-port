@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use super::{
     field::{BoardCount, Field},
     key_operators, long_board_map,
@@ -306,5 +308,11 @@ impl HashCode for SmallField {
 
     fn hash_code(&self) -> Self::Output {
         self.0 ^ self.0 >> 32
+    }
+}
+
+impl Debug for SmallField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:#060x}", self.0)
     }
 }

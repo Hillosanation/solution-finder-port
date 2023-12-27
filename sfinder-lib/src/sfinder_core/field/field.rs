@@ -3,7 +3,7 @@ use crate::sfinder_core::neighbor::original_piece::OriginalPiece;
 
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
-pub trait Field /* : PartialOrd */ {
+pub trait Field: std::fmt::Debug /* : PartialOrd */ {
     // フィールドの最大高さを返却
     fn get_max_field_height(&self) -> u8;
 
