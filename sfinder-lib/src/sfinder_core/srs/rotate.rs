@@ -25,7 +25,7 @@ impl Rotate {
         &VALUE_LIST
     }
 
-    pub fn get_size() -> usize {
+    pub const fn get_size() -> usize {
         ROTATE_COUNT
     }
 
