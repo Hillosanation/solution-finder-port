@@ -6,7 +6,7 @@ use crate::{
 
 // TODO: merge with MinoOperation?
 // Porting note: This doesn't check if the operation is valid.
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct SimpleOperation {
     piece: Piece,
     rotate: Rotate,
@@ -50,6 +50,12 @@ impl HashCode for SimpleOperation {
 
     fn hash_code(&self) -> Self::Output {
         Operation::default_hash_code(self)
+    }
+}
+
+impl PartialOrd for SimpleOperation {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        (self as &dyn Operation<u8>).partial_cmp(other)
     }
 }
 
