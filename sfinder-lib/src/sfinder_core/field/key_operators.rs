@@ -58,7 +58,7 @@ pub fn get_bit_keys(ys: &[u8]) -> u64 {
 }
 
 // TODO (#3): inline this function
-pub fn get_delete_bit_key(y: u8) -> u64 {
+pub const fn get_delete_bit_key(y: u8) -> u64 {
     get_bit_key(y)
 }
 
@@ -91,7 +91,7 @@ const BIT_KEY_MASKS: [u64; 24] = [
 
 // TODO (#4): check if using 1 << (y % 6 * 10 + y / 6) instead is good enough
 /// Panics if y > 23
-pub fn get_bit_key(y: u8) -> u64 {
+pub const fn get_bit_key(y: u8) -> u64 {
     BIT_KEY_MASKS[y as usize]
 }
 
@@ -191,8 +191,6 @@ mod tests {
     use super::*;
     use rand::{thread_rng, Rng};
 
-    // todo, implement BitOperators first
-
     #[test]
     fn test_get_delete_key() {
         let mut rngs = thread_rng();
@@ -207,7 +205,7 @@ mod tests {
                     for x in 0..10 {
                         field.set_block(x, y);
                     }
-                    expect_delete_key += get_delete_bit_key(y);
+                    expect_delete_key |= get_delete_bit_key(y);
                 } else {
                     // ラインを全て埋めない
                     for x in 0..10 {
