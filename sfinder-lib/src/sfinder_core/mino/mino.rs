@@ -18,8 +18,8 @@ pub struct Mino {
     positions: Positions,
 }
 
-const MASK_CENTER_X: u8 = 4;
-const MASK_CENTER_Y: u8 = 2;
+const MASK_CENTER_X: i8 = 4;
+const MASK_CENTER_Y: i8 = 2;
 
 impl Mino {
     pub fn new(piece: Piece, rotate: Rotate) -> Self {
@@ -36,7 +36,9 @@ impl Mino {
     fn calc_mask(positions: &Positions) -> u64 {
         positions
             .iter()
-            .fold(0, |acc, position| acc | (1 << position.y * 10 + position.x))
+            // TODO: replace 10 with FIELD_WIDTH in Field, or replace with Field::get_x_mask entirely
+            .map(|position| 1 << ((MASK_CENTER_Y + position.y) * 10 + (MASK_CENTER_X + position.x)))
+            .fold(0, core::ops::BitOr::bitor)
     }
 
     // Porting note: follows naming convention of RotateDirection
@@ -123,7 +125,7 @@ impl Mino {
         assert!(x < 10);
         assert!(-4 < y && y < 8);
 
-        let slide = (x - MASK_CENTER_X) as i8 + (y - MASK_CENTER_Y as i8 * 10);
+        let slide = (x as i8 - MASK_CENTER_X) + (y as i8 - MASK_CENTER_Y) * 10;
         if slide >= 0 {
             self.mask << slide
         } else {
