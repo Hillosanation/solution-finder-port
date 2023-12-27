@@ -90,7 +90,7 @@ impl OperationWithKey<u8> for FullOperationWithKey<'_> {
     }
 }
 
-impl MinoOperationWithKey<u8> for FullOperationWithKey<'_> {}
+impl MinoOperationWithKey for FullOperationWithKey<'_> {}
 
 impl HashCode for FullOperationWithKey<'_> {
     type Output = u32;
@@ -102,6 +102,6 @@ impl HashCode for FullOperationWithKey<'_> {
 
 impl PartialEq for FullOperationWithKey<'_> {
     fn eq(&self, other: &Self) -> bool {
-        self as &dyn MinoOperationWithKey<u8> == other as &_
+        self as &dyn MinoOperationWithKey == other as &_
     }
 }

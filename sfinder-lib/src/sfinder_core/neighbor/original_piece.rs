@@ -79,7 +79,7 @@ impl OperationWithKey<u8> for OriginalPiece<'_> {
     }
 }
 
-impl MinoOperationWithKey<u8> for OriginalPiece<'_> {}
+impl MinoOperationWithKey for OriginalPiece<'_> {}
 
 impl<'a> PartialEq for OriginalPiece<'a> {
     fn eq(&self, other: &Self) -> bool {

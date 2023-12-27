@@ -19,7 +19,7 @@ pub fn parse_to_operation_with_keys<'a, O: Operation<u8>>(
     operations: &'a Operations<O>,
     mino_factory: &'a MinoFactory,
     height: u8,
-) -> Vec<impl MinoOperationWithKey<u8> + 'a> {
+) -> Vec<impl MinoOperationWithKey + 'a> {
     let mut keys = Vec::with_capacity(operations.get_operations().len());
 
     let mut field = field_origin.prune(height);
@@ -73,7 +73,7 @@ pub fn to_full_operation_with_key(
 // 初めにライン消去を行う
 pub fn parse_to_operations(
     field_origin: &dyn Field,
-    operation_with_keys: &[impl MinoOperationWithKey<u8>],
+    operation_with_keys: &[impl MinoOperationWithKey],
     height: u8,
 ) -> Operations<impl Operation<u8>> {
     let mut operations = Vec::with_capacity(operation_with_keys.len());
@@ -110,7 +110,7 @@ pub fn parse_to_block_field() -> ! {
 }
 
 pub fn parse_to_field(
-    operation_with_keys: &[impl MinoOperationWithKey<u8>],
+    operation_with_keys: &[impl MinoOperationWithKey],
     height: u8,
 ) -> Box<dyn Field> {
     let mut field: Box<dyn Field> = todo!("FieldFactory");

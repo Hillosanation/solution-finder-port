@@ -1,14 +1,11 @@
 use super::operation_with_key::OperationWithKey;
 use crate::{
-    common::datastore::mino_operation::MinoOperation, extras::hash_code::HashCode,
-    sfinder_core::field::field::Field,
+    common::datastore::mino_operation::MinoOperation,
+    extras::hash_code::HashCode,
+    sfinder_core::field::{field::Field, field_factory},
 };
 
-pub trait MinoOperationWithKey<Coord>: OperationWithKey<Coord> + MinoOperation<Coord>
-where
-    u32: From<Coord>,
-    u64: From<Coord>,
-{
+pub trait MinoOperationWithKey: OperationWithKey<u8> + MinoOperation<u8> {
     fn default_hash(&self) -> u32 {
         let mut result = u32::from(self.get_y());
         result = 10 * result + u32::from(self.get_x());
@@ -25,7 +22,7 @@ where
     }
 }
 
-impl<'a> PartialEq for dyn MinoOperationWithKey<u8> + 'a {
+impl<'a> PartialEq for dyn MinoOperationWithKey + 'a {
     fn eq(&self, other: &Self) -> bool {
         self.get_x() == other.get_x()
             && self.get_y() == other.get_y()
