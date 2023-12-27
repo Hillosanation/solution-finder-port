@@ -18,7 +18,10 @@ pub trait MinoOperationWithKey: OperationWithKey<u8> + MinoOperation<u8> {
     }
 
     fn create_mino_field(&self, max_height: u8) -> Box<dyn Field> {
-        todo!("FieldFactory");
+        let mut field = field_factory::create_field(max_height);
+        field.put(self.get_mino(), self.get_x(), self.get_y());
+        field.insert_blank_row_with_key(self.get_need_deleted_key());
+        field
     }
 }
 
