@@ -25,7 +25,7 @@ where
     }
 }
 
-impl<Coord> PartialEq for dyn Operation<Coord>
+impl<Coord> PartialEq for dyn Operation<Coord> + '_
 where
     u32: From<Coord>,
     u64: From<Coord>,
@@ -39,7 +39,7 @@ where
     }
 }
 
-impl<Coord> PartialOrd for dyn Operation<Coord>
+impl<Coord> PartialOrd for dyn Operation<Coord> + '_
 where
     u32: From<Coord>,
     u64: From<Coord>,
