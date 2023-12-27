@@ -51,7 +51,7 @@ impl Mino {
     }
 
     fn rotate_180(positions: &Positions) -> Positions {
-        positions.map(|coord| Coordinate::new(coord.x, coord.y))
+        positions.map(|coord| Coordinate::new(-coord.x, -coord.y))
     }
 
     fn calc_positions(piece: Piece, rotate: Rotate) -> Positions {
@@ -175,7 +175,627 @@ impl nohash::IsEnabled for Mino {}
 
 #[cfg(test)]
 mod tests {
+    use crate::sfinder_core::field::field_factory;
+
     use super::*;
 
-    // Todo, tests require FieldFactory
+    mod i {
+        use super::*;
+
+        #[test]
+        fn spawn() {
+            let mino = Mino::new(Piece::I, Rotate::Spawn);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 2);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::I);
+            assert_eq!(mino.get_rotate(), Rotate::Spawn);
+
+            #[rustfmt::skip]
+            let mask = field_factory::create_small_field_with_marks(
+                    String::from("XXXX______")
+            );
+            assert_eq!(mino.get_mask(1, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn left() {
+            let mino = Mino::new(Piece::I, Rotate::Left);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 2);
+            assert_eq!(mino.get_piece(), Piece::I);
+            assert_eq!(mino.get_rotate(), Rotate::Left);
+
+            #[rustfmt::skip]
+            let mask = field_factory::create_small_field_with_marks(String::new() +
+                    "X_________" +
+                    "X_________" +
+                    "X_________" +
+                    "X_________"
+            );
+            assert_eq!(mino.get_mask(0, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn reverse() {
+            let mino = Mino::new(Piece::I, Rotate::Reverse);
+
+            assert_eq!(mino.get_min_x(), -2);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::I);
+            assert_eq!(mino.get_rotate(), Rotate::Reverse);
+
+            #[rustfmt::skip]
+            let mask = field_factory::create_small_field_with_marks(
+                    String::from("XXXX______")
+            );
+            assert_eq!(mino.get_mask(2, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn right() {
+            let mino = Mino::new(Piece::I, Rotate::Right);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -2);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::I);
+            assert_eq!(mino.get_rotate(), Rotate::Right);
+
+            #[rustfmt::skip]
+            let mask = field_factory::create_small_field_with_marks(String::new() +
+                    "X_________" +
+                    "X_________" +
+                    "X_________" +
+                    "X_________"
+            );
+            assert_eq!(mino.get_mask(0, 2), mask.get_x_board());
+        }
+    }
+
+    mod o {
+        use super::*;
+
+        #[test]
+        fn spawn() {
+            let mino = Mino::new(Piece::O, Rotate::Spawn);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::O);
+            assert_eq!(mino.get_rotate(), Rotate::Spawn);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(0, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn left() {
+            let mino = Mino::new(Piece::O, Rotate::Left);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::O);
+            assert_eq!(mino.get_rotate(), Rotate::Left);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(1, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn reverse() {
+            let mino = Mino::new(Piece::O, Rotate::Reverse);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::O);
+            assert_eq!(mino.get_rotate(), Rotate::Reverse);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn right() {
+            let mino = Mino::new(Piece::O, Rotate::Right);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::O);
+            assert_eq!(mino.get_rotate(), Rotate::Right);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(0, 1), mask.get_x_board());
+        }
+    }
+
+    mod s {
+        use super::*;
+
+        #[test]
+        fn spawn() {
+            let mino = Mino::new(Piece::S, Rotate::Spawn);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::S);
+            assert_eq!(mino.get_rotate(), Rotate::Spawn);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "_XX_______" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(1, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn left() {
+            let mino = Mino::new(Piece::S, Rotate::Left);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::S);
+            assert_eq!(mino.get_rotate(), Rotate::Left);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "X_________" +
+                        "XX________" +
+                        "_X________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn reverse() {
+            let mino = Mino::new(Piece::S, Rotate::Reverse);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::S);
+            assert_eq!(mino.get_rotate(), Rotate::Reverse);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "_XX_______" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn right() {
+            let mino = Mino::new(Piece::S, Rotate::Right);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::S);
+            assert_eq!(mino.get_rotate(), Rotate::Right);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "X_________" +
+                        "XX________" +
+                        "_X________"
+                );
+            assert_eq!(mino.get_mask(0, 1), mask.get_x_board());
+        }
+    }
+
+    mod z {
+        use super::*;
+
+        #[test]
+        fn spawn() {
+            let mino = Mino::new(Piece::Z, Rotate::Spawn);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::Z);
+            assert_eq!(mino.get_rotate(), Rotate::Spawn);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "_XX_______"
+                );
+            assert_eq!(mino.get_mask(1, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn left() {
+            let mino = Mino::new(Piece::Z, Rotate::Left);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::Z);
+            assert_eq!(mino.get_rotate(), Rotate::Left);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "_X________" +
+                        "XX________" +
+                        "X_________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn reverse() {
+            let mino = Mino::new(Piece::Z, Rotate::Reverse);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::Z);
+            assert_eq!(mino.get_rotate(), Rotate::Reverse);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "_XX_______"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn right() {
+            let mino = Mino::new(Piece::Z, Rotate::Right);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::Z);
+            assert_eq!(mino.get_rotate(), Rotate::Right);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "_X________" +
+                        "XX________" +
+                        "X_________"
+                );
+            assert_eq!(mino.get_mask(0, 1), mask.get_x_board());
+        }
+    }
+
+    mod l {
+        use super::*;
+
+        #[test]
+        fn spawn() {
+            let mino = Mino::new(Piece::L, Rotate::Spawn);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::L);
+            assert_eq!(mino.get_rotate(), Rotate::Spawn);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "__X_______" +
+                        "XXX_______"
+                );
+            assert_eq!(mino.get_mask(1, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn left() {
+            let mino = Mino::new(Piece::L, Rotate::Left);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::L);
+            assert_eq!(mino.get_rotate(), Rotate::Left);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "_X________" +
+                        "_X________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn reverse() {
+            let mino = Mino::new(Piece::L, Rotate::Reverse);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::L);
+            assert_eq!(mino.get_rotate(), Rotate::Reverse);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XXX_______" +
+                        "X_________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn right() {
+            let mino = Mino::new(Piece::L, Rotate::Right);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::L);
+            assert_eq!(mino.get_rotate(), Rotate::Right);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "X_________" +
+                        "X_________" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(0, 1), mask.get_x_board());
+        }
+    }
+
+    mod j {
+        use super::*;
+
+        #[test]
+        fn spawn() {
+            let mino = Mino::new(Piece::J, Rotate::Spawn);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::J);
+            assert_eq!(mino.get_rotate(), Rotate::Spawn);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "X_________" +
+                        "XXX_______"
+                );
+            assert_eq!(mino.get_mask(1, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn left() {
+            let mino = Mino::new(Piece::J, Rotate::Left);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::J);
+            assert_eq!(mino.get_rotate(), Rotate::Left);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "_X________" +
+                        "_X________" +
+                        "XX________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn reverse() {
+            let mino = Mino::new(Piece::J, Rotate::Reverse);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::J);
+            assert_eq!(mino.get_rotate(), Rotate::Reverse);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XXX_______" +
+                        "__X_______"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn right() {
+            let mino = Mino::new(Piece::J, Rotate::Right);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::J);
+            assert_eq!(mino.get_rotate(), Rotate::Right);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XX________" +
+                        "X_________" +
+                        "X_________"
+                );
+            assert_eq!(mino.get_mask(0, 1), mask.get_x_board());
+        }
+    }
+
+    mod t {
+        use super::*;
+
+        #[test]
+        fn spawn() {
+            let mino = Mino::new(Piece::T, Rotate::Spawn);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), 0);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::T);
+            assert_eq!(mino.get_rotate(), Rotate::Spawn);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "_X________" +
+                        "XXX_______"
+                );
+            assert_eq!(mino.get_mask(1, 0), mask.get_x_board());
+        }
+
+        #[test]
+        fn left() {
+            let mino = Mino::new(Piece::T, Rotate::Left);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 0);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::T);
+            assert_eq!(mino.get_rotate(), Rotate::Left);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "_X________" +
+                        "XX________" +
+                        "_X________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn reverse() {
+            let mino = Mino::new(Piece::T, Rotate::Reverse);
+
+            assert_eq!(mino.get_min_x(), -1);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 0);
+            assert_eq!(mino.get_piece(), Piece::T);
+            assert_eq!(mino.get_rotate(), Rotate::Reverse);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "XXX_______" +
+                        "_X________"
+                );
+            assert_eq!(mino.get_mask(1, 1), mask.get_x_board());
+        }
+
+        #[test]
+        fn right() {
+            let mino = Mino::new(Piece::T, Rotate::Right);
+
+            assert_eq!(mino.get_min_x(), 0);
+            assert_eq!(mino.get_max_x(), 1);
+            assert_eq!(mino.get_min_y(), -1);
+            assert_eq!(mino.get_max_y(), 1);
+            assert_eq!(mino.get_piece(), Piece::T);
+            assert_eq!(mino.get_rotate(), Rotate::Right);
+
+            #[rustfmt::skip]
+                let mask = field_factory::create_small_field_with_marks(String::new() +
+                        "X_________" +
+                        "XX________" +
+                        "X_________"
+                );
+            assert_eq!(mino.get_mask(0, 1), mask.get_x_board());
+        }
+    }
+
+    #[test]
+    fn test_equals() {
+        let mino1 = Mino::new(Piece::I, Rotate::Spawn);
+        let mino2 = Mino::new(Piece::I, Rotate::Spawn);
+        assert_eq!(mino1, mino2);
+    }
+
+    #[test]
+    fn test_equals_diff_rotate() {
+        let mino1 = Mino::new(Piece::I, Rotate::Spawn);
+        let mino2 = Mino::new(Piece::I, Rotate::Reverse);
+        assert_ne!(mino1, mino2);
+    }
+
+    #[test]
+    fn test_equals_diff_block() {
+        let mino1 = Mino::new(Piece::I, Rotate::Spawn);
+        let mino2 = Mino::new(Piece::T, Rotate::Spawn);
+        assert_ne!(mino1, mino2);
+    }
+
+    #[test]
+    fn test_hash_code() {
+        let mino1 = Mino::new(Piece::I, Rotate::Spawn);
+        let mino2 = Mino::new(Piece::I, Rotate::Spawn);
+        assert_eq!(mino1.hash_code(), mino2.hash_code());
+
+        let mino3 = Mino::new(Piece::I, Rotate::Reverse);
+        assert_ne!(mino1.hash_code(), mino3.hash_code());
+
+        let mino4 = Mino::new(Piece::T, Rotate::Spawn);
+        assert_ne!(mino1.hash_code(), mino4.hash_code());
+    }
+
+    #[test]
+    fn test_hash_code_diff_block() {
+        let mino1 = Mino::new(Piece::I, Rotate::Spawn);
+        let mino2 = Mino::new(Piece::I, Rotate::Reverse);
+        assert_ne!(mino1.hash_code(), mino2.hash_code());
+    }
+
+    #[test]
+    fn test_hash_code_diff_rotate() {
+        let mino1 = Mino::new(Piece::I, Rotate::Spawn);
+        let mino2 = Mino::new(Piece::T, Rotate::Spawn);
+        assert_ne!(mino1.hash_code(), mino2.hash_code());
+    }
 }
