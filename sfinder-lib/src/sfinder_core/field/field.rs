@@ -1,9 +1,10 @@
-use crate::sfinder_core::mino::mino::Mino;
-use crate::sfinder_core::neighbor::original_piece::OriginalPiece;
+use crate::sfinder_core::{
+    field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
+};
 
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
-pub trait Field: std::fmt::Debug /* : PartialOrd */ {
+pub trait Field: std::fmt::Debug /* + PartialOrd */ {
     // フィールドの最大高さを返却
     fn get_max_field_height(&self) -> u8;
 
@@ -44,10 +45,27 @@ pub trait Field: std::fmt::Debug /* : PartialOrd */ {
     }
 
     // 指定した位置からミノをharddropしたとき、接着するyを返却
-    fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8;
+    fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8 {
+        let min = -mino.get_min_y() as u8;
+        (min..start_y)
+            .rev()
+            .find(|&y| !self.can_put(mino, x, y))
+            .map_or(min, |y| y + 1)
+    }
 
     // 一番上からharddropで指定した位置を通過するとき true を返却
     fn can_reach_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> bool;
+    /// Internal function for implementing can_reach_on_harddrop
+    /// TODO: find a way to make this private
+    fn _can_reach_on_harddrop(
+        &self,
+        mino: &Mino,
+        x: u8,
+        start_y: u8,
+        max_field_height: u8,
+    ) -> bool {
+        (start_y + 1..max_field_height - mino.get_min_y() as u8).all(|y| self.can_put(mino, x, y))
+    }
 
     // 一番上からharddropで指定した位置を通過するとき true を返却
     fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool {
@@ -76,7 +94,9 @@ pub trait Field: std::fmt::Debug /* : PartialOrd */ {
     fn is_wall_between_left(&self, x: u8, max_y: u8) -> bool;
 
     // 指定した位置のミノが接着できるとき true を返却
-    fn is_on_ground(&self, mino: &Mino, x: u8, y: u8) -> bool;
+    fn is_on_ground(&self, mino: &Mino, x: u8, y: u8) -> bool {
+        y <= -mino.get_min_y() as u8 || !self.can_put(mino, x, y - 1)
+    }
 
     // Porting note: replaces getBlockCountBelowOnX, altered name to match is_filled_in_column
     // x列上で、maxY行より下にあるブロックの個数を返却 （maxY行上のブロックは対象に含まない）
@@ -94,7 +114,9 @@ pub trait Field: std::fmt::Debug /* : PartialOrd */ {
 
     // Porting note: replaces clearLine
     // ブロックがそろった行を削除し、削除した行数を返却
-    fn clear_filled_rows(&mut self) -> u32;
+    fn clear_filled_rows(&mut self) -> u32 {
+        self.clear_filled_rows_return_key().count_ones()
+    }
 
     // TODO: wrap in newtype for functions that return a Key representing the cleared rows
 
@@ -191,6 +213,7 @@ pub trait Field: std::fmt::Debug /* : PartialOrd */ {
 }
 
 pub trait FieldHelper {
+    /// TODO: is_in should be the only function that should be exposed
     fn is_in(mino: &Mino, x: i8, y: i8) -> bool {
         let min_x = x + mino.get_min_x();
         let max_x = x + mino.get_max_x();
@@ -206,6 +229,12 @@ pub trait FieldHelper {
     fn get_row_mask(y: u8) -> u64 {
         0x3ff << (y * FIELD_WIDTH)
     }
+
+    #[inline]
+    fn extract_delete_key(delete_key: u64, index: u8) -> u64 {
+        assert!(index <= 4);
+        (delete_key >> index) & bit_operators::get_column_one_row_below_y(6)
+    }
 }
 
 impl FieldHelper for dyn Field {}
@@ -219,3 +248,35 @@ pub enum BoardCount {
 
 pub const FIELD_WIDTH: u8 = 10;
 pub const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::sfinder_core::field::key_operators;
+    use rand::{thread_rng, Rng};
+
+    fn legacy_extract_delete_key(delete_key: u64, index: u8) -> u64 {
+        assert!(index <= 4);
+        (delete_key & (0x4010040100401 << index)) >> index
+    }
+
+    #[test]
+    fn extract_delete_key_agrees() {
+        let mut rngs = thread_rng();
+
+        for _ in 0..1000 {
+            let column_key = rngs.gen_range(0..1 << 24);
+            let delete_key = key_operators::to_bit_key(column_key);
+
+            // println!("testing {delete_key:060b}");
+
+            for index in 0..4 {
+                assert_eq!(
+                    legacy_extract_delete_key(delete_key, index),
+                    <dyn Field>::extract_delete_key(delete_key, index),
+                    "delete_key: {delete_key}",
+                )
+            }
+        }
+    }
+}

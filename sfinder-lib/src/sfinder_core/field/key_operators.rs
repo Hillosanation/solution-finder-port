@@ -152,6 +152,7 @@ pub fn extract_lower_bit(key: u64) -> u64 {
         "{key:0b}"
     );
 
+    // although the return signiture looks similar, the different branches give different results because each masks a different range of bits.
     if let low @ 1.. = key & repeat_rows(0b0000000001) {
         get_lowest_bit(low)
     } else if let mid_low @ 1.. = key & repeat_rows(0b0000000010) {

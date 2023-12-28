@@ -1,12 +1,10 @@
 use super::{
-    field::{BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field::{self, BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
 };
 use crate::{
     extras::hash_code::HashCode,
-    sfinder_core::{
-        field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
-    },
+    sfinder_core::{field::bit_operators, mino::mino::Mino},
 };
 use std::fmt::Debug;
 
@@ -61,17 +59,8 @@ impl Field for SmallField {
         self.0 &= !mino.get_mask(x, y as i8);
     }
 
-    fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8 {
-        let min = -mino.get_min_y() as u8;
-        (min..start_y)
-            .rev()
-            .find(|&y| !self.can_put(mino, x, y))
-            .map(|y| y + 1)
-            .unwrap_or(min)
-    }
-
     fn can_reach_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> bool {
-        (start_y + 1..MAX_FIELD_HEIGHT - mino.get_min_y() as u8).all(|y| self.can_put(mino, x, y))
+        self._can_reach_on_harddrop(mino, x, start_y, MAX_FIELD_HEIGHT)
     }
 
     fn is_empty_block(&self, x: u8, y: u8) -> bool {
@@ -100,10 +89,6 @@ impl Field for SmallField {
         bit_operators::is_wall_between_left(x, max_y, self.0)
     }
 
-    fn is_on_ground(&self, mino: &Mino, x: u8, y: u8) -> bool {
-        y <= -mino.get_min_y() as u8 || !self.can_put(mino, x, y - 1)
-    }
-
     fn get_block_count_in_column(&self, x: u8, max_y: u8) -> u32 {
         let column = bit_operators::get_column_one_row_below_y(max_y) << x;
         (self.0 & column).count_ones()
@@ -119,10 +104,6 @@ impl Field for SmallField {
 
     fn get_num_of_all_blocks(&self) -> u32 {
         self.0.count_ones()
-    }
-
-    fn clear_filled_rows(&mut self) -> u32 {
-        self.clear_filled_rows_return_key().count_ones()
     }
 
     fn clear_filled_rows_return_key(&mut self) -> u64 {
@@ -282,13 +263,14 @@ impl HashCode for SmallField {
 
 impl Debug for SmallField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:#060x}", self.0)
+        write!(f, "SmallField {:#060x}", self.0)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::sfinder_core::neighbor::original_piece::OriginalPiece;
 
     fn create_all_pieces<'a>(field_height: u8) -> Vec<OriginalPiece<'a>> {
         todo!("OriginalPiece");
