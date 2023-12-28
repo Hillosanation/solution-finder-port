@@ -1,11 +1,9 @@
 use super::{
-    field::{self, BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
+    bit_operators,
+    field::{BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
 };
-use crate::{
-    extras::hash_code::HashCode,
-    sfinder_core::{field::bit_operators, mino::mino::Mino},
-};
+use crate::{extras::hash_code::HashCode, sfinder_core::mino::mino::Mino};
 use std::fmt::Debug;
 
 const MAX_FIELD_HEIGHT: u8 = 6;

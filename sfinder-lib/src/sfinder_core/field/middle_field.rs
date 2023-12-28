@@ -1,9 +1,10 @@
 use super::{
     bit_operators,
-    field::{self, BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field::{BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
+    small_field::SmallField,
 };
-use crate::sfinder_core::{field::small_field::SmallField, mino::mino::Mino};
+use crate::sfinder_core::mino::mino::Mino;
 use std::fmt::Debug;
 
 const FIELD_ROW_BORDER_Y: u8 = 6;
