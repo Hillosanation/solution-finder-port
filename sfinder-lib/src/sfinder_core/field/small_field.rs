@@ -1,7 +1,5 @@
-use std::fmt::Debug;
-
 use super::{
-    field::{BoardCount, Field},
+    field::{BoardCount, Field, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
 };
 use crate::{
@@ -10,9 +8,8 @@ use crate::{
         field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
     },
 };
+use std::fmt::Debug;
 
-const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
-const FIELD_WIDTH: u8 = 10;
 const MAX_FIELD_HEIGHT: u8 = 6;
 
 /// Porting note: clone replaces copy constructor
