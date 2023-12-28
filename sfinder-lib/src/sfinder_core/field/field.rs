@@ -188,6 +188,14 @@ pub trait FieldHelper {
 
         0 <= min_x && max_x < 10 && 0 <= min_y
     }
+
+    fn get_x_mask(x: u8, y: u8) -> u64 {
+        1 << (x + y * FIELD_WIDTH)
+    }
+
+    fn get_row_mask(y: u8) -> u64 {
+        0x3ff << (y * FIELD_WIDTH)
+    }
 }
 
 impl FieldHelper for dyn Field {}

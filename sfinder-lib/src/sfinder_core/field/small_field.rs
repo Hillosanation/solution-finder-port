@@ -1,5 +1,5 @@
 use super::{
-    field::{BoardCount, Field, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field::{BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
 };
 use crate::{
@@ -24,14 +24,6 @@ impl SmallField {
     pub fn get_x_board(&self) -> u64 {
         self.0
     }
-
-    fn get_x_mask(x: u8, y: u8) -> u64 {
-        1 << (x + y * FIELD_WIDTH)
-    }
-
-    fn get_row_mask(y: u8) -> u64 {
-        0x3ff << (y * FIELD_WIDTH)
-    }
 }
 
 impl From<u64> for SmallField {
@@ -50,11 +42,11 @@ impl Field for SmallField {
     }
 
     fn set_block(&mut self, x: u8, y: u8) {
-        self.0 |= Self::get_x_mask(x, y);
+        self.0 |= <dyn Field>::get_x_mask(x, y);
     }
 
     fn remove_block(&mut self, x: u8, y: u8) {
-        self.0 &= !Self::get_x_mask(x, y);
+        self.0 &= !<dyn Field>::get_x_mask(x, y);
     }
 
     fn put(&mut self, mino: &Mino, x: u8, y: u8) {
@@ -99,7 +91,7 @@ impl Field for SmallField {
     }
 
     fn is_empty_block(&self, x: u8, y: u8) -> bool {
-        self.0 & Self::get_x_mask(x, y) == 0
+        self.0 & <dyn Field>::get_x_mask(x, y) == 0
     }
 
     fn exists_block(&self, x: u8, y: u8) -> bool {
@@ -182,7 +174,7 @@ impl Field for SmallField {
     }
 
     fn fill_row(&mut self, y: u8) {
-        self.0 |= Self::get_row_mask(y);
+        self.0 |= <dyn Field>::get_row_mask(y);
     }
 
     fn get_board(&self, index: u8) -> u64 {
@@ -311,5 +303,14 @@ impl HashCode for SmallField {
 impl Debug for SmallField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:#060x}", self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn create_all_pieces<'a>(field_height: u8) -> Vec<OriginalPiece<'a>> {
+        todo!("OriginalPiece");
     }
 }
