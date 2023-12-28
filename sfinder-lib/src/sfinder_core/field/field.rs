@@ -23,19 +23,25 @@ pub trait Field: std::fmt::Debug /* : PartialOrd */ {
     fn put(&mut self, mino: &Mino, x: u8, y: u8);
 
     // 指定した位置にピースの形にブロックをおく
-    fn put_piece(&mut self, piece: OriginalPiece);
+    fn put_piece(&mut self, piece: OriginalPiece) {
+        self.merge(piece.get_mino_field())
+    }
 
     // 指定した位置にミノを置くことができるとき true を返却
     fn can_put(&self, mino: &Mino, x: u8, y: u8) -> bool;
 
     // 指定した位置にピースをおくことができるか（足場は確認しない）
-    fn can_put_piece(&self, piece: OriginalPiece) -> bool;
+    fn can_put_piece(&self, piece: OriginalPiece) -> bool {
+        self.can_merge(piece.get_mino_field())
+    }
 
     // 指定した位置のミノの形でブロックを消す
     fn remove(&mut self, mino: &Mino, x: u8, y: u8);
 
     // 指定した位置のピースの形でブロックを消す
-    fn remove_piece(&mut self, piece: OriginalPiece);
+    fn remove_piece(&mut self, piece: OriginalPiece) {
+        self.reduce(piece.get_mino_field())
+    }
 
     // 指定した位置からミノをharddropしたとき、接着するyを返却
     fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8;
@@ -44,13 +50,17 @@ pub trait Field: std::fmt::Debug /* : PartialOrd */ {
     fn can_reach_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> bool;
 
     // 一番上からharddropで指定した位置を通過するとき true を返却
-    fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool;
+    fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool {
+        self.can_merge(piece.get_harddrop_collider())
+    }
 
     // 指定した位置にブロックがないとき true を返却
     fn is_empty_block(&self, x: u8, y: u8) -> bool;
 
     // 指定した位置にブロックがあるとき true を返却
-    fn exists_block(&self, x: u8, y: u8) -> bool;
+    fn exists_block(&self, x: u8, y: u8) -> bool {
+        !self.is_empty_block(x, y)
+    }
 
     // Porting note: replaces existsAbove
     // y行以上にブロックがあるとき true を返却（y行上のブロックも対象に含む）

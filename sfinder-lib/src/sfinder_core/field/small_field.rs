@@ -53,24 +53,12 @@ impl Field for SmallField {
         self.0 |= mino.get_mask(x, y as i8);
     }
 
-    fn put_piece(&mut self, piece: OriginalPiece) {
-        self.merge(piece.get_mino_field())
-    }
-
     fn can_put(&self, mino: &Mino, x: u8, y: u8) -> bool {
         MAX_FIELD_HEIGHT + 2 <= y || self.0 & mino.get_mask(x, y as i8) == 0
     }
 
-    fn can_put_piece(&self, piece: OriginalPiece) -> bool {
-        self.can_merge(piece.get_mino_field())
-    }
-
     fn remove(&mut self, mino: &Mino, x: u8, y: u8) {
         self.0 &= !mino.get_mask(x, y as i8);
-    }
-
-    fn remove_piece(&mut self, piece: OriginalPiece) {
-        self.reduce(piece.get_mino_field())
     }
 
     fn get_y_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> u8 {
@@ -86,16 +74,8 @@ impl Field for SmallField {
         (start_y + 1..MAX_FIELD_HEIGHT - mino.get_min_y() as u8).all(|y| self.can_put(mino, x, y))
     }
 
-    fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool {
-        self.can_merge(piece.get_harddrop_collider())
-    }
-
     fn is_empty_block(&self, x: u8, y: u8) -> bool {
         self.0 & <dyn Field>::get_x_mask(x, y) == 0
-    }
-
-    fn exists_block(&self, x: u8, y: u8) -> bool {
-        !self.is_empty_block(x, y)
     }
 
     fn exists_above_row(&self, y: u8) -> bool {
