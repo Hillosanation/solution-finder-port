@@ -8,7 +8,7 @@ use crate::{
         operations::Operations, simple_operation::SimpleOperation,
     },
     sfinder_core::{
-        field::{field::Field, key_operators},
+        field::{field::Field, field_factory, key_operators},
         mino::{mino::Mino, mino_factory::MinoFactory},
     },
 };
@@ -46,7 +46,7 @@ pub fn to_full_operation_with_key(
     height: u8,
 ) -> FullOperationWithKey {
     // 一番上と一番下のy座標を抽出
-    let mut vanilla: Box<dyn Field> = todo!("FieldFactory");
+    let mut vanilla = field_factory::create_field(height);
     vanilla.put(mino, x, y);
     vanilla.insert_blank_row_with_key(delete_key);
     assert!(
@@ -113,9 +113,9 @@ pub fn parse_to_field(
     operation_with_keys: &[impl MinoOperationWithKey],
     height: u8,
 ) -> Box<dyn Field> {
-    let mut field: Box<dyn Field> = todo!("FieldFactory");
+    let mut field = field_factory::create_field(height);
     for operation in operation_with_keys {
-        let mut piece_field: Box<dyn Field> = todo!("FieldFactory");
+        let mut piece_field = field_factory::create_field(height);
         piece_field.put(operation.get_mino(), operation.get_x(), operation.get_y());
         piece_field.insert_blank_row_with_key(operation.get_need_deleted_key());
 

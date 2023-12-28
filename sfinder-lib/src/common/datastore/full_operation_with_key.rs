@@ -6,6 +6,7 @@ use super::{
 use crate::{
     extras::hash_code::HashCode,
     sfinder_core::{
+        field::field_factory,
         mino::{mino::Mino, piece::Piece},
         srs::rotate::Rotate,
     },
@@ -23,7 +24,18 @@ pub struct FullOperationWithKey<'m> {
 
 impl<'a> FullOperationWithKey<'a> {
     pub fn create(mino: &'a Mino, x: u8, y: u8, need_deleted_key: u64, field_height: u8) -> Self {
-        todo!("FieldFactory");
+        let mut field = field_factory::create_field(field_height);
+        field.put(mino, x, y);
+        field.insert_blank_row_with_key(need_deleted_key);
+        let using_key = field.get_using_key();
+
+        Self {
+            mino,
+            x,
+            y,
+            need_deleted_key,
+            using_key,
+        }
     }
 
     // lowerY: 最も下にあるブロックのy座標

@@ -98,7 +98,7 @@ mod tests {
     #[test]
     #[rustfmt::skip]
     fn test_compare_to() {
-        let binding = (Box::new(SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 5)) as Box<dyn Operation<u8>>);
+        let binding = Box::new(SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 5)) as Box<dyn Operation<u8>>;
         let operation1 = binding.as_ref();
         let operation2 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 5) as &dyn Operation<u8>;
         let operation3 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 13) as &dyn Operation<u8>;
