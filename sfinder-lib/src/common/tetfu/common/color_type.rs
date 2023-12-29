@@ -1,7 +1,7 @@
 use crate::sfinder_core::mino::piece::Piece;
 
 #[repr(u8)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum ColorType {
     Empty = 0,
     I,
