@@ -564,68 +564,48 @@ impl Field for LargeField {
             )
         }
 
-        if delete_rows[2] < 6 {
-            // Low & MidLow & MidHigh & High
-            let new_x_boards = [
+        #[rustfmt::skip]
+        let new_x_boards = if delete_rows[2] >= FIELD_ROW_MID_HIGH_BORDER_Y {
+            // Low & MidLow
+            [
                 create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[0]),
-                create_upper_board(self.1, self.2, delete_rows[1], delete_keys[1]),
-                create_upper_board(self.2, self.3, delete_rows[2], delete_keys[2]),
-            ];
-
-            self.0 = new_x_boards[0];
-            self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-            self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-            self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
-        } else if delete_rows[2] < 12 {
+                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
+                create_upper_board(self.0, self.1, delete_rows[1] - BOARD_HEIGHT, delete_keys[2]),
+                create_upper_board(self.0, self.1, delete_rows[2] - FIELD_ROW_MID_HIGH_BORDER_Y, delete_keys[3]),
+            ]
+        } else if delete_rows[2] >= BOARD_HEIGHT {
             // Low & MidLow & MidHigh
-            let delete_row_3_6 = delete_rows[2] - 6;
-
-            if delete_rows[1] < 6 {
+            if delete_rows[1] >= BOARD_HEIGHT {
+                // Low & MidLow
+                [
+                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
+                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
+                    create_upper_board(self.0, self.1, delete_rows[1] - BOARD_HEIGHT, delete_keys[2]),
+                    create_upper_board(self.1, self.2, delete_rows[2] - BOARD_HEIGHT, delete_keys[3]),
+                ]
+            } else {
                 // Low & MidLow & MidHigh
-                let new_x_boards = [
+                [
                     create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
                     create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
                     create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]),
-                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]),
-                ];
-
-                self.0 = new_x_boards[0];
-                self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-                self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-                self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
-            } else {
-                // Low & MidLow
-                let delete_row_2_6 = delete_rows[1] - 6;
-                let new_x_boards = [
-                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                    create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]),
-                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]),
-                ];
-
-                self.0 = new_x_boards[0];
-                self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-                self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-                self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
+                    create_upper_board(self.1, self.2, delete_rows[2] - BOARD_HEIGHT, delete_keys[3]),
+                ]
             }
         } else {
-            // Low & MidLow
-            let delete_row_3_12 = delete_rows[2] - 12;
-            let delete_row_2_6 = delete_rows[1] - 6;
-
-            let new_x_boards = [
+            // Low & MidLow & MidHigh & High
+            [
                 create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
                 create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]),
-                create_upper_board(self.0, self.1, delete_row_3_12, delete_keys[3]),
-            ];
+                create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]),
+                create_upper_board(self.2, self.3, delete_rows[2], delete_keys[3]),
+            ]
+        };
 
-            self.0 = new_x_boards[0];
-            self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-            self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-            self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
-        }
+        self.0 = new_x_boards[0];
+        self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+        self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
+        self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
     }
 
     fn insert_blank_row_with_key(&mut self, delete_key: u64) {
