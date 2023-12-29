@@ -583,52 +583,48 @@ impl Field for LargeField {
 
             if delete_rows[1] < 6 {
                 // Low & MidLow & MidHigh
-                let new_x_board_high =
-                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]);
-                let new_x_board_mid_high =
-                    create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]);
-                let new_x_board_mid_low =
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]);
-                let new_x_board_low = create_bottom_board(self.0, delete_rows[0], delete_keys[0]);
+                let new_x_boards = [
+                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
+                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
+                    create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]),
+                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]),
+                ];
 
-                self.0 = new_x_board_low;
-                self.1 = new_x_board_mid_low & VALID_BOARD_RANGE;
-                self.2 = new_x_board_mid_high & VALID_BOARD_RANGE;
-                self.3 = new_x_board_high & VALID_BOARD_RANGE;
+                self.0 = new_x_boards[0];
+                self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+                self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
+                self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
             } else {
                 // Low & MidLow
                 let delete_row_2_6 = delete_rows[1] - 6;
+                let new_x_boards = [
+                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
+                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
+                    create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]),
+                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]),
+                ];
 
-                let new_x_board_high =
-                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]);
-                let new_x_board_mid_high =
-                    create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]);
-                let new_x_board_mid_low =
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]);
-                let new_x_board_low = create_bottom_board(self.0, delete_rows[0], delete_keys[0]);
-
-                self.0 = new_x_board_low;
-                self.1 = new_x_board_mid_low & VALID_BOARD_RANGE;
-                self.2 = new_x_board_mid_high & VALID_BOARD_RANGE;
-                self.3 = new_x_board_high & VALID_BOARD_RANGE;
+                self.0 = new_x_boards[0];
+                self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+                self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
+                self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
             }
         } else {
             // Low & MidLow
             let delete_row_3_12 = delete_rows[2] - 12;
             let delete_row_2_6 = delete_rows[1] - 6;
 
-            let new_x_board_high =
-                create_upper_board(self.0, self.1, delete_row_3_12, delete_keys[3]);
-            let new_x_board_mid_high =
-                create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]);
-            let new_x_board_mid_low =
-                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]);
-            let new_x_board_low = create_bottom_board(self.0, delete_rows[0], delete_keys[0]);
+            let new_x_boards = [
+                create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
+                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
+                create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]),
+                create_upper_board(self.0, self.1, delete_row_3_12, delete_keys[3]),
+            ];
 
-            self.0 = new_x_board_low;
-            self.1 = new_x_board_mid_low & VALID_BOARD_RANGE;
-            self.2 = new_x_board_mid_high & VALID_BOARD_RANGE;
-            self.3 = new_x_board_high & VALID_BOARD_RANGE;
+            self.0 = new_x_boards[0];
+            self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+            self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
+            self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
         }
     }
 
