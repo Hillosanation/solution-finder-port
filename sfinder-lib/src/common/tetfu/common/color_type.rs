@@ -1,3 +1,5 @@
+use crate::sfinder_core::mino::piece::Piece;
+
 #[repr(u8)]
 #[derive(Clone, Copy)]
 pub enum ColorType {
@@ -45,5 +47,36 @@ impl TryFrom<u8> for ColorType {
             .get(value as usize)
             .copied()
             .ok_or("Invalid ColorType value".to_owned())
+    }
+}
+
+impl From<Piece> for ColorType {
+    fn from(piece: Piece) -> Self {
+        match piece {
+            Piece::I => ColorType::I,
+            Piece::L => ColorType::L,
+            Piece::O => ColorType::O,
+            Piece::Z => ColorType::Z,
+            Piece::T => ColorType::T,
+            Piece::J => ColorType::J,
+            Piece::S => ColorType::S,
+        }
+    }
+}
+
+impl TryFrom<ColorType> for Piece {
+    type Error = String;
+
+    fn try_from(value: ColorType) -> Result<Self, Self::Error> {
+        match value {
+            ColorType::I => Ok(Piece::I),
+            ColorType::L => Ok(Piece::L),
+            ColorType::O => Ok(Piece::O),
+            ColorType::Z => Ok(Piece::Z),
+            ColorType::T => Ok(Piece::T),
+            ColorType::J => Ok(Piece::J),
+            ColorType::S => Ok(Piece::S),
+            _ => Err("Cannot convert this color to Piece".to_owned()),
+        }
     }
 }
