@@ -147,3 +147,98 @@ pub fn from_colored_field(colored_field: &dyn ColoredField, height: u8) -> Box<d
 
     field
 }
+
+#[cfg(test)]
+mod tests {
+    use rand::{thread_rng, Rng};
+
+    use crate::sfinder_core::field::field::BoardCount;
+
+    use super::*;
+
+    #[test]
+    fn test_small() {
+        let field = create_field_with_marks(
+            String::new()
+                + "XXXXX_XXXX"
+                + "XXXX_XXXXX"
+                + "XXX_XXXXXX"
+                + "XX_XXXXXXX"
+                + "X_XXXXXXXX"
+                + "_XXXXXXXXX",
+        );
+
+        assert_eq!(field.get_board_count(), BoardCount::Small);
+
+        for y in 0..6 {
+            for x in 0..10 {
+                assert_eq!(field.is_empty_block(x, y), x == y);
+            }
+        }
+    }
+
+    #[test]
+    fn test_middle() {
+        let field = create_field_with_marks(
+            String::new()
+                + "X_XXXXXXXX"
+                + "_XXXXXXXXX"
+                + "XXXXXXXXX_"
+                + "XXXXXXXX_X"
+                + "XXXXXXX_XX"
+                + "XXXXXX_XXX"
+                + "XXXXX_XXXX"
+                + "XXXX_XXXXX"
+                + "XXX_XXXXXX"
+                + "XX_XXXXXXX"
+                + "X_XXXXXXXX"
+                + "_XXXXXXXXX",
+        );
+
+        assert_eq!(field.get_board_count(), BoardCount::Middle);
+
+        for y in 0..12 {
+            for x in 0..10 {
+                assert_eq!(field.is_empty_block(x, y), x == y % 10);
+            }
+        }
+    }
+
+    #[test]
+    fn test_random() {
+        let mut rngs = thread_rng();
+
+        for _ in 0..10000 {
+            let height = rngs.gen_range(1..=12);
+            let empty_spots: Vec<[_; 10]> = (0..height)
+                .map(|_| std::array::from_fn(|_| rngs.gen_bool(0.5)))
+                .collect();
+
+            let marks: String = empty_spots
+                .iter()
+                // start from the top for the string
+                .rev()
+                .flat_map(|row_spots| {
+                    row_spots
+                        .iter()
+                        .map(|is_empty| if *is_empty { ' ' } else { 'X' })
+                })
+                .collect();
+
+            // println!("marks: {marks}");
+            // println!("empty_spots: {empty_spots:?}");
+
+            let field = create_field_with_marks(marks);
+
+            for y in 0..height {
+                for x in 0..10 {
+                    assert_eq!(
+                        field.is_empty_block(x, y),
+                        empty_spots[y as usize][x as usize],
+                        "x: {x}, y: {y}"
+                    );
+                }
+            }
+        }
+    }
+}

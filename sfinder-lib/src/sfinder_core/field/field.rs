@@ -5,7 +5,7 @@ use crate::{
     },
 };
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum BoardCount {
     Small = 1,
     Middle = 2,
