@@ -7,7 +7,8 @@ use super::{
 use crate::sfinder_core::mino::mino::Mino;
 use std::fmt::Debug;
 
-const FIELD_ROW_BORDER_Y: u8 = 6;
+const BOARD_HEIGHT: u8 = 6;
+const FIELD_ROW_BORDER_Y: u8 = BOARD_HEIGHT;
 const MAX_FIELD_HEIGHT: u8 = 12;
 
 #[derive(Clone)]
@@ -41,9 +42,9 @@ impl MiddleField {
         let delete_row_low = delete_key_low.count_ones() as u8;
 
         self.0 = (new_x_board_low
-            | (new_x_board_high << (FIELD_ROW_BORDER_Y - delete_row_low) * FIELD_WIDTH))
+            | <dyn Field>::board_shl(new_x_board_high, BOARD_HEIGHT - delete_row_low))
             & VALID_BOARD_RANGE;
-        self.1 = new_x_board_high >> (delete_row_low * FIELD_WIDTH);
+        self.1 = <dyn Field>::board_shr(new_x_board_high, delete_row_low);
     }
 
     fn clear_all(&mut self) {
@@ -151,19 +152,14 @@ impl Field for MiddleField {
             MAX_FIELD_HEIGHT.. => false,
             FIELD_ROW_BORDER_Y.. => {
                 // Highで完結
-                let mask = VALID_BOARD_RANGE << ((y - FIELD_ROW_BORDER_Y) * FIELD_WIDTH);
-                self.1 & mask != 0
+                self.1 & <dyn Field>::get_valid_mask(y - FIELD_ROW_BORDER_Y) != 0
             }
             _ => {
                 // すべて必要
                 // Highのチェック
-                if self.1 != 0 {
-                    return true;
-                }
-
+                self.1 != 0
                 // Lowのチェック
-                let mask = VALID_BOARD_RANGE << (y * FIELD_WIDTH);
-                self.0 & mask != 0
+                || self.0 & <dyn Field>::get_valid_mask(y) != 0
             }
         }
     }
@@ -177,21 +173,14 @@ impl Field for MiddleField {
             0 => true,
             ..=FIELD_ROW_BORDER_Y => {
                 // Lowで完結
-                let mask = bit_operators::get_column_one_row_below_y(max_y) << x;
-                (!self.0 & mask) == 0
+                !self.0 & bit_operators::get_column_mask(max_y, x) == 0
             }
             _ => {
                 // すべて必要
                 // Lowのチェック
-                let mask_low = bit_operators::get_column_one_row_below_y(FIELD_ROW_BORDER_Y) << x;
-                if !self.0 & mask_low != 0 {
-                    return false;
-                }
-
+                !self.0 & bit_operators::get_column_mask(BOARD_HEIGHT, x) == 0
                 // Highのチェック
-                let mask_high =
-                    bit_operators::get_column_one_row_below_y(max_y - FIELD_ROW_BORDER_Y) << x;
-                (!self.1 & mask_high) == 0
+                && !self.1 & bit_operators::get_column_mask(max_y - FIELD_ROW_BORDER_Y, x) == 0
             }
         }
     }
@@ -206,28 +195,24 @@ impl Field for MiddleField {
             _ => {
                 // すべて必要
                 // Lowのチェック
-                if !bit_operators::is_wall_between_left(x, FIELD_ROW_BORDER_Y, self.0) {
-                    return false;
-                }
-
+                bit_operators::is_wall_between_left(x, BOARD_HEIGHT, self.0)
                 // Highのチェック
-                bit_operators::is_wall_between_left(x, max_y - FIELD_ROW_BORDER_Y, self.1)
+                && bit_operators::is_wall_between_left(x, max_y - FIELD_ROW_BORDER_Y, self.1)
             }
         }
     }
 
     fn get_block_count_in_column(&self, x: u8, max_y: u8) -> u32 {
         match max_y {
+            // Lowで完結
             ..=FIELD_ROW_BORDER_Y => {
-                // Lowで完結
-                (self.0 & bit_operators::get_column_one_row_below_y(max_y) << x).count_ones()
+                (self.0 & bit_operators::get_column_mask(max_y, x)).count_ones()
             }
+            // すべて必要
             _ => {
-                // すべて必要
-                let mask_low = bit_operators::get_column_one_row_below_y(FIELD_ROW_BORDER_Y) << x;
-                let mask_high =
-                    bit_operators::get_column_one_row_below_y(max_y - FIELD_ROW_BORDER_Y) << x;
-                (self.0 & mask_low).count_ones() + (self.1 & mask_high).count_ones()
+                (self.0 & bit_operators::get_column_mask(BOARD_HEIGHT, x)).count_ones()
+                    + (self.1 & bit_operators::get_column_mask(max_y - FIELD_ROW_BORDER_Y, x))
+                        .count_ones()
             }
         }
     }
@@ -235,26 +220,16 @@ impl Field for MiddleField {
     fn get_block_count_in_row(&self, y: u8) -> u32 {
         match y {
             FIELD_ROW_BORDER_Y.. => {
-                let mask = <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y);
-                (self.1 & mask).count_ones()
+                (self.1 & <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y)).count_ones()
             }
-            _ => {
-                let mask = <dyn Field>::get_row_mask(y);
-                (self.0 & mask).count_ones()
-            }
+            _ => (self.0 & <dyn Field>::get_row_mask(y)).count_ones(),
         }
     }
 
     fn exists_block_in_row(&self, y: u8) -> bool {
         match y {
-            FIELD_ROW_BORDER_Y.. => {
-                let mask = <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y);
-                self.1 & mask != 0
-            }
-            _ => {
-                let mask = <dyn Field>::get_row_mask(y);
-                self.0 & mask != 0
-            }
+            FIELD_ROW_BORDER_Y.. => self.1 & <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y) != 0,
+            _ => self.0 & <dyn Field>::get_row_mask(y) != 0,
         }
     }
 
@@ -462,7 +437,7 @@ impl Field for MiddleField {
     }
 
     fn slide_down_one(&mut self) {
-        self.0 = (self.0 >> FIELD_WIDTH | self.1 << ((FIELD_ROW_BORDER_Y - 1) * FIELD_WIDTH))
+        self.0 = (self.0 >> FIELD_WIDTH | <dyn Field>::board_shl(self.1, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
         self.1 = self.1 >> FIELD_WIDTH;
     }
@@ -474,7 +449,7 @@ impl Field for MiddleField {
             }
             ..=MAX_FIELD_HEIGHT => {
                 self.delete_row(
-                    bit_operators::get_column_one_row_below_y(FIELD_ROW_BORDER_Y),
+                    bit_operators::get_column_one_row_below_y(BOARD_HEIGHT),
                     key_operators::get_mask_for_key_below_y(slide - FIELD_ROW_BORDER_Y),
                 );
             }

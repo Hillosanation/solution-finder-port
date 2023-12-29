@@ -83,33 +83,36 @@ impl LargeField {
 
         let boards = [
             // 下半分
-            (new_x_boards[0] | (new_x_boards[1] << (BOARD_HEIGHT - delete_rows[0]) * FIELD_WIDTH))
+            (new_x_boards[0]
+                | <dyn Field>::board_shl(new_x_boards[1], BOARD_HEIGHT - delete_rows[0]))
                 & VALID_BOARD_RANGE,
-            new_x_boards[1] >> (delete_rows[0] * FIELD_WIDTH),
+            <dyn Field>::board_shr(new_x_boards[1], delete_rows[0]),
             // 上半分
-            (new_x_boards[2] | (new_x_boards[3] << (BOARD_HEIGHT - delete_rows[2]) * FIELD_WIDTH))
+            (new_x_boards[2]
+                | <dyn Field>::board_shl(new_x_boards[3], BOARD_HEIGHT - delete_rows[2]))
                 & VALID_BOARD_RANGE,
-            new_x_boards[3] >> (delete_rows[2] * BOARD_HEIGHT),
+            <dyn Field>::board_shr(new_x_boards[3], delete_rows[2]),
         ];
 
         let delete_row_bottom = delete_rows[0] + delete_rows[1];
         // 上半分と下半分をマージ
         if delete_row_bottom >= BOARD_HEIGHT {
             let slide = delete_row_bottom - BOARD_HEIGHT;
-            self.0 = (boards[0] | (boards[2] << (BOARD_HEIGHT - slide) * FIELD_WIDTH))
+            self.0 = (boards[0] | (<dyn Field>::board_shl(boards[2], BOARD_HEIGHT - slide)))
                 & VALID_BOARD_RANGE;
-            self.1 = boards[2] >> (slide * FIELD_WIDTH)
-                | (boards[3] << ((BOARD_HEIGHT - slide) * FIELD_WIDTH)) & VALID_BOARD_RANGE;
-            self.2 = boards[3] >> (slide * FIELD_WIDTH);
+            self.1 = <dyn Field>::board_shr(boards[2], slide)
+                | <dyn Field>::board_shl(boards[3], BOARD_HEIGHT - slide) & VALID_BOARD_RANGE;
+            self.2 = <dyn Field>::board_shr(boards[3], slide);
             self.3 = 0;
         } else {
             self.0 = boards[0];
-            self.1 = (boards[1] | (boards[2] << (BOARD_HEIGHT - delete_row_bottom) * FIELD_WIDTH))
+            self.1 = (boards[1]
+                | <dyn Field>::board_shl(boards[2], BOARD_HEIGHT - delete_row_bottom))
                 & VALID_BOARD_RANGE;
-            self.2 = boards[2] >> (delete_row_bottom * FIELD_WIDTH)
-                | (boards[3] << (BOARD_HEIGHT - delete_row_bottom) * FIELD_WIDTH)
+            self.2 = <dyn Field>::board_shr(boards[2], delete_row_bottom)
+                | <dyn Field>::board_shl(boards[3], BOARD_HEIGHT - delete_row_bottom)
                     & VALID_BOARD_RANGE;
-            self.3 = boards[3] >> (delete_row_bottom * FIELD_WIDTH);
+            self.3 = <dyn Field>::board_shr(boards[3], delete_row_bottom);
         }
     }
 
@@ -363,41 +366,26 @@ impl Field for LargeField {
         match Self::select(max_y) {
             Position::Low(y_off) => {
                 // Lowで完結
-                !self.0 & (bit_operators::get_column_one_row_below_y(y_off) << x) == 0
+                self.0 | !bit_operators::get_column_mask(y_off, x) == !0
             }
             Position::MidLow(y_off) => {
-                let mask_full = bit_operators::get_column_one_row_below_y(BOARD_HEIGHT) << x;
-
                 // Lowのチェック
-                if !self.0 & mask_full != 0 {
-                    return false;
-                }
-
+                self.0 | !bit_operators::get_column_mask(BOARD_HEIGHT, x) == !0
                 // MidLowのチェック
-                !self.1 & (bit_operators::get_column_one_row_below_y(y_off) << x) == 0
+                && self.1 | !bit_operators::get_column_mask(y_off, x) == !0
             }
             Position::MidHigh(y_off) => {
-                let mask_full = bit_operators::get_column_one_row_below_y(BOARD_HEIGHT) << x;
-
                 // Low & MidLowのチェック
-                if !self.0 & mask_full != 0 || !self.1 & mask_full != 0 {
-                    return false;
-                }
-
+                (self.0 & self.1) | !bit_operators::get_column_mask(BOARD_HEIGHT, x) == !0
                 // MidHighのチェック
-                !self.2 & (bit_operators::get_column_one_row_below_y(y_off) << x) == 0
+                && self.2 | !bit_operators::get_column_mask(y_off, x) == !0
             }
             Position::High(y_off) => {
-                let mask_full = bit_operators::get_column_one_row_below_y(BOARD_HEIGHT) << x;
-
                 // Low & MidLow & MidHighのチェック
-                if !self.0 & mask_full != 0 || !self.1 & mask_full != 0 || !self.2 & mask_full != 0
-                {
-                    return false;
-                }
-
+                (self.0 & self.1 & self.2) | !bit_operators::get_column_mask(BOARD_HEIGHT, x)
+                    == !0
                 // Highのチェック
-                !self.3 & (bit_operators::get_column_one_row_below_y(y_off) << x) == 0
+                && self.3 | !bit_operators::get_column_mask(y_off, x) == !0
             }
         }
     }
@@ -437,27 +425,27 @@ impl Field for LargeField {
         match Self::select(max_y) {
             Position::Low(y_off) => {
                 // Low
-                (self.0 & bit_operators::get_column_one_row_below_y(y_off) << x).count_ones()
+                (self.0 & bit_operators::get_column_mask(y_off, x)).count_ones()
             }
             Position::MidLow(y_off) => {
                 // Low + MidLow
-                (self.0 & bit_operators::get_column_one_row_below_y(BOARD_HEIGHT) << x).count_ones()
-                    + (self.1 & bit_operators::get_column_one_row_below_y(y_off) << x).count_ones()
+                (self.0 & bit_operators::get_column_mask(BOARD_HEIGHT, x)).count_ones()
+                    + (self.1 & bit_operators::get_column_mask(y_off, x)).count_ones()
             }
             Position::MidHigh(y_off) => {
-                let full_mask = bit_operators::get_column_one_row_below_y(BOARD_HEIGHT) << x;
+                let full_mask = bit_operators::get_column_mask(BOARD_HEIGHT, x);
                 // Low + MidLow + MidHigh
                 (self.0 & full_mask).count_ones()
                     + (self.1 & full_mask).count_ones()
-                    + (self.2 & bit_operators::get_column_one_row_below_y(y_off) << x).count_ones()
+                    + (self.2 & bit_operators::get_column_mask(y_off, x)).count_ones()
             }
             Position::High(y_off) => {
-                let full_mask = bit_operators::get_column_one_row_below_y(BOARD_HEIGHT);
+                let full_mask = bit_operators::get_column_mask(BOARD_HEIGHT, x);
                 // Low + MidLow + MidHigh + High
-                (self.0 & full_mask << x).count_ones()
-                    + (self.1 & full_mask << x).count_ones()
-                    + (self.2 & full_mask << x).count_ones()
-                    + (self.3 & bit_operators::get_column_one_row_below_y(y_off) << x).count_ones()
+                (self.0 & full_mask).count_ones()
+                    + (self.1 & full_mask).count_ones()
+                    + (self.2 & full_mask).count_ones()
+                    + (self.3 & bit_operators::get_column_mask(y_off, x)).count_ones()
             }
         }
     }
@@ -545,10 +533,9 @@ impl Field for LargeField {
         ) -> u64 {
             let left_row = BOARD_HEIGHT - delete_row;
             long_board_map::insert_filled_row(
-                board_high << (delete_row * FIELD_WIDTH)
+                <dyn Field>::board_shl(board_high, delete_row)
                     // why mask and shift? aren't those bits shifted out?
-                    | (board_low & bit_operators::get_row_mask_above_y(left_row))
-                        >> (left_row * FIELD_WIDTH),
+                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
                 delete_key,
             )
         }
@@ -626,10 +613,9 @@ impl Field for LargeField {
         ) -> u64 {
             let left_row = BOARD_HEIGHT - delete_row;
             long_board_map::insert_blank_row(
-                board_high << (delete_row * FIELD_WIDTH)
+                <dyn Field>::board_shl(board_high, delete_row)
                     // why mask and shift? aren't those bits shifted out?
-                    | (board_low & bit_operators::get_row_mask_above_y(left_row))
-                        >> (left_row * FIELD_WIDTH),
+                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
                 delete_key,
             )
         }
@@ -857,11 +843,11 @@ impl Field for LargeField {
     }
 
     fn slide_down_one(&mut self) {
-        self.0 = (self.0 >> FIELD_WIDTH | self.1 << ((BOARD_HEIGHT - 1) * FIELD_WIDTH))
+        self.0 = (self.0 >> FIELD_WIDTH | <dyn Field>::board_shl(self.1, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
-        self.1 = (self.1 >> FIELD_WIDTH | self.2 << ((BOARD_HEIGHT - 1) * FIELD_WIDTH))
+        self.1 = (self.1 >> FIELD_WIDTH | <dyn Field>::board_shl(self.2, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
-        self.2 = (self.2 >> FIELD_WIDTH | self.3 << ((BOARD_HEIGHT - 1) * FIELD_WIDTH))
+        self.2 = (self.2 >> FIELD_WIDTH | <dyn Field>::board_shl(self.3, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
         self.3 >>= FIELD_WIDTH;
     }

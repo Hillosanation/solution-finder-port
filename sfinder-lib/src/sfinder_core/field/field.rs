@@ -236,8 +236,25 @@ pub trait FieldHelper {
         1 << (x + y * FIELD_WIDTH)
     }
 
+    // TODO: move these to bit_operators?
+    #[inline]
+    fn board_shl(board: u64, shift: u8) -> u64 {
+        board << (shift * FIELD_WIDTH)
+    }
+
+    #[inline]
+    fn board_shr(board: u64, shift: u8) -> u64 {
+        board >> (shift * FIELD_WIDTH)
+    }
+
     fn get_row_mask(y: u8) -> u64 {
-        0x3ff << (y * FIELD_WIDTH)
+        Self::board_shl(0x3ff, y)
+    }
+
+    // returns a mask of the rows above y
+    #[inline]
+    fn get_valid_mask(y: u8) -> u64 {
+        Self::board_shl(VALID_BOARD_RANGE, y)
     }
 
     #[inline]

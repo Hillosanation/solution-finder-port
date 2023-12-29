@@ -66,7 +66,7 @@ impl Field for SmallField {
     }
 
     fn exists_above_row(&self, y: u8) -> bool {
-        let mask = VALID_BOARD_RANGE << (y * FIELD_WIDTH);
+        let mask = <dyn Field>::get_valid_mask(y);
         y < MAX_FIELD_HEIGHT && (self.0 & mask) != 0
     }
 
@@ -79,8 +79,7 @@ impl Field for SmallField {
             return true;
         }
 
-        let column = bit_operators::get_column_one_row_below_y(max_y) << x;
-        (!self.0 & column) == !0
+        self.0 | !bit_operators::get_column_mask(max_y, x) == !0
     }
 
     fn is_wall_between_left(&self, x: u8, max_y: u8) -> bool {
@@ -88,16 +87,15 @@ impl Field for SmallField {
     }
 
     fn get_block_count_in_column(&self, x: u8, max_y: u8) -> u32 {
-        let column = bit_operators::get_column_one_row_below_y(max_y) << x;
-        (self.0 & column).count_ones()
+        (self.0 & bit_operators::get_column_mask(max_y, x)).count_ones()
     }
 
     fn get_block_count_in_row(&self, y: u8) -> u32 {
-        (self.0 & 0x3ff << (y * FIELD_WIDTH)).count_ones()
+        (self.0 & <dyn Field>::get_row_mask(y)).count_ones()
     }
 
     fn exists_block_in_row(&self, y: u8) -> bool {
-        (self.0 & 0x3ff << (y * FIELD_WIDTH)) != 0
+        (self.0 & <dyn Field>::get_row_mask(y)) != 0
     }
 
     fn get_num_of_all_blocks(&self) -> u32 {
