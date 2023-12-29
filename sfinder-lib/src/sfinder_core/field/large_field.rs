@@ -544,7 +544,6 @@ impl Field for LargeField {
             board_low: u64,
             board_high: u64,
             delete_row: u8,
-            left_row: u8,
             delete_key: u64,
         ) -> u64 {
             let left_row = BOARD_HEIGHT - delete_row;
@@ -557,7 +556,8 @@ impl Field for LargeField {
             )
         }
 
-        fn create_bottom_board(board_bottom: u64, left_row: u8, delete_key: u64) -> u64 {
+        fn create_bottom_board(board_bottom: u64, delete_row: u8, delete_key: u64) -> u64 {
+            let left_row = BOARD_HEIGHT - delete_row;
             long_board_map::insert_filled_row(
                 board_bottom & bit_operators::get_row_mask_below_y(left_row),
                 delete_key,
@@ -566,16 +566,11 @@ impl Field for LargeField {
 
         if delete_rows[2] < 6 {
             // Low & MidLow & MidHigh & High
-            let left_rows = delete_rows
-                .iter()
-                .map(|&row| BOARD_HEIGHT - row)
-                .collect::<Vec<_>>();
-
             let new_x_boards = [
-                create_bottom_board(self.0, left_rows[0], delete_keys[0]),
-                create_upper_board(self.0, self.1, delete_rows[0], left_rows[0], delete_keys[0]),
-                create_upper_board(self.1, self.2, delete_rows[1], left_rows[1], delete_keys[1]),
-                create_upper_board(self.2, self.3, delete_rows[2], left_rows[2], delete_keys[2]),
+                create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
+                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[0]),
+                create_upper_board(self.1, self.2, delete_rows[1], delete_keys[1]),
+                create_upper_board(self.2, self.3, delete_rows[2], delete_keys[2]),
             ];
 
             self.0 = new_x_boards[0];
@@ -585,21 +580,16 @@ impl Field for LargeField {
         } else if delete_rows[2] < 12 {
             // Low & MidLow & MidHigh
             let delete_row_3_6 = delete_rows[2] - 6;
-            let left_row_3 = 6 - delete_row_3_6;
-
-            let new_x_board_high =
-                create_upper_board(self.1, self.2, delete_row_3_6, left_row_3, delete_keys[3]);
 
             if delete_rows[1] < 6 {
                 // Low & MidLow & MidHigh
-                let left_row_2 = 6 - delete_rows[1];
-                let left_row_1 = 6 - delete_rows[0];
-
+                let new_x_board_high =
+                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]);
                 let new_x_board_mid_high =
-                    create_upper_board(self.1, self.2, delete_rows[1], left_row_2, delete_keys[2]);
+                    create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]);
                 let new_x_board_mid_low =
-                    create_upper_board(self.0, self.1, delete_rows[0], left_row_1, delete_keys[1]);
-                let new_x_board_low = create_bottom_board(self.0, left_row_1, delete_keys[0]);
+                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]);
+                let new_x_board_low = create_bottom_board(self.0, delete_rows[0], delete_keys[0]);
 
                 self.0 = new_x_board_low;
                 self.1 = new_x_board_mid_low & VALID_BOARD_RANGE;
@@ -608,14 +598,14 @@ impl Field for LargeField {
             } else {
                 // Low & MidLow
                 let delete_row_2_6 = delete_rows[1] - 6;
-                let left_row_2 = 6 - delete_row_2_6;
-                let left_row_1 = 6 - delete_rows[0];
 
+                let new_x_board_high =
+                    create_upper_board(self.1, self.2, delete_row_3_6, delete_keys[3]);
                 let new_x_board_mid_high =
-                    create_upper_board(self.0, self.1, delete_row_2_6, left_row_2, delete_keys[2]);
+                    create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]);
                 let new_x_board_mid_low =
-                    create_upper_board(self.0, self.1, delete_rows[0], left_row_1, delete_keys[1]);
-                let new_x_board_low = create_bottom_board(self.0, left_row_1, delete_keys[0]);
+                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]);
+                let new_x_board_low = create_bottom_board(self.0, delete_rows[0], delete_keys[0]);
 
                 self.0 = new_x_board_low;
                 self.1 = new_x_board_mid_low & VALID_BOARD_RANGE;
@@ -625,18 +615,15 @@ impl Field for LargeField {
         } else {
             // Low & MidLow
             let delete_row_3_12 = delete_rows[2] - 12;
-            let left_row_3 = 6 - delete_row_3_12;
             let delete_row_2_6 = delete_rows[1] - 6;
-            let left_row_2 = 6 - delete_row_2_6;
-            let left_row_1 = 6 - delete_rows[0];
 
             let new_x_board_high =
-                create_upper_board(self.0, self.1, delete_row_3_12, left_row_3, delete_keys[3]);
+                create_upper_board(self.0, self.1, delete_row_3_12, delete_keys[3]);
             let new_x_board_mid_high =
-                create_upper_board(self.0, self.1, delete_row_2_6, left_row_2, delete_keys[2]);
+                create_upper_board(self.0, self.1, delete_row_2_6, delete_keys[2]);
             let new_x_board_mid_low =
-                create_upper_board(self.0, self.1, delete_rows[0], left_row_1, delete_keys[1]);
-            let new_x_board_low = create_bottom_board(self.0, left_row_1, delete_keys[0]);
+                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]);
+            let new_x_board_low = create_bottom_board(self.0, delete_rows[0], delete_keys[0]);
 
             self.0 = new_x_board_low;
             self.1 = new_x_board_mid_low & VALID_BOARD_RANGE;
