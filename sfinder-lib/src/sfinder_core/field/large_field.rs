@@ -94,15 +94,7 @@ impl LargeField {
 
         let delete_row_bottom = delete_rows[0] + delete_rows[1];
         // 上半分と下半分をマージ
-        if delete_row_bottom < BOARD_HEIGHT {
-            self.0 = boards[0];
-            self.1 = (boards[1] | (boards[2] << (BOARD_HEIGHT - delete_row_bottom) * FIELD_WIDTH))
-                & VALID_BOARD_RANGE;
-            self.2 = boards[2] >> (delete_row_bottom * FIELD_WIDTH)
-                | (boards[3] << (BOARD_HEIGHT - delete_row_bottom) * FIELD_WIDTH)
-                    & VALID_BOARD_RANGE;
-            self.3 = boards[3] >> (delete_row_bottom * FIELD_WIDTH);
-        } else {
+        if delete_row_bottom >= BOARD_HEIGHT {
             let slide = delete_row_bottom - BOARD_HEIGHT;
             self.0 = (boards[0] | (boards[2] << (BOARD_HEIGHT - slide) * FIELD_WIDTH))
                 & VALID_BOARD_RANGE;
@@ -110,6 +102,14 @@ impl LargeField {
                 | (boards[3] << ((BOARD_HEIGHT - slide) * FIELD_WIDTH)) & VALID_BOARD_RANGE;
             self.2 = boards[3] >> (slide * FIELD_WIDTH);
             self.3 = 0;
+        } else {
+            self.0 = boards[0];
+            self.1 = (boards[1] | (boards[2] << (BOARD_HEIGHT - delete_row_bottom) * FIELD_WIDTH))
+                & VALID_BOARD_RANGE;
+            self.2 = boards[2] >> (delete_row_bottom * FIELD_WIDTH)
+                | (boards[3] << (BOARD_HEIGHT - delete_row_bottom) * FIELD_WIDTH)
+                    & VALID_BOARD_RANGE;
+            self.3 = boards[3] >> (delete_row_bottom * FIELD_WIDTH);
         }
     }
 
@@ -329,21 +329,18 @@ impl Field for LargeField {
                 // すべて必要
                 // High & MidHigh & MidLowのチェック
                 self.1 != 0 || self.2 != 0 || self.3 != 0
-
                 // Lowのチェック
                 || self.0 & <dyn Field>::get_valid_mask(y_off) != 0
             }
             Position::MidLow(y_off) => {
                 // High & MidHighのチェック
                 self.2 != 0 || self.3 != 0
-
                 // MidLowのチェック
                 || self.1 & <dyn Field>::get_valid_mask(y_off) != 0
             }
             Position::MidHigh(y_off) => {
                 // Highのチェック
                 self.3 != 0
-
                 // MidHighのチェック
                 || self.2 & <dyn Field>::get_valid_mask(y_off) != 0
             }
