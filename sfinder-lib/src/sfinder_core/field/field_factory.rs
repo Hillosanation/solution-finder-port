@@ -1,4 +1,7 @@
-use super::{field::Field, middle_field::MiddleField, small_field::SmallField};
+use super::{
+    field::Field, large_field::LargeField, middle_field::MiddleField, small_field::SmallField,
+};
+use crate::common::tetfu::{common::color_type::ColorType, field::colored_field::ColoredField};
 
 // TODO: replace 6 with MAX_FIELD_HEIGHT
 pub fn create_field(max_height: u8) -> Box<dyn Field> {
@@ -96,12 +99,23 @@ pub fn create_middle_field_with_marks_and_block(marks: String, is_block: bool) -
     field
 }
 
-pub fn create_large_field() {
-    todo!("LargeField")
+pub fn create_large_field() -> LargeField {
+    LargeField::new()
 }
 
-fn create_large_field_with_marks(marks: String, is_block: bool) -> SmallField {
-    todo!("LargeField")
+fn create_large_field_with_marks(marks: String, is_block: bool) -> LargeField {
+    assert!(marks.len() <= 240, "marks is too long for LargeField");
+    assert_eq!(
+        marks.len() % 10,
+        0,
+        "length of marks should be multiple of 10"
+    );
+
+    let mut field = create_large_field();
+
+    set_marks_to_field(marks, &mut field, is_block);
+
+    field
 }
 
 // TODO: niche use
@@ -119,6 +133,17 @@ pub fn create_inverse_field(marks: String) -> Box<dyn Field> {
     }
 }
 
-pub fn from_colored_field() {
-    todo!("ColoredField")
+// TODO: move this to From<ColoredField>?
+pub fn from_colored_field(colored_field: &dyn ColoredField, height: u8) -> Box<dyn Field> {
+    let mut field = create_field(height);
+
+    for y in 0..height {
+        for x in 0..10 {
+            if colored_field.get_color(x, y) != ColorType::Empty {
+                field.set_block(x, y);
+            }
+        }
+    }
+
+    field
 }
