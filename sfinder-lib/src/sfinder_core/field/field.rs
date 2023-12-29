@@ -2,6 +2,16 @@ use crate::sfinder_core::{
     field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
 };
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub enum BoardCount {
+    Small = 1,
+    Middle = 2,
+    Large = 4,
+}
+
+pub const FIELD_WIDTH: u8 = 10;
+pub const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
+
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
 pub trait Field: std::fmt::Debug /* + PartialOrd */ {
@@ -239,15 +249,8 @@ pub trait FieldHelper {
 
 impl FieldHelper for dyn Field {}
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub enum BoardCount {
-    Small = 1,
-    Middle = 2,
-    Large = 4,
 }
 
-pub const FIELD_WIDTH: u8 = 10;
-pub const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
 
 #[cfg(test)]
 mod tests {
