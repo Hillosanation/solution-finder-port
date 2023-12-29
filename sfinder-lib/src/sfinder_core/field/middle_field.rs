@@ -470,15 +470,12 @@ impl Field for MiddleField {
     fn slide_down(&mut self, slide: u8) {
         match slide {
             ..=FIELD_ROW_BORDER_Y => {
-                let delete_key = key_operators::get_mask_for_key_below_y(slide);
-                self.delete_row(delete_key, 0);
+                self.delete_row(key_operators::get_mask_for_key_below_y(slide), 0);
             }
             ..=MAX_FIELD_HEIGHT => {
-                let delete_key =
-                    key_operators::get_mask_for_key_below_y(slide - FIELD_ROW_BORDER_Y);
                 self.delete_row(
                     bit_operators::get_column_one_row_below_y(FIELD_ROW_BORDER_Y),
-                    delete_key,
+                    key_operators::get_mask_for_key_below_y(slide - FIELD_ROW_BORDER_Y),
                 );
             }
             _ => self.clear_all(),

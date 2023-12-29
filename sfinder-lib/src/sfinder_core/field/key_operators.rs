@@ -140,6 +140,7 @@ pub fn bit_to_y_from_key(key: u64) -> u8 {
 }
 
 // reused in Field implementations
+// TODO: This is mostly used in conjection with bit_to_x, but that can just be replaced with trailing_zeros()
 pub(super) const fn get_lowest_bit(x: u64) -> u64 {
     // compiles down to the same thing as x & -x, getting the least significant bit, in -O
     (x as i64 & -(x as i64)) as u64
