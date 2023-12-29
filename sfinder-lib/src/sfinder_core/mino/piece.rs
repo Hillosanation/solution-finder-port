@@ -72,11 +72,11 @@ impl Piece {
         VALUE_LIST[number as usize]
     }
 
-    pub fn value_list() -> &'static [Piece] {
+    pub const fn value_list() -> &'static [Piece] {
         &VALUE_LIST
     }
 
-    pub fn get_size() -> usize {
+    pub const fn get_size() -> usize {
         PIECE_COUNT
     }
 

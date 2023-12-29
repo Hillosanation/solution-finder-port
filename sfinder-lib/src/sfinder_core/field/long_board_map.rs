@@ -17,7 +17,7 @@ pub fn delete_row(x: u64, mask: u64) -> u64 {
     delete_line_inner(x, wrapper(mask))
 }
 
-fn delete_line_inner(x: u64, mask: u64) -> u64 {
+const fn delete_line_inner(x: u64, mask: u64) -> u64 {
     match mask {
         0b1100000000110000000011 => 0,
         0b1100000000110000000010 => x & rm(1, 0),
@@ -89,11 +89,11 @@ fn delete_line_inner(x: u64, mask: u64) -> u64 {
     }
 }
 
-pub fn insert_filled_row(x: u64, mask: u64) -> u64 {
+pub const fn insert_filled_row(x: u64, mask: u64) -> u64 {
     insert_filled_row_inner(x, wrapper(mask))
 }
 
-fn insert_filled_row_inner(x: u64, mask: u64) -> u64 {
+const fn insert_filled_row_inner(x: u64, mask: u64) -> u64 {
     match mask {
         0b1100000000110000000011 => 0xfffffffffffffff,
         0b1100000000110000000010 => x & rm(1, 0) | 0xffffffffffffc00,
@@ -177,11 +177,11 @@ fn insert_filled_row_inner(x: u64, mask: u64) -> u64 {
     }
 }
 
-pub fn insert_blank_row(x: u64, mask: u64) -> u64 {
+pub const fn insert_blank_row(x: u64, mask: u64) -> u64 {
     insert_blank_row_inner(x, wrapper(mask))
 }
 
-fn insert_blank_row_inner(x: u64, mask: u64) -> u64 {
+const fn insert_blank_row_inner(x: u64, mask: u64) -> u64 {
     match mask {
         0b1100000000110000000011 => 0,
         0b1100000000110000000010 => x & rm(1, 0),
