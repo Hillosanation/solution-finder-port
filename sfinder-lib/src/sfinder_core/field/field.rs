@@ -1,5 +1,8 @@
-use crate::sfinder_core::{
-    field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
+use crate::{
+    extras::hash_code::HashCode,
+    sfinder_core::{
+        field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
+    },
 };
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
@@ -247,6 +250,7 @@ pub trait FieldHelper {
         board >> (shift * FIELD_WIDTH)
     }
 
+    #[inline]
     fn get_row_mask(y: u8) -> u64 {
         Self::board_shl(0x3ff, y)
     }
@@ -266,8 +270,42 @@ pub trait FieldHelper {
 
 impl FieldHelper for dyn Field {}
 
+impl std::cmp::PartialEq for dyn Field {
+    fn eq(&self, other: &Self) -> bool {
+        let largest_board_count = self.get_board_count().max(other.get_board_count());
+        (0..largest_board_count as u8).all(|index| self.get_board(index) == other.get_board(index))
+    }
 }
 
+impl HashCode for dyn Field {
+    type Output = u32;
+
+    fn hash_code(&self) -> Self::Output {
+        (0..self.get_board_count() as u8)
+            .map(|index| {
+                let board = self.get_board(index);
+                (board ^ (board >> 32)) as u32
+            })
+            .fold(0, |acc, partial| 31 * acc + partial)
+    }
+}
+
+impl std::cmp::PartialOrd for dyn Field {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        let largest_board_count = self.get_board_count().max(other.get_board_count());
+
+        // there isn't a way to chain a variable number of then_with together
+        for index in 0..largest_board_count as u8 {
+            // takes advantage of the fact that indexing out of bounds of the boards for a Field returns 0
+            let cmp = self.get_board(index).cmp(&other.get_board(index));
+            if cmp != std::cmp::Ordering::Equal {
+                return Some(cmp);
+            }
+        }
+
+        Some(std::cmp::Ordering::Equal)
+    }
+}
 
 #[cfg(test)]
 mod tests {

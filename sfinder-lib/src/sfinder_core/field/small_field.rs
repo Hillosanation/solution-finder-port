@@ -249,14 +249,6 @@ impl Field for SmallField {
     }
 }
 
-impl HashCode for SmallField {
-    type Output = u64;
-
-    fn hash_code(&self) -> Self::Output {
-        self.0 ^ self.0 >> 32
-    }
-}
-
 impl Debug for SmallField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "SmallField {:#060x}", self.0)
