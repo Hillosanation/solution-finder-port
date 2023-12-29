@@ -760,67 +760,31 @@ impl Field for LargeField {
             self.0.count_ones() + self.1.count_ones() + self.2.count_ones() + self.3.count_ones(),
             4
         );
-        // TODO: replace with checked_ilog2? it is faster from preliminary benches of random u64 with 4 bits set, and wins both the fixed and variable bit twiddlings
-        // used when you don't know how many bits are in the board
-        fn get_upper_y(board: u64) -> u8 {
-            let mut prev_board = board;
-            let mut board = board & (board - 1);
 
-            while board != 0 {
-                prev_board = board;
-                board &= board - 1;
-            }
-
-            bit_operators::bit_to_y(prev_board)
-        }
-
-        if self.3 != 0 {
-            get_upper_y(self.3) + FIELD_ROW_HIGH_BORDER_Y
-        } else if self.2 != 0 {
-            get_upper_y(self.2) + FIELD_ROW_MID_HIGH_BORDER_Y
-        } else if self.1 != 0 {
-            get_upper_y(self.1) + FIELD_ROW_MID_LOW_BORDER_Y
+        if let Some(min_y) = bit_operators::try_get_highest_y(self.3) {
+            min_y + FIELD_ROW_HIGH_BORDER_Y
+        } else if let Some(min_y) = bit_operators::try_get_highest_y(self.2) {
+            min_y + FIELD_ROW_MID_HIGH_BORDER_Y
+        } else if let Some(min_y) = bit_operators::try_get_highest_y(self.1) {
+            min_y + FIELD_ROW_MID_LOW_BORDER_Y
         } else {
-            get_upper_y(self.0)
+            bit_operators::get_highest_y(self.0)
         }
     }
 
     fn get_min_x(&self) -> Option<u8> {
-        let mut board = self.0 | self.1 | self.2 | self.3;
-
-        if board == 0 {
-            return None;
-        }
-
-        board |= board >> 20;
-        board |= board >> 20;
-        board |= board >> 10;
-
-        Some(bit_operators::bit_to_x(key_operators::get_lowest_bit(
-            board,
-        )))
+        bit_operators::get_lowest_x(self.0 | self.1 | self.2 | self.3)
     }
 
     fn get_min_y(&self) -> Option<u8> {
-        if self.0 != 0 {
-            Some(bit_operators::bit_to_y(key_operators::get_lowest_bit(
-                self.0,
-            )))
-        } else if self.1 != 0 {
-            Some(
-                bit_operators::bit_to_y(key_operators::get_lowest_bit(self.1))
-                    + FIELD_ROW_MID_LOW_BORDER_Y,
-            )
-        } else if self.2 != 0 {
-            Some(
-                bit_operators::bit_to_y(key_operators::get_lowest_bit(self.2))
-                    + FIELD_ROW_MID_HIGH_BORDER_Y,
-            )
-        } else if self.3 != 0 {
-            Some(
-                bit_operators::bit_to_y(key_operators::get_lowest_bit(self.3))
-                    + FIELD_ROW_HIGH_BORDER_Y,
-            )
+        if let Some(min_y) = bit_operators::try_get_lowest_y(self.0) {
+            Some(min_y)
+        } else if let Some(min_y) = bit_operators::try_get_lowest_y(self.1) {
+            Some(min_y + FIELD_ROW_MID_LOW_BORDER_Y)
+        } else if let Some(min_y) = bit_operators::try_get_lowest_y(self.2) {
+            Some(min_y + FIELD_ROW_MID_HIGH_BORDER_Y)
+        } else if let Some(min_y) = bit_operators::try_get_lowest_y(self.3) {
+            Some(min_y + FIELD_ROW_HIGH_BORDER_Y)
         } else {
             None
         }

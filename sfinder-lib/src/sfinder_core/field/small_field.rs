@@ -160,31 +160,15 @@ impl Field for SmallField {
 
     fn get_upper_y_with_4_blocks(&self) -> u8 {
         assert_eq!(self.get_num_of_all_blocks(), 4);
-
-        // 下から順に3bit分、オフする
-        let mut board = self.0;
-        board = board & (board - 1);
-        board = board & (board - 1);
-        board = board & (board - 1);
-
-        // find the y coordinate of the most significant bit
-        bit_operators::bit_to_y(board)
+        bit_operators::get_highest_y(self.0)
     }
 
     fn get_min_x(&self) -> Option<u8> {
-        (!self.is_empty()).then(|| {
-            // Porting note: refactor this since it's used multiple times
-            let mut board = self.0;
-            board = board | (board >> 20);
-            board = board | (board >> 20);
-            board = board | (board >> 10);
-
-            bit_operators::bit_to_x(key_operators::extract_lower_bit(board))
-        })
+        bit_operators::get_lowest_x(self.0)
     }
 
     fn get_min_y(&self) -> Option<u8> {
-        (!self.is_empty()).then(|| bit_operators::bit_to_y(key_operators::get_lowest_bit(self.0)))
+        bit_operators::try_get_lowest_y(self.0)
     }
 
     // The bitshifts are moving the values to lower/higer significance, which is why they are opposite of the semantic direction

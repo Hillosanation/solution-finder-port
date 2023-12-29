@@ -90,22 +90,56 @@ pub const fn get_row_mask_above_y(y: u8) -> u64 {
     repeat_rows(0b1111111111) - get_row_mask_below_y(y)
 }
 
+// TODO: update tests to test the functions below instead
 // boardのうち1ビットがオンになっているとき、そのビットのy座標を返却
-pub fn bit_to_y(bit: u64) -> u8 {
+pub fn legacy_bit_to_y(bit: u64) -> u8 {
     assert_eq!(bit.count_ones(), 1);
     (bit.trailing_zeros() / 10) as _
 }
 
-pub fn bit_to_x(bit: u64) -> u8 {
+pub fn legacy_bit_to_x(bit: u64) -> u8 {
     assert_eq!(bit.count_ones(), 1);
     assert!(bit < 1 << 10);
     (10 - 1 - bit.trailing_zeros() % 10) as _
 }
 
+// legacy_bit_to_[xy] seems to be slightly faster from microbenching, but the following are better when there are 4
+
+/// Paincs if board == 0
+pub fn get_lowest_y(board: u64) -> u8 {
+    try_get_lowest_y(board).unwrap()
+}
+
+pub fn try_get_lowest_y(board: u64) -> Option<u8> {
+    (board == 0).then(|| (board.trailing_ones() / 10) as _)
+}
+
+/// Panics if board == 0
+pub fn get_highest_y(board: u64) -> u8 {
+    try_get_highest_y(board).unwrap()
+}
+
+pub fn try_get_highest_y(board: u64) -> Option<u8> {
+    board.checked_ilog2().map(|index| (index / 10) as _)
+}
+
+pub fn get_lowest_x(mut board: u64) -> Option<u8> {
+    if board == 0 {
+        return None;
+    }
+
+    // fold the 60 bits into a single row
+    board >>= 20;
+    board >>= 20;
+    board >>= 10;
+
+    Some((10 - 1 - board.trailing_zeros()) as _)
+}
+
 // x列とその左の列の間が壁（隙間がない）とき true を返却。1 <= xであること
 pub fn is_wall_between_left(x: u8, max_y: u8, board: u64) -> bool {
     let reverse_x_board_high = !board;
-    let column_high = get_column_one_row_below_y(max_y) << x;
+    let column_high = get_column_mask(max_y, x);
     let right_high = reverse_x_board_high & column_high;
     let left_high = reverse_x_board_high & (column_high >> 1);
 
@@ -220,7 +254,7 @@ mod tests {
         for y in 0..6 {
             for x in 0..10 {
                 let bit = 1 << (y * 10 + x);
-                let actual_y = bit_to_y(bit);
+                let actual_y = legacy_bit_to_y(bit);
                 assert_eq!(actual_y, y);
             }
         }

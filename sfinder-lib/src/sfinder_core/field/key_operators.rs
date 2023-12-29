@@ -128,19 +128,19 @@ pub fn bit_to_y_from_key(key: u64) -> u8 {
     );
 
     if let low @ 1.. = key & repeat_rows(0b0000000001) {
-        bit_operators::bit_to_y(low)
+        bit_operators::get_lowest_y(low)
     } else if let mid_low @ 1.. = key & repeat_rows(0b0000000010) {
-        bit_operators::bit_to_y(mid_low >> 1) + 6
+        bit_operators::get_lowest_y(mid_low >> 1) + 6
     } else if let mid_high @ 1.. = key & repeat_rows(0b0000000100) {
-        bit_operators::bit_to_y(mid_high >> 2) + 6 * 2
+        bit_operators::get_lowest_y(mid_high >> 2) + 6 * 2
     } else {
         let high = key & repeat_rows(0b0000001000);
-        bit_operators::bit_to_y(high >> 3) + 6 * 3
+        bit_operators::get_lowest_y(high >> 3) + 6 * 3
     }
 }
 
 // reused in Field implementations
-// TODO: This is mostly used in conjection with bit_to_x, but that can just be replaced with trailing_zeros()
+/// If you just want to get the most/least set bits, use `ilog2` and `trailing_zeros` instead.
 pub(super) const fn get_lowest_bit(x: u64) -> u64 {
     // compiles down to the same thing as x & -x, getting the least significant bit, in -O
     (x as i64 & -(x as i64)) as u64
@@ -153,7 +153,7 @@ pub fn extract_lower_bit(key: u64) -> u64 {
         "{key:0b}"
     );
 
-    // although the return signiture looks similar, the different branches give different results because each masks a different range of bits.
+    // although the return signature looks similar, the different branches give different results because each masks a different range of bits.
     if let low @ 1.. = key & repeat_rows(0b0000000001) {
         get_lowest_bit(low)
     } else if let mid_low @ 1.. = key & repeat_rows(0b0000000010) {

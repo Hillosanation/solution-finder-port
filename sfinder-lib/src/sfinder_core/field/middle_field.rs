@@ -362,61 +362,23 @@ impl Field for MiddleField {
     fn get_upper_y_with_4_blocks(&self) -> u8 {
         assert_eq!(self.0.count_ones() + self.1.count_ones(), 4);
 
-        if self.1 == 0 {
+        if let Some(min_y) = bit_operators::try_get_lowest_y(self.1) {
+            min_y + FIELD_ROW_BORDER_Y
+        } else {
             // すべてxBoardLowにある
-            // xBoardLowを下から順に3bit分、オフする
-            let mut board = self.0 & (self.0 - 1);
-            board &= board - 1;
-            board &= board - 1;
-
-            return bit_operators::bit_to_y(board);
+            bit_operators::get_lowest_y(self.0)
         }
-
-        if self.0 == 0 {
-            // すべてxBoardHighにある
-            // xBoardHighを下から順に3bit分、オフする
-            let mut board = self.1 & (self.1 - 1);
-            board &= board - 1;
-            board &= board - 1;
-
-            return bit_operators::bit_to_y(board) + FIELD_ROW_BORDER_Y;
-        }
-
-        // 何ビットかxBoardHighにある
-        // xBoardHighを下から順にオフする
-        let mut prev_board = self.1;
-        let mut board = self.1 & (self.1 - 1);
-        while board != 0 {
-            prev_board = board;
-            board &= board - 1;
-        }
-
-        bit_operators::bit_to_y(prev_board) + FIELD_ROW_BORDER_Y
     }
 
     fn get_min_x(&self) -> Option<u8> {
-        let mut board = self.0 | self.1;
-
-        if board == 0 {
-            return None;
-        }
-
-        board |= board >> 20;
-        board |= board >> 20;
-        board |= board >> 10;
-
-        Some(bit_operators::bit_to_x(key_operators::get_lowest_bit(
-            board,
-        )))
+        bit_operators::get_lowest_x(self.0 | self.1)
     }
 
     fn get_min_y(&self) -> Option<u8> {
-        if self.0 != 0 {
-            let lower_bit = key_operators::get_lowest_bit(self.0);
-            Some(bit_operators::bit_to_y(lower_bit))
-        } else if self.1 != 0 {
-            let lower_bit = key_operators::get_lowest_bit(self.1);
-            Some(bit_operators::bit_to_y(lower_bit) + FIELD_ROW_BORDER_Y)
+        if let Some(min_y) = bit_operators::try_get_lowest_y(self.0) {
+            Some(min_y)
+        } else if let Some(min_y) = bit_operators::try_get_lowest_y(self.1) {
+            Some(min_y + FIELD_ROW_BORDER_Y)
         } else {
             None
         }
