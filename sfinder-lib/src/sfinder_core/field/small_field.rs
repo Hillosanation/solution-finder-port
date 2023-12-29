@@ -164,7 +164,7 @@ impl Field for SmallField {
     }
 
     fn get_min_x(&self) -> Option<u8> {
-        bit_operators::get_lowest_x(self.0)
+        bit_operators::try_get_lowest_x(self.0)
     }
 
     fn get_min_y(&self) -> Option<u8> {

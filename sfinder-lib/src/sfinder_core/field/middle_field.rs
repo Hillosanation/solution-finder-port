@@ -371,7 +371,7 @@ impl Field for MiddleField {
     }
 
     fn get_min_x(&self) -> Option<u8> {
-        bit_operators::get_lowest_x(self.0 | self.1)
+        bit_operators::try_get_lowest_x(self.0 | self.1)
     }
 
     fn get_min_y(&self) -> Option<u8> {

@@ -773,7 +773,7 @@ impl Field for LargeField {
     }
 
     fn get_min_x(&self) -> Option<u8> {
-        bit_operators::get_lowest_x(self.0 | self.1 | self.2 | self.3)
+        bit_operators::try_get_lowest_x(self.0 | self.1 | self.2 | self.3)
     }
 
     fn get_min_y(&self) -> Option<u8> {
