@@ -11,7 +11,7 @@ use super::{
 const BOARD_HEIGHT: u8 = 6;
 
 const FIELD_ROW_MID_LOW_BORDER_Y: u8 = BOARD_HEIGHT;
-const FIELD_ROW_MID_HIGH_BOARDER_Y: u8 = BOARD_HEIGHT * 2;
+const FIELD_ROW_MID_HIGH_BORDER_Y: u8 = BOARD_HEIGHT * 2;
 const FIELD_ROW_HIGH_BORDER_Y: u8 = BOARD_HEIGHT * 3;
 const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT * 4;
 
@@ -55,7 +55,7 @@ impl LargeField {
     fn select(y: u8) -> Position {
         match y {
             FIELD_ROW_HIGH_BORDER_Y.. => Position::High(y - FIELD_ROW_HIGH_BORDER_Y),
-            FIELD_ROW_MID_HIGH_BOARDER_Y.. => Position::MidHigh(y - FIELD_ROW_MID_HIGH_BOARDER_Y),
+            FIELD_ROW_MID_HIGH_BORDER_Y.. => Position::MidHigh(y - FIELD_ROW_MID_HIGH_BORDER_Y),
             FIELD_ROW_MID_LOW_BORDER_Y.. => Position::MidLow(y - FIELD_ROW_MID_LOW_BORDER_Y),
             _ => Position::Low(y),
         }
@@ -732,7 +732,7 @@ impl Field for LargeField {
         if self.3 != 0 {
             get_upper_y(self.3) + FIELD_ROW_HIGH_BORDER_Y
         } else if self.2 != 0 {
-            get_upper_y(self.2) + FIELD_ROW_MID_HIGH_BOARDER_Y
+            get_upper_y(self.2) + FIELD_ROW_MID_HIGH_BORDER_Y
         } else if self.1 != 0 {
             get_upper_y(self.1) + FIELD_ROW_MID_LOW_BORDER_Y
         } else {
@@ -769,7 +769,7 @@ impl Field for LargeField {
         } else if self.2 != 0 {
             Some(
                 bit_operators::bit_to_y(key_operators::get_lowest_bit(self.2))
-                    + FIELD_ROW_MID_HIGH_BOARDER_Y,
+                    + FIELD_ROW_MID_HIGH_BORDER_Y,
             )
         } else if self.3 != 0 {
             Some(
@@ -813,7 +813,7 @@ impl Field for LargeField {
             ..=FIELD_ROW_MID_LOW_BORDER_Y => {
                 self.delete_row(key_operators::get_mask_for_key_below_y(slide), 0, 0, 0)
             }
-            ..=FIELD_ROW_MID_HIGH_BOARDER_Y => self.delete_row(
+            ..=FIELD_ROW_MID_HIGH_BORDER_Y => self.delete_row(
                 key_operators::get_mask_for_key_below_y(BOARD_HEIGHT),
                 key_operators::get_mask_for_key_below_y(slide - FIELD_ROW_MID_LOW_BORDER_Y),
                 0,
@@ -822,7 +822,7 @@ impl Field for LargeField {
             ..=FIELD_ROW_HIGH_BORDER_Y => self.delete_row(
                 key_operators::get_mask_for_key_below_y(BOARD_HEIGHT),
                 key_operators::get_mask_for_key_below_y(BOARD_HEIGHT),
-                key_operators::get_mask_for_key_below_y(slide - FIELD_ROW_MID_HIGH_BOARDER_Y),
+                key_operators::get_mask_for_key_below_y(slide - FIELD_ROW_MID_HIGH_BORDER_Y),
                 0,
             ),
             ..=MAX_FIELD_HEIGHT => self.delete_row(
