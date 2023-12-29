@@ -60,7 +60,8 @@ where
 mod tests {
     use super::*;
     use crate::{
-        common::datastore::simple_operation::SimpleOperation, sfinder_core::srs::rotate::Rotate,
+        common::datastore::simple_operation::SimpleOperation,
+        extras::test_functions::assert_partialord_symmetric, sfinder_core::srs::rotate::Rotate,
     };
 
     fn test_operations(
@@ -68,20 +69,6 @@ mod tests {
         operation2: &dyn Operation<u8>,
     ) -> Option<std::cmp::Ordering> {
         operation1.partial_cmp(operation2)
-    }
-
-    fn test_symmetry(operation1: &dyn Operation<u8>, operation2: &dyn Operation<u8>) {
-        match test_operations(operation1, operation2) {
-            Some(std::cmp::Ordering::Greater) => assert_eq!(
-                test_operations(operation2, operation1),
-                Some(std::cmp::Ordering::Less)
-            ),
-            Some(std::cmp::Ordering::Less) => assert_eq!(
-                test_operations(operation2, operation1),
-                Some(std::cmp::Ordering::Greater)
-            ),
-            _ => panic!("invalid test input"),
-        }
     }
 
     #[test]
@@ -97,7 +84,7 @@ mod tests {
 
     #[test]
     fn compare_diff_block() {
-        test_symmetry(
+        assert_partialord_symmetric(
             &SimpleOperation::new(Piece::S, Rotate::Spawn, 0, 1),
             &SimpleOperation::new(Piece::J, Rotate::Spawn, 7, 1),
         );
@@ -105,7 +92,7 @@ mod tests {
 
     #[test]
     fn compare_diff_rotate() {
-        test_symmetry(
+        assert_partialord_symmetric(
             &SimpleOperation::new(Piece::S, Rotate::Left, 0, 1),
             &SimpleOperation::new(Piece::J, Rotate::Right, 7, 1),
         );
@@ -113,7 +100,7 @@ mod tests {
 
     #[test]
     fn compare_diff_x() {
-        test_symmetry(
+        assert_partialord_symmetric(
             &SimpleOperation::new(Piece::I, Rotate::Spawn, 0, 1),
             &SimpleOperation::new(Piece::I, Rotate::Spawn, 7, 1),
         );
@@ -121,7 +108,7 @@ mod tests {
 
     #[test]
     fn compare_diff_y() {
-        test_symmetry(
+        assert_partialord_symmetric(
             &SimpleOperation::new(Piece::I, Rotate::Spawn, 0, 1),
             &SimpleOperation::new(Piece::I, Rotate::Spawn, 0, 4),
         );
