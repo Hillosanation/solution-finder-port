@@ -7,7 +7,7 @@ use std::{convert::Infallible, fmt::Display, str::FromStr};
 
 // TODO: merge with MinoOperation?
 // Porting note: This doesn't check if the operation is valid.
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug)]
 pub struct SimpleOperation {
     piece: Piece,
     rotate: Rotate,
@@ -51,6 +51,12 @@ impl HashCode for SimpleOperation {
 
     fn hash_code(&self) -> Self::Output {
         Operation::default_hash_code(self)
+    }
+}
+
+impl PartialEq for SimpleOperation {
+    fn eq(&self, other: &Self) -> bool {
+        (self as &dyn Operation<u8>).eq(other)
     }
 }
 
