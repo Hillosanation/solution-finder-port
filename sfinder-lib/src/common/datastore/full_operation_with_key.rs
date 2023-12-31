@@ -27,14 +27,13 @@ impl<'a> FullOperationWithKey<'a> {
         let mut field = field_factory::create_field(field_height);
         field.put(mino, x, y);
         field.insert_blank_row_with_key(need_deleted_key);
-        let using_key = field.get_using_key();
 
         Self {
             mino,
             x,
             y,
             need_deleted_key,
-            using_key,
+            using_key: field.get_using_key(),
         }
     }
 
@@ -55,7 +54,7 @@ impl<'a> FullOperationWithKey<'a> {
         }
     }
 
-    pub fn new(&self, mino: &'a Mino, x: u8, y: u8, need_deleted_key: u64, using_key: u64) -> Self {
+    pub fn new(mino: &'a Mino, x: u8, y: u8, need_deleted_key: u64, using_key: u64) -> Self {
         Self {
             mino,
             x,
