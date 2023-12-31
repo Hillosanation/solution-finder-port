@@ -3,6 +3,7 @@ use crate::{
     extras::hash_code::HashCode,
     sfinder_core::{mino::piece::Piece, srs::rotate::Rotate},
 };
+use std::{convert::Infallible, fmt::Display, str::FromStr};
 
 // TODO: merge with MinoOperation?
 // Porting note: This doesn't check if the operation is valid.
@@ -56,6 +57,30 @@ impl HashCode for SimpleOperation {
 impl PartialOrd for SimpleOperation {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         (self as &dyn Operation<u8>).partial_cmp(other)
+    }
+}
+
+// Porting note: moved from OperationInterpreter
+impl FromStr for SimpleOperation {
+    type Err = Infallible;
+
+    // Used mainly for testing
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let split = s.split(',').collect::<Vec<_>>();
+        assert_eq!(split.len(), 4);
+
+        Ok(SimpleOperation::new(
+            split[0].parse().unwrap(),
+            split[1].parse().unwrap(),
+            split[2].parse().unwrap(),
+            split[3].parse().unwrap(),
+        ))
+    }
+}
+
+impl Display for SimpleOperation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self as &dyn Operation<u8>)
     }
 }
 

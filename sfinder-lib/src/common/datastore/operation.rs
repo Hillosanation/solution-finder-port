@@ -1,5 +1,6 @@
 use super::action::action::Action;
 use crate::sfinder_core::mino::piece::Piece;
+use std::fmt::Display;
 
 pub trait Operation<Coord>: Action<Coord> + std::fmt::Debug
 where
@@ -53,6 +54,25 @@ where
                     .then_with(|| self.get_y().cmp(&other.get_y()))
             })
         }))
+    }
+}
+
+// Porting note: moved from OperationInterpreter
+impl<Coord> Display for dyn Operation<Coord> + '_
+where
+    u32: From<Coord>,
+    u64: From<Coord>,
+    Coord: Display,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{},{},{},{}",
+            self.get_piece(),
+            self.get_rotate(),
+            self.get_x(),
+            self.get_y()
+        )
     }
 }
 

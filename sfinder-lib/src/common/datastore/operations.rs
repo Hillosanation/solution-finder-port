@@ -1,5 +1,6 @@
-use super::operation::Operation;
+use super::{operation::Operation, simple_operation::SimpleOperation};
 use crate::extras::hash_code::HashCode;
+use std::{convert::Infallible, fmt::Display, str::FromStr};
 
 #[derive(Debug)]
 pub struct Operations<O: Operation<u8>> {
@@ -54,6 +55,33 @@ impl<O: Operation<u8> + PartialOrd> PartialOrd for Operations<O> {
     }
 }
 
+// Porting note: moved from OperationInterpreter
+impl<O: Operation<u8> + Display> Display for Operations<O> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Porting note: It's a bit difficult to format with ';' interspersed instead of ',' without using itertools
+        let len = self.operations.len();
+        for (i, operation) in self.operations.iter().enumerate() {
+            if i != len - 1 {
+                write!(f, "{operation};")?;
+            } else {
+                write!(f, "{operation}")?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl FromStr for Operations<SimpleOperation> {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from_vec(
+            s.split(';').map(|s| s.parse().unwrap()).collect(),
+        ))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -61,7 +89,7 @@ mod tests {
         common::datastore::simple_operation::SimpleOperation,
         sfinder_core::{mino::piece::Piece, srs::rotate::Rotate},
     };
-    use rand::{rngs::ThreadRng, Rng};
+    use rand::{rngs::ThreadRng, thread_rng, Rng};
 
     #[test]
     fn create() {
@@ -77,12 +105,12 @@ mod tests {
     }
 
     /// Note that this doesn't check if the operation is valid
-    fn create_random_operation(rngs: &mut ThreadRng) -> SimpleOperation {
+    fn create_random_operation(rngs: &mut ThreadRng, y: u8) -> SimpleOperation {
         SimpleOperation::new(
             Piece::new(rngs.gen_range(0..Piece::get_size()) as u8),
             Rotate::new(rngs.gen_range(0..Rotate::get_size()) as u8),
             rngs.gen_range(0..10),
-            rngs.gen_range(0..20),
+            rngs.gen_range(0..y),
         )
     }
 
@@ -91,11 +119,11 @@ mod tests {
         let mut rngs = rand::thread_rng();
         for _ in 0..1000 {
             let list1 = (0..10)
-                .map(|_| create_random_operation(&mut rngs))
+                .map(|_| create_random_operation(&mut rngs, 20))
                 .collect::<Vec<_>>();
             let operations1 = Operations::from_vec(list1.clone());
             let list2 = (0..10)
-                .map(|_| create_random_operation(&mut rngs))
+                .map(|_| create_random_operation(&mut rngs, 20))
                 .collect::<Vec<_>>();
             let operations2 = Operations::from_vec(list2.clone());
 
@@ -110,6 +138,31 @@ mod tests {
                         || operations1 < operations2 && operations2 > operations1
                 )
             }
+        }
+    }
+
+    // tests retrieved from OperationInterpreterTest
+    #[test]
+    fn parse_to_operations() {
+        let base = "T,0,1,0;L,2,1,2;I,L,3,1;J,2,1,3";
+        let operations = base.parse::<Operations<SimpleOperation>>().unwrap();
+        let str = format!("{}", operations);
+        assert_eq!(str, base);
+    }
+
+    #[test]
+    fn parse_random() {
+        let mut rngs = thread_rng();
+        for size in 1..20 {
+            let operations = (0..size)
+                .map(|_| create_random_operation(&mut rngs, 4))
+                .collect::<Vec<_>>();
+
+            let operations = Operations::from_vec(operations);
+            let str = format!("{}", operations);
+            let actual = str.parse::<Operations<SimpleOperation>>().unwrap();
+
+            assert_eq!(operations, actual);
         }
     }
 }
