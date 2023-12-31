@@ -11,6 +11,7 @@ use crate::{
         srs::rotate::Rotate,
     },
 };
+use std::fmt::{Debug, Display};
 
 // TODO: the lifetime of Mino should be static, elide this lifetime
 #[derive(Debug)]
@@ -114,5 +115,11 @@ impl HashCode for FullOperationWithKey<'_> {
 impl PartialEq for FullOperationWithKey<'_> {
     fn eq(&self, other: &Self) -> bool {
         self as &dyn MinoOperationWithKey == other as &_
+    }
+}
+
+impl Display for FullOperationWithKey<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self as &dyn OperationWithKey<u8>)
     }
 }

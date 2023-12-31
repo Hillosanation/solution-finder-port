@@ -24,29 +24,32 @@ where
 
         unique_deleted_key + self.to_unique_key()
     }
+}
 
-    // Porting note: Because we need multiple ways of converting to a string, and because of lifetime stuff,
-    // it's easier to implement the parsing functions here.
-
-    fn parse_to_string(&self) -> String {
-        format!(
-            "{},{:?},{},{},{},{}",
-            self.get_piece(),
-            self.get_rotate(),
-            self.get_x(),
-            self.get_y(),
-            key_operators::to_column_key(self.get_need_deleted_key()),
-            key_operators::to_column_key(self.get_using_key())
-        )
-    }
-
-    fn parse_to_string_simple(&self) -> String {
-        format!(
-            "{:?},{},{},{}",
-            self.get_rotate(),
-            self.get_x(),
-            self.get_y(),
-            key_operators::to_column_key(self.get_using_key())
-        )
+impl Display for dyn OperationWithKey<u8> + '_ {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            // Porting note: the alternate formatting replaces parseToStringSimple
+            write!(
+                f,
+                "{},{},{},{}",
+                self.get_rotate(),
+                self.get_x(),
+                self.get_y(),
+                key_operators::to_column_key(self.get_using_key())
+            )
+        } else {
+            // Porting note: the default formatting replaces parseToString
+            write!(
+                f,
+                "{},{},{},{},{},{}",
+                self.get_piece(),
+                self.get_rotate(),
+                self.get_x(),
+                self.get_y(),
+                key_operators::to_column_key(self.get_need_deleted_key()),
+                key_operators::to_column_key(self.get_using_key())
+            )
+        }
     }
 }
