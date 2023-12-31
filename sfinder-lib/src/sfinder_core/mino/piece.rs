@@ -4,6 +4,7 @@
 use crate::common::datastore::coordinate::Coordinate;
 use crate::extras::hash_code::HashCode;
 use std::fmt::Display;
+use std::str::FromStr;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -133,6 +134,23 @@ impl Display for Piece {
     }
 }
 
+impl FromStr for Piece {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "T" => Ok(Piece::T),
+            "I" => Ok(Piece::I),
+            "L" => Ok(Piece::L),
+            "J" => Ok(Piece::J),
+            "S" => Ok(Piece::S),
+            "Z" => Ok(Piece::Z),
+            "O" => Ok(Piece::O),
+            _ => Err(format!("Invalid piece: {s}")),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -241,5 +259,17 @@ mod tests {
         assert_eq!(Piece::S.to_string(), "S");
         assert_eq!(Piece::Z.to_string(), "Z");
         assert_eq!(Piece::O.to_string(), "O");
+    }
+
+    // tests retrieved from StringEnumTransformTest.java
+    #[test]
+    fn to_block_string() {
+        assert_eq!(
+            ["T", "I", "L", "J", "S", "Z", "O"]
+                .iter()
+                .map(|s| Piece::from_str(s).unwrap())
+                .collect::<Vec<_>>(),
+            Piece::value_list()
+        );
     }
 }

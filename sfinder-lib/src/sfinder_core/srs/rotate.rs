@@ -1,4 +1,5 @@
 use crate::{extras::hash_code::HashCode, sfinder_core::srs::rotate_direction::RotateDirection};
+use std::str::FromStr;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -19,6 +20,17 @@ impl Rotate {
     /// Panics if number is out of range.
     pub fn new(number: u8) -> Self {
         VALUE_LIST[number as usize]
+    }
+
+    // Porting note: replaces StringEnumTransform::toNEWSRotate
+    pub fn from_cardinal(c: char) -> Self {
+        match c {
+            'N' => Rotate::Spawn,
+            'E' => Rotate::Right,
+            'W' => Rotate::Left,
+            'S' => Rotate::Reverse,
+            _ => panic!("Invalid cardinal: {c}"),
+        }
     }
 
     pub fn value_list() -> &'static [Rotate] {
@@ -86,6 +98,31 @@ impl std::hash::Hash for Rotate {
 
 impl nohash::IsEnabled for Rotate {}
 
+impl FromStr for Rotate {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "0" => Ok(Rotate::Spawn),
+            "R" => Ok(Rotate::Right),
+            "2" => Ok(Rotate::Reverse),
+            "L" => Ok(Rotate::Left),
+            _ => Err(format!("Invalid rotate: {s}")),
+        }
+    }
+}
+
+impl ToString for Rotate {
+    fn to_string(&self) -> String {
+        match self {
+            Rotate::Spawn => "0".to_string(),
+            Rotate::Right => "R".to_string(),
+            Rotate::Reverse => "2".to_string(),
+            Rotate::Left => "L".to_string(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -137,5 +174,30 @@ mod tests {
         assert_eq!(Rotate::Left as u8, 3);
         assert_eq!(Rotate::Left.get_cw_rotate(), Rotate::Spawn);
         assert_eq!(Rotate::Left.get_ccw_rotate(), Rotate::Reverse);
+    }
+
+    // tests retrieved from StringEnumTransformTest.java
+    #[test]
+    fn from_cardinal() {
+        assert_eq!(Rotate::from_cardinal('N'), Rotate::Spawn);
+        assert_eq!(Rotate::from_cardinal('E'), Rotate::Right);
+        assert_eq!(Rotate::from_cardinal('W'), Rotate::Left);
+        assert_eq!(Rotate::from_cardinal('S'), Rotate::Reverse);
+    }
+
+    #[test]
+    fn to_string() {
+        assert_eq!(Rotate::Spawn.to_string(), "0");
+        assert_eq!(Rotate::Right.to_string(), "R");
+        assert_eq!(Rotate::Reverse.to_string(), "2");
+        assert_eq!(Rotate::Left.to_string(), "L");
+    }
+
+    #[test]
+    fn from_str() {
+        assert_eq!(Rotate::from_str("0").unwrap(), Rotate::Spawn);
+        assert_eq!(Rotate::from_str("R").unwrap(), Rotate::Right);
+        assert_eq!(Rotate::from_str("2").unwrap(), Rotate::Reverse);
+        assert_eq!(Rotate::from_str("L").unwrap(), Rotate::Left);
     }
 }
