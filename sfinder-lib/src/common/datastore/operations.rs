@@ -2,7 +2,7 @@ use super::{operation::Operation, simple_operation::SimpleOperation};
 use crate::extras::hash_code::HashCode;
 use std::{convert::Infallible, fmt::Display, str::FromStr};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub struct Operations<O: Operation<u8>> {
     // Porting note: I don't think you need to accomodate for each operation being a different concrete type.
     // In practive, Operations should be getting a vec of operations that are of the same concrete type, we just don't know which one.
@@ -28,12 +28,6 @@ impl<O: Operation<u8>> FromIterator<O> for Operations<O> {
     }
 }
 
-impl<O: Operation<u8> + std::cmp::PartialEq> PartialEq for Operations<O> {
-    fn eq(&self, other: &Self) -> bool {
-        self.operations == other.operations
-    }
-}
-
 impl<T, O: Operation<u8> + HashCode<Output = T>> HashCode for Operations<O>
 where
     u32: std::ops::Add<T, Output = u32>,
@@ -46,12 +40,6 @@ where
             .map(|operation| operation.hash_code())
             // combining hash codes with defined by java
             .fold(1, |acc, hash_code| 31 * acc + hash_code)
-    }
-}
-
-impl<O: Operation<u8> + PartialOrd> PartialOrd for Operations<O> {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.operations.partial_cmp(&other.operations)
     }
 }
 
