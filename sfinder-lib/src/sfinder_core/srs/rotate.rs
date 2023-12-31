@@ -1,5 +1,5 @@
 use crate::{extras::hash_code::HashCode, sfinder_core::srs::rotate_direction::RotateDirection};
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -112,13 +112,13 @@ impl FromStr for Rotate {
     }
 }
 
-impl ToString for Rotate {
-    fn to_string(&self) -> String {
+impl Display for Rotate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Rotate::Spawn => "0".to_string(),
-            Rotate::Right => "R".to_string(),
-            Rotate::Reverse => "2".to_string(),
-            Rotate::Left => "L".to_string(),
+            Rotate::Spawn => write!(f, "0"),
+            Rotate::Right => write!(f, "R"),
+            Rotate::Reverse => write!(f, "2"),
+            Rotate::Left => write!(f, "L"),
         }
     }
 }
