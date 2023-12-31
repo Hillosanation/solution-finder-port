@@ -3,6 +3,7 @@ use crate::sfinder_core::srs::rotate::Rotate;
 use nohash::IntMap;
 
 pub struct MinoFactory {
+    // TODO: I don't actually need IntMap, an array will do
     map: IntMap<u8, Mino>,
 }
 

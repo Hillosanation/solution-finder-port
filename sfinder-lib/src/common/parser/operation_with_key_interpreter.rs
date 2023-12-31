@@ -37,3 +37,13 @@ pub fn parse_to_stream<'m>(
         )
     })
 }
+
+#[cfg(test)]
+pub fn full_operation_with_key_to_string(operations: &[FullOperationWithKey]) -> String {
+    operations
+        .iter()
+        .map(|o| format!("{o}"))
+        // .inspect(|s| println!("{s}"))
+        .collect::<Vec<_>>()
+        .join(";")
+}
