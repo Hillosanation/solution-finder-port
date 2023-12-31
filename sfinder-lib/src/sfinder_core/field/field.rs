@@ -4,6 +4,8 @@ use crate::{
         field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
     },
 };
+use dyn_clone::DynClone;
+use std::fmt::Debug;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum BoardCount {
@@ -17,7 +19,7 @@ pub const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
 
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
-pub trait Field: std::fmt::Debug /* + PartialOrd */ {
+pub trait Field: Debug + DynClone /* + PartialOrd */ {
     // フィールドの最大高さを返却
     fn get_max_field_height(&self) -> u8;
 
@@ -306,6 +308,8 @@ impl std::cmp::PartialOrd for dyn Field {
         Some(std::cmp::Ordering::Equal)
     }
 }
+
+dyn_clone::clone_trait_object!(Field);
 
 #[cfg(test)]
 mod tests {
