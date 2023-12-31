@@ -475,11 +475,6 @@ impl Field for MiddleField {
 
 impl Debug for MiddleField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "MiddleField {} {}",
-            self.get_x_board_low(),
-            self.get_x_board_high()
-        )
+        write!(f, "MiddleField {:#060b} {:#060b}", self.0, self.1)
     }
 }

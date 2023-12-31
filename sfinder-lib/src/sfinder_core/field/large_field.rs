@@ -1,5 +1,3 @@
-use crate::sfinder_core::mino::mino::Mino;
-
 use super::{
     bit_operators,
     field::{BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
@@ -7,6 +5,8 @@ use super::{
     middle_field::MiddleField,
     small_field::SmallField,
 };
+use crate::sfinder_core::mino::mino::Mino;
+use std::fmt::Debug;
 
 const BOARD_HEIGHT: u8 = 6;
 
@@ -23,7 +23,7 @@ enum Position {
     High(u8),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct LargeField(u64, u64, u64, u64);
 
 impl LargeField {
@@ -904,5 +904,15 @@ impl Field for LargeField {
         self.1 &= mask_field.get_board(1);
         self.2 &= mask_field.get_board(2);
         self.3 &= mask_field.get_board(3);
+    }
+}
+
+impl Debug for LargeField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "LargeField {:#060x} {:#060x} {:#060x} {:#060x}",
+            self.0, self.1, self.2, self.3
+        )
     }
 }

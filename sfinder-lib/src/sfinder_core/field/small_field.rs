@@ -235,7 +235,7 @@ impl Field for SmallField {
 
 impl Debug for SmallField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "SmallField {:#060x}", self.0)
+        write!(f, "SmallField {:#060b}", self.0)
     }
 }
 
