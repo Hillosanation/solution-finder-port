@@ -58,17 +58,15 @@ impl<O: Operation<u8> + PartialOrd> PartialOrd for Operations<O> {
 // Porting note: moved from OperationInterpreter
 impl<O: Operation<u8> + Display> Display for Operations<O> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // Porting note: It's a bit difficult to format with ';' interspersed instead of ',' without using itertools
-        let len = self.operations.len();
-        for (i, operation) in self.operations.iter().enumerate() {
-            if i != len - 1 {
-                write!(f, "{operation};")?;
-            } else {
-                write!(f, "{operation}")?;
-            }
-        }
-
-        Ok(())
+        write!(
+            f,
+            "{}",
+            self.operations
+                .iter()
+                .map(|operation| format!("{operation}"))
+                .collect::<Vec<_>>()
+                .join(";")
+        )
     }
 }
 
