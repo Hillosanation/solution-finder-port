@@ -39,7 +39,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
     fn put(&mut self, mino: &Mino, x: u8, y: u8);
 
     // 指定した位置にピースの形にブロックをおく
-    fn put_piece(&mut self, piece: OriginalPiece) {
+    fn put_piece(&mut self, piece: &OriginalPiece) {
         self.merge(piece.get_mino_field())
     }
 
@@ -47,7 +47,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
     fn can_put(&self, mino: &Mino, x: u8, y: u8) -> bool;
 
     // 指定した位置にピースをおくことができるか（足場は確認しない）
-    fn can_put_piece(&self, piece: OriginalPiece) -> bool {
+    fn can_put_piece(&self, piece: &OriginalPiece) -> bool {
         self.can_merge(piece.get_mino_field())
     }
 
@@ -55,7 +55,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
     fn remove(&mut self, mino: &Mino, x: u8, y: u8);
 
     // 指定した位置のピースの形でブロックを消す
-    fn remove_piece(&mut self, piece: OriginalPiece) {
+    fn remove_piece(&mut self, piece: &OriginalPiece) {
         self.reduce(piece.get_mino_field())
     }
 
@@ -83,7 +83,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
     }
 
     // 一番上からharddropで指定した位置を通過するとき true を返却
-    fn can_reach_on_harddrop_piece(&self, piece: OriginalPiece) -> bool {
+    fn can_reach_on_harddrop_piece(&self, piece: &OriginalPiece) -> bool {
         self.can_merge(piece.get_harddrop_collider())
     }
 
