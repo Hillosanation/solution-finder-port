@@ -129,6 +129,86 @@ impl LargeField {
         self.2 = VALID_BOARD_RANGE;
         self.3 = VALID_BOARD_RANGE;
     }
+
+    // row_fill_fn is used to factor out the two calls of this function that differ only by this argument.
+    fn insert_row_with_key(&mut self, delete_key: u64, row_fill_fn: impl Fn(u64, u64) -> u64) {
+        let delete_keys: [_; 4] =
+            std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
+
+        let delete_rows = delete_keys[0..3]
+            .iter()
+            .scan(0, |sum, delete_key| {
+                *sum += delete_key.count_ones() as u8;
+                Some(*sum)
+            })
+            .collect::<Vec<_>>();
+
+        // used for boards that are not the bottommost
+        let create_upper_board = |board_low: u64,
+                                  board_high: u64,
+                                  delete_row: u8,
+                                  delete_key: u64|
+         -> u64 {
+            let left_row = BOARD_HEIGHT - delete_row;
+            row_fill_fn(
+                <dyn Field>::board_shl(board_high, delete_row)
+                    // why mask and shift? aren't those bits shifted out?
+                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
+                delete_key,
+            )
+        };
+
+        let create_bottom_board = |board_bottom: u64, delete_row: u8, delete_key: u64| -> u64 {
+            let left_row = BOARD_HEIGHT - delete_row;
+            row_fill_fn(
+                board_bottom & bit_operators::get_row_mask_below_y(left_row),
+                delete_key,
+            )
+        };
+
+        // we perform the carry over of the rows to the higher boards here
+        let create_new_x_boards =
+            // ([board_low, board_high], offset)
+            |carry_seq: [([u64; 2], u8); 2]| {
+                [
+                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
+                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
+                    create_upper_board(carry_seq[0].0[0], carry_seq[0].0[1], delete_rows[1] - carry_seq[1].1, delete_keys[2]),
+                    create_upper_board(carry_seq[1].0[0], carry_seq[1].0[1], delete_rows[2] - carry_seq[1].1, delete_keys[3]),
+                ]
+            };
+
+        let new_x_boards = match delete_rows[2] {
+            FIELD_ROW_HIGH_BORDER_Y.. => {
+                // Low & MidLow
+                create_new_x_boards([
+                    ([self.0, self.1], BOARD_HEIGHT),
+                    ([self.0, self.1], FIELD_ROW_MID_HIGH_BORDER_Y),
+                ])
+            }
+            // Low & MidLow & MidHigh
+            BOARD_HEIGHT.. if delete_rows[1] >= BOARD_HEIGHT => {
+                // Low & MidLow
+                create_new_x_boards([
+                    ([self.0, self.1], BOARD_HEIGHT),
+                    ([self.1, self.2], BOARD_HEIGHT),
+                ])
+            }
+            BOARD_HEIGHT.. => {
+                // Low & MidLow & MidHigh
+                create_new_x_boards([([self.1, self.2], 0), ([self.1, self.2], BOARD_HEIGHT)])
+            }
+            _ => {
+                // Low & MidLow & MidHigh & High
+                create_new_x_boards([([self.1, self.2], 0), ([self.2, self.3], 0)])
+            }
+        };
+
+        self.0 = new_x_boards[0];
+        self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+        self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
+        self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
+    }
 }
 
 impl Field for LargeField {
@@ -513,163 +593,11 @@ impl Field for LargeField {
     }
 
     fn insert_filled_row_with_key(&mut self, delete_key: u64) {
-        let delete_keys: [_; 4] =
-            std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
-
-        let delete_rows = delete_keys[0..3]
-            .iter()
-            .scan(0, |sum, delete_key| {
-                *sum += delete_key.count_ones() as u8;
-                Some(*sum)
-            })
-            .collect::<Vec<_>>();
-
-        // used for boards that are not the bottommost
-        fn create_upper_board(
-            board_low: u64,
-            board_high: u64,
-            delete_row: u8,
-            delete_key: u64,
-        ) -> u64 {
-            let left_row = BOARD_HEIGHT - delete_row;
-            long_board_map::insert_filled_row(
-                <dyn Field>::board_shl(board_high, delete_row)
-                    // why mask and shift? aren't those bits shifted out?
-                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
-                delete_key,
-            )
-        }
-
-        fn create_bottom_board(board_bottom: u64, delete_row: u8, delete_key: u64) -> u64 {
-            let left_row = BOARD_HEIGHT - delete_row;
-            long_board_map::insert_filled_row(
-                board_bottom & bit_operators::get_row_mask_below_y(left_row),
-                delete_key,
-            )
-        }
-
-        #[rustfmt::skip]
-        let new_x_boards = if delete_rows[2] >= FIELD_ROW_MID_HIGH_BORDER_Y {
-            // Low & MidLow
-            [
-                create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                create_upper_board(self.0, self.1, delete_rows[1] - BOARD_HEIGHT, delete_keys[2]),
-                create_upper_board(self.0, self.1, delete_rows[2] - FIELD_ROW_MID_HIGH_BORDER_Y, delete_keys[3]),
-            ]
-        } else if delete_rows[2] >= BOARD_HEIGHT {
-            // Low & MidLow & MidHigh
-            if delete_rows[1] >= BOARD_HEIGHT {
-                // Low & MidLow
-                [
-                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                    create_upper_board(self.0, self.1, delete_rows[1] - BOARD_HEIGHT, delete_keys[2]),
-                    create_upper_board(self.1, self.2, delete_rows[2] - BOARD_HEIGHT, delete_keys[3]),
-                ]
-            } else {
-                // Low & MidLow & MidHigh
-                [
-                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                    create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]),
-                    create_upper_board(self.1, self.2, delete_rows[2] - BOARD_HEIGHT, delete_keys[3]),
-                ]
-            }
-        } else {
-            // Low & MidLow & MidHigh & High
-            [
-                create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]),
-                create_upper_board(self.2, self.3, delete_rows[2], delete_keys[3]),
-            ]
-        };
-
-        self.0 = new_x_boards[0];
-        self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-        self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-        self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
+        self.insert_row_with_key(delete_key, long_board_map::insert_filled_row);
     }
 
     fn insert_blank_row_with_key(&mut self, delete_key: u64) {
-        let delete_keys: [_; 4] =
-            std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
-
-        let delete_rows = delete_keys[0..3]
-            .iter()
-            .scan(0, |sum, delete_key| {
-                *sum += delete_key.count_ones() as u8;
-                Some(*sum)
-            })
-            .collect::<Vec<_>>();
-
-        // used for boards that are not the bottommost
-        fn create_upper_board(
-            board_low: u64,
-            board_high: u64,
-            delete_row: u8,
-            delete_key: u64,
-        ) -> u64 {
-            let left_row = BOARD_HEIGHT - delete_row;
-            long_board_map::insert_blank_row(
-                <dyn Field>::board_shl(board_high, delete_row)
-                    // why mask and shift? aren't those bits shifted out?
-                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
-                delete_key,
-            )
-        }
-
-        fn create_bottom_board(board_bottom: u64, delete_row: u8, delete_key: u64) -> u64 {
-            let left_row = BOARD_HEIGHT - delete_row;
-            long_board_map::insert_blank_row(
-                board_bottom & bit_operators::get_row_mask_below_y(left_row),
-                delete_key,
-            )
-        }
-
-        #[rustfmt::skip]
-        let new_x_boards = if delete_rows[2] >= FIELD_ROW_MID_HIGH_BORDER_Y {
-            // Low & MidLow
-            [
-                create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                create_upper_board(self.0, self.1, delete_rows[1] - BOARD_HEIGHT, delete_keys[2]),
-                create_upper_board(self.0, self.1, delete_rows[2] - FIELD_ROW_MID_HIGH_BORDER_Y, delete_keys[3]),
-            ]
-        } else if delete_rows[2] >= BOARD_HEIGHT {
-            // Low & MidLow & MidHigh
-            if delete_rows[1] >= BOARD_HEIGHT {
-                // Low & MidLow
-                [
-                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                    create_upper_board(self.0, self.1, delete_rows[1] - BOARD_HEIGHT, delete_keys[2]),
-                    create_upper_board(self.1, self.2, delete_rows[2] - BOARD_HEIGHT, delete_keys[3]),
-                ]
-            } else {
-                // Low & MidLow & MidHigh
-                [
-                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                    create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]),
-                    create_upper_board(self.1, self.2, delete_rows[2] - BOARD_HEIGHT, delete_keys[3]),
-                ]
-            }
-        } else {
-            // Low & MidLow & MidHigh & High
-            [
-                create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                create_upper_board(self.1, self.2, delete_rows[1], delete_keys[2]),
-                create_upper_board(self.2, self.3, delete_rows[2], delete_keys[3]),
-            ]
-        };
-
-        self.0 = new_x_boards[0];
-        self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-        self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-        self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
+        self.insert_row_with_key(delete_key, long_board_map::insert_blank_row);
     }
 
     fn delete_rows_with_key(&mut self, delete_key: u64) {
