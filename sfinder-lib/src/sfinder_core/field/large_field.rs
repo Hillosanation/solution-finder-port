@@ -911,8 +911,14 @@ impl Debug for LargeField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "LargeField {:#060x} {:#060x} {:#060x} {:#060x}",
+            "LargeField {:#062x} {:#062x} {:#062x} {:#062x}",
             self.0, self.1, self.2, self.3
         )
+    }
+}
+
+impl PartialEq for LargeField {
+    fn eq(&self, other: &Self) -> bool {
+        self as &dyn Field == other as &_
     }
 }

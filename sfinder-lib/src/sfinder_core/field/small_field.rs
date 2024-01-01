@@ -3,7 +3,7 @@ use super::{
     field::{BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
 };
-use crate::{extras::hash_code::HashCode, sfinder_core::mino::mino::Mino};
+use crate::sfinder_core::mino::mino::Mino;
 use std::fmt::Debug;
 
 const MAX_FIELD_HEIGHT: u8 = 6;
@@ -235,7 +235,13 @@ impl Field for SmallField {
 
 impl Debug for SmallField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "SmallField {:#060b}", self.0)
+        write!(f, "SmallField {:#062b}", self.0)
+    }
+}
+
+impl PartialEq for SmallField {
+    fn eq(&self, other: &Self) -> bool {
+        self as &dyn Field == other as &_
     }
 }
 

@@ -475,6 +475,12 @@ impl Field for MiddleField {
 
 impl Debug for MiddleField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "MiddleField {:#060b} {:#060b}", self.0, self.1)
+        write!(f, "MiddleField {:#062b} {:#062b}", self.0, self.1)
+    }
+}
+
+impl PartialEq for MiddleField {
+    fn eq(&self, other: &Self) -> bool {
+        self as &dyn Field == other as &_
     }
 }
