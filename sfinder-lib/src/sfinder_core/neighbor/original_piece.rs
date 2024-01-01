@@ -7,6 +7,7 @@ use crate::{
         },
         parser::operation_transform,
     },
+    extras::hash_code::HashCode,
     sfinder_core::{
         field::{field::Field, field_factory},
         mino::mino::Mino,
@@ -108,5 +109,115 @@ impl MinoOperationWithKey for OriginalPiece<'_> {}
 impl<'a> PartialEq for OriginalPiece<'a> {
     fn eq(&self, other: &Self) -> bool {
         self.operation_with_key == other.operation_with_key
+    }
+}
+
+impl HashCode for OriginalPiece<'_> {
+    type Output = u32;
+
+    fn hash_code(&self) -> Self::Output {
+        self.operation_with_key.hash_code()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::sfinder_core::mino::piece::Piece;
+
+    #[test]
+    fn test_equals() {
+        assert_eq!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10)
+        );
+    }
+
+    #[test]
+    fn test_equals_diff_block() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::L, Rotate::Spawn), 3, 4, 10),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10)
+        );
+    }
+
+    #[test]
+    fn test_equals_diff_rotate() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Left), 3, 4, 10),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10)
+        );
+    }
+
+    #[test]
+    fn test_equals_diff_x() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Left), 2, 4, 10),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10)
+        );
+    }
+
+    #[test]
+    fn test_equals_diff_y() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Left), 3, 8, 10),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10)
+        );
+    }
+
+    #[test]
+    fn test_equals_diff_field_height() {
+        assert_eq!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 5),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10)
+        );
+    }
+
+    #[test]
+    fn test_hash_code() {
+        assert_eq!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10).hash_code(),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10).hash_code()
+        );
+    }
+
+    #[test]
+    fn test_hash_code_diff_block() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::L, Rotate::Spawn), 3, 4, 10).hash_code(),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10).hash_code()
+        );
+    }
+
+    #[test]
+    fn test_hash_code_diff_rotate() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Left), 3, 4, 10).hash_code(),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10).hash_code()
+        );
+    }
+
+    #[test]
+    fn test_hash_code_diff_x() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Left), 2, 4, 10).hash_code(),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10).hash_code()
+        );
+    }
+
+    #[test]
+    fn test_hash_code_diff_y() {
+        assert_ne!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Left), 3, 8, 10).hash_code(),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10).hash_code()
+        );
+    }
+
+    #[test]
+    fn test_hash_code_diff_field_height() {
+        assert_eq!(
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 5).hash_code(),
+            OriginalPiece::new(&Mino::new(Piece::I, Rotate::Spawn), 3, 4, 10).hash_code()
+        );
     }
 }
