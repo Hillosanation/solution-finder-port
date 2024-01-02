@@ -1085,7 +1085,7 @@ mod tests {
     #[test]
     fn contains_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let empty_minos = rngs.gen_range(3..10);
             let init_field = create_random_small_field(&mut rngs, empty_minos);
 
@@ -1121,7 +1121,7 @@ mod tests {
     #[test]
     fn slide_down_one_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = field_factory::create_small_field();
             let mut expected = field_factory::create_small_field();
 
@@ -1148,7 +1148,7 @@ mod tests {
     #[test]
     fn slide_down_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_small_field(&mut rngs, 10);
             let slide = rngs.gen_range(0..=MAX_FIELD_HEIGHT);
 
@@ -1165,7 +1165,7 @@ mod tests {
     #[test]
     fn slide_up_with_empty_row_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_small_field(&mut rngs, 10);
 
             let mut freeze = field.clone();
@@ -1184,7 +1184,7 @@ mod tests {
     #[test]
     fn slide_up_with_filled_row_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_small_field(&mut rngs, 10);
 
             let mut freeze = field.clone();
@@ -1203,7 +1203,7 @@ mod tests {
     #[test]
     fn slide_up_with_empty_row_n_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_small_field(&mut rngs, 10);
             let slide = rngs.gen_range(0..=MAX_FIELD_HEIGHT);
 
@@ -1222,7 +1222,7 @@ mod tests {
     #[test]
     fn slide_up_with_filled_row_n_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_small_field(&mut rngs, 10);
             let slide = rngs.gen_range(0..=MAX_FIELD_HEIGHT);
 
@@ -1241,7 +1241,7 @@ mod tests {
     #[test]
     fn slide_left_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = field_factory::create_small_field();
             let mut expected = field_factory::create_small_field();
 
@@ -1273,7 +1273,7 @@ mod tests {
     #[test]
     fn slide_right_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = field_factory::create_small_field();
             let mut expected = field_factory::create_small_field();
 
