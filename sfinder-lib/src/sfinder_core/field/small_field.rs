@@ -849,7 +849,7 @@ mod tests {
 
         field1.merge(&field2);
         assert_eq!(field1, field_expected);
-        assert_ne!(field1, field_expected);
+        assert_ne!(field2, field_expected);
     }
 
     #[test]
@@ -884,7 +884,7 @@ mod tests {
 
         field1.merge(&field2);
         assert_eq!(field1, field_expected);
-        assert_ne!(field1, field_expected);
+        assert_ne!(field2, field_expected);
     }
 
     #[test]
