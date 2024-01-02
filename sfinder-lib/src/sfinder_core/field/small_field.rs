@@ -192,12 +192,12 @@ impl Field for SmallField {
     }
 
     fn slide_up_with_filled_row(&mut self, slide: u8) {
-        self.0 <<= slide * FIELD_WIDTH;
+        let count = slide * FIELD_WIDTH;
+        self.0 = (self.0 << count) | ((1 << count) - 1);
     }
 
     fn slide_up_with_empty_row(&mut self, slide: u8) {
-        let count = slide * FIELD_WIDTH;
-        self.0 = (self.0 << count) | ((1 << count) - 1);
+        self.0 <<= slide * FIELD_WIDTH;
     }
 
     fn contains(&self, child: &dyn Field) -> bool {
