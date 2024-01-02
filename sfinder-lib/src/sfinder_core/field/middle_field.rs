@@ -9,7 +9,11 @@ use std::fmt::Debug;
 
 const FIELD_ROW_BORDER_Y: u8 = BOARD_HEIGHT;
 const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT * 2;
-const MAX_FIELD_HEIGHT: u8 = 12;
+
+enum Position {
+    Low(u8),
+    High(u8),
+}
 
 #[derive(Clone)]
 pub struct MiddleField(u64, u64);
@@ -29,6 +33,13 @@ impl MiddleField {
 
     pub fn get_x_board_high(&self) -> u64 {
         self.1
+    }
+
+    fn select(y: u8) -> Position {
+        match y {
+            FIELD_ROW_BORDER_Y.. => Position::High(y - FIELD_ROW_BORDER_Y),
+            _ => Position::Low(y),
+        }
     }
 
     fn combine_keys(low: u64, high: u64) -> u64 {
@@ -56,6 +67,33 @@ impl MiddleField {
         self.0 = VALID_BOARD_RANGE;
         self.1 = VALID_BOARD_RANGE;
     }
+
+    // row_fill_fn is used to factor out the two calls of this function that differ only by this argument.
+    fn insert_row_with_key(&mut self, delete_key: u64, row_fill_fn: fn(u64, u64) -> u64) {
+        let delete_keys = [
+            <dyn Field>::extract_delete_key(delete_key, 0),
+            <dyn Field>::extract_delete_key(delete_key, 1),
+        ];
+
+        let delete_rows = [
+            delete_keys[0].count_ones() as u8,
+            // delete_keys[1].count_ones() as u8,
+        ];
+
+        let new_x_boards = [
+            <dyn Field>::create_bottom_board(self.0, delete_rows[0], delete_keys[0], row_fill_fn),
+            <dyn Field>::create_upper_board(
+                self.0,
+                self.1,
+                delete_rows[0],
+                delete_keys[1],
+                row_fill_fn,
+            ),
+        ];
+
+        self.0 = new_x_boards[0];
+        self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+    }
 }
 
 impl Field for MiddleField {
@@ -67,27 +105,17 @@ impl Field for MiddleField {
         BoardCount::Middle
     }
 
-    // Porting note: flipped the conditional to avoid using exclusive ranges
-
     fn set_block(&mut self, x: u8, y: u8) {
-        match y {
-            FIELD_ROW_BORDER_Y.. => {
-                self.1 |= <dyn Field>::get_x_mask(x, y - FIELD_ROW_BORDER_Y);
-            }
-            _ => {
-                self.0 |= <dyn Field>::get_x_mask(x, y);
-            }
+        match Self::select(y) {
+            Position::Low(y_off) => self.0 |= <dyn Field>::get_x_mask(x, y_off),
+            Position::High(y_off) => self.1 |= <dyn Field>::get_x_mask(x, y_off),
         }
     }
 
     fn remove_block(&mut self, x: u8, y: u8) {
-        match y {
-            FIELD_ROW_BORDER_Y.. => {
-                self.1 &= !<dyn Field>::get_x_mask(x, y - FIELD_ROW_BORDER_Y);
-            }
-            _ => {
-                self.0 &= !<dyn Field>::get_x_mask(x, y);
-            }
+        match Self::select(y) {
+            Position::Low(y_off) => self.0 &= !<dyn Field>::get_x_mask(x, y_off),
+            Position::High(y_off) => self.1 &= !<dyn Field>::get_x_mask(x, y_off),
         }
     }
 
@@ -139,28 +167,27 @@ impl Field for MiddleField {
     }
 
     fn is_empty_block(&self, x: u8, y: u8) -> bool {
-        match y {
-            FIELD_ROW_BORDER_Y.. => {
-                self.1 & <dyn Field>::get_x_mask(x, y - FIELD_ROW_BORDER_Y) == 0
-            }
-            _ => self.0 & <dyn Field>::get_x_mask(x, y) == 0,
-        }
+        (match Self::select(y) {
+            Position::Low(y_off) => self.0 & <dyn Field>::get_x_mask(x, y_off),
+            Position::High(y_off) => self.1 & <dyn Field>::get_x_mask(x, y_off),
+        }) == 0
     }
 
     fn exists_above_row(&self, y: u8) -> bool {
-        match y {
-            MAX_FIELD_HEIGHT.. => false,
-            FIELD_ROW_BORDER_Y.. => {
-                // Highで完結
-                self.1 & <dyn Field>::get_valid_mask(y - FIELD_ROW_BORDER_Y) != 0
-            }
-            _ => {
-                // すべて必要
+        if y >= MAX_FIELD_HEIGHT {
+            return false;
+        }
+
+        match Self::select(y) {
+            // すべて必要
+            Position::Low(y_off) => {
                 // Highのチェック
                 self.1 != 0
                 // Lowのチェック
                 || self.0 & <dyn Field>::get_valid_mask(y) != 0
             }
+            // Highで完結
+            Position::High(y_off) => self.1 & <dyn Field>::get_valid_mask(y_off) != 0,
         }
     }
 
@@ -218,19 +245,18 @@ impl Field for MiddleField {
     }
 
     fn get_block_count_in_row(&self, y: u8) -> u32 {
-        match y {
-            FIELD_ROW_BORDER_Y.. => {
-                (self.1 & <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y)).count_ones()
-            }
-            _ => (self.0 & <dyn Field>::get_row_mask(y)).count_ones(),
+        match Self::select(y) {
+            Position::Low(y_off) => self.0 & <dyn Field>::get_row_mask(y_off),
+            Position::High(y_off) => self.1 & <dyn Field>::get_row_mask(y_off),
         }
+        .count_ones()
     }
 
     fn exists_block_in_row(&self, y: u8) -> bool {
-        match y {
-            FIELD_ROW_BORDER_Y.. => self.1 & <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y) != 0,
-            _ => self.0 & <dyn Field>::get_row_mask(y) != 0,
-        }
+        (match Self::select(y) {
+            Position::Low(y_off) => self.0 & <dyn Field>::get_row_mask(y_off),
+            Position::High(y_off) => self.1 & <dyn Field>::get_row_mask(y_off),
+        }) != 0
     }
 
     fn get_num_of_all_blocks(&self) -> u32 {
@@ -261,45 +287,11 @@ impl Field for MiddleField {
     }
 
     fn insert_filled_row_with_key(&mut self, delete_key: u64) {
-        let delete_key_low = <dyn Field>::extract_delete_key(delete_key, 0);
-        let delete_row_low = delete_key_low.count_ones() as u8;
-        let left_row_low_y = FIELD_ROW_BORDER_Y - delete_row_low;
-        let new_x_board_low = long_board_map::insert_filled_row(
-            self.0 & bit_operators::get_row_mask_below_y(left_row_low_y),
-            delete_key_low,
-        );
-
-        let delete_key_high = <dyn Field>::extract_delete_key(delete_key, 1);
-        let new_x_board_high = long_board_map::insert_filled_row(
-            self.1 << (FIELD_WIDTH * delete_row_low)
-                | ((self.0 & bit_operators::get_row_mask_above_y(left_row_low_y))
-                    >> (FIELD_WIDTH * left_row_low_y)),
-            delete_key_high,
-        );
-
-        self.0 = new_x_board_low;
-        self.1 = new_x_board_high & VALID_BOARD_RANGE;
+        self.insert_row_with_key(delete_key, long_board_map::insert_filled_row);
     }
 
     fn insert_blank_row_with_key(&mut self, delete_key: u64) {
-        let delete_key_low = <dyn Field>::extract_delete_key(delete_key, 0);
-        let delete_row_low = delete_key_low.count_ones() as u8;
-        let left_row_low_y = FIELD_ROW_BORDER_Y - delete_row_low;
-        let new_x_board_low = long_board_map::insert_blank_row(
-            self.0 & bit_operators::get_row_mask_below_y(left_row_low_y),
-            delete_key_low,
-        );
-
-        let delete_key_high = <dyn Field>::extract_delete_key(delete_key, 1);
-        let new_x_board_high = long_board_map::insert_blank_row(
-            self.1 << (FIELD_WIDTH * delete_row_low)
-                | ((self.0 & bit_operators::get_row_mask_above_y(left_row_low_y))
-                    >> (FIELD_WIDTH * left_row_low_y)),
-            delete_key_high,
-        );
-
-        self.0 = new_x_board_low;
-        self.1 = new_x_board_high & VALID_BOARD_RANGE;
+        self.insert_row_with_key(delete_key, long_board_map::insert_blank_row);
     }
 
     fn delete_rows_with_key(&mut self, delete_key: u64) {
@@ -310,9 +302,9 @@ impl Field for MiddleField {
     }
 
     fn fill_row(&mut self, y: u8) {
-        match y {
-            FIELD_ROW_BORDER_Y.. => self.1 |= <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y),
-            _ => self.0 |= <dyn Field>::get_row_mask(y),
+        match Self::select(y) {
+            Position::Low(y_off) => self.0 |= <dyn Field>::get_row_mask(y_off),
+            Position::High(y_off) => self.1 |= <dyn Field>::get_row_mask(y_off),
         }
     }
 
@@ -327,7 +319,7 @@ impl Field for MiddleField {
     fn prune(&self, max_height: u8) -> Box<dyn Field> {
         assert!(max_height <= 12);
         match max_height {
-            ..=6 => Box::new(SmallField::from(self.0)),
+            ..=FIELD_ROW_BORDER_Y => Box::new(SmallField::from(self.0)),
             _ => Box::new(self.clone()),
         }
     }
@@ -336,6 +328,7 @@ impl Field for MiddleField {
         debug_assert!(other.get_board_count() <= BoardCount::Large);
 
         self.0 |= other.get_board(0);
+
         if other.get_board_count() > BoardCount::Small {
             self.1 |= other.get_board(1);
         }
@@ -354,6 +347,7 @@ impl Field for MiddleField {
         debug_assert!(other.get_board_count() <= BoardCount::Large);
 
         self.0 &= !other.get_board(0);
+
         if other.get_board_count() > BoardCount::Small {
             self.1 &= !other.get_board(1);
         }
