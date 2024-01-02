@@ -253,33 +253,12 @@ mod tests {
         sfinder_core::{
             field::field_factory,
             mino::{mino_factory::MinoFactory, piece::Piece},
-            neighbor::original_piece::OriginalPiece,
+            neighbor::original_piece::create_all_pieces,
             srs::rotate::Rotate,
         },
         sfinder_lib::{boolean_walker, randoms},
     };
     use rand::{rngs::ThreadRng, thread_rng, Rng};
-
-    fn create_all_pieces<'a>(
-        mino_factory: &'a MinoFactory,
-        field_height: u8,
-    ) -> Vec<OriginalPiece<'a>> {
-        // A reference to a Mino in MinoFactory is needed because OriginalPiece stores a reference of a Mino
-
-        Piece::value_list()
-            .iter()
-            .flat_map(move |piece| {
-                Rotate::value_list().iter().flat_map(move |rotate| {
-                    let mino = mino_factory.get(*piece, *rotate);
-
-                    (-mino.get_min_y()..field_height as i8 - mino.get_max_y()).flat_map(move |y| {
-                        (-mino.get_min_x()..FIELD_WIDTH as i8 - mino.get_max_x())
-                            .map(move |x| OriginalPiece::new(mino, x as u8, y as u8, field_height))
-                    })
-                })
-            })
-            .collect()
-    }
 
     fn create_random_small_field(rngs: &mut ThreadRng, empty_minos: u8) -> SmallField {
         // although gen_field should always return a SmallField here, it is erased by the return type

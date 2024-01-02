@@ -15,7 +15,7 @@ use crate::{
     },
 };
 
-// Porting note: EMPTY_COLLIDER_PIECE, (and the empty constructor) was used as a null check and is removed.
+// Porting note: EMPTY_COLLIDER_PIECE (and the empty constructor) was used as a null check and is removed.
 #[derive(Debug)]
 pub struct OriginalPiece<'m> {
     operation_with_key: FullOperationWithKey<'m>,
@@ -118,6 +118,31 @@ impl HashCode for OriginalPiece<'_> {
     fn hash_code(&self) -> Self::Output {
         self.operation_with_key.hash_code()
     }
+}
+
+#[cfg(test)]
+use crate::sfinder_core::mino::mino_factory::MinoFactory;
+#[cfg(test)]
+pub fn create_all_pieces<'a>(
+    mino_factory: &'a MinoFactory,
+    field_height: u8,
+) -> Vec<OriginalPiece<'a>> {
+    // A reference to a Mino in MinoFactory is needed because OriginalPiece stores a reference of a Mino
+    use crate::sfinder_core::{field::field::FIELD_WIDTH, mino::piece::Piece};
+
+    Piece::value_list()
+        .iter()
+        .flat_map(move |piece| {
+            Rotate::value_list().iter().flat_map(move |rotate| {
+                let mino = mino_factory.get(*piece, *rotate);
+
+                (-mino.get_min_y()..field_height as i8 - mino.get_max_y()).flat_map(move |y| {
+                    (-mino.get_min_x()..FIELD_WIDTH as i8 - mino.get_max_x())
+                        .map(move |x| OriginalPiece::new(mino, x as u8, y as u8, field_height))
+                })
+            })
+        })
+        .collect()
 }
 
 #[cfg(test)]
