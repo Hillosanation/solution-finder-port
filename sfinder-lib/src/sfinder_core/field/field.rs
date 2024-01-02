@@ -15,6 +15,7 @@ pub enum BoardCount {
 }
 
 pub const FIELD_WIDTH: u8 = 10;
+pub const BOARD_HEIGHT: u8 = 6;
 pub const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
 
 // TODO: add translated documentation

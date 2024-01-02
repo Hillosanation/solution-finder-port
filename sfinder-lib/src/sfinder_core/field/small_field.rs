@@ -1,12 +1,12 @@
 use super::{
     bit_operators,
-    field::{BoardCount, Field, FieldHelper, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field::{BoardCount, Field, FieldHelper, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
 };
 use crate::sfinder_core::mino::mino::Mino;
 use std::fmt::Debug;
 
-const MAX_FIELD_HEIGHT: u8 = 6;
+const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT;
 
 /// Porting note: clone replaces copy constructor
 #[derive(Clone)]
