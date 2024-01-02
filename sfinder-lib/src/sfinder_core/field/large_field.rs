@@ -129,7 +129,7 @@ impl LargeField {
     }
 
     // row_fill_fn is used to factor out the two calls of this function that differ only by this argument.
-    fn insert_row_with_key(&mut self, delete_key: u64, row_fill_fn: impl Fn(u64, u64) -> u64) {
+    fn insert_row_with_key(&mut self, delete_key: u64, row_fill_fn: fn(u64, u64) -> u64) {
         let delete_keys: [_; 4] =
             std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
 
@@ -141,38 +141,15 @@ impl LargeField {
             })
             .collect::<Vec<_>>();
 
-        // used for boards that are not the bottommost
-        let create_upper_board = |board_low: u64,
-                                  board_high: u64,
-                                  delete_row: u8,
-                                  delete_key: u64|
-         -> u64 {
-            let left_row = BOARD_HEIGHT - delete_row;
-            row_fill_fn(
-                <dyn Field>::board_shl(board_high, delete_row)
-                    // why mask and shift? aren't those bits shifted out?
-                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
-                delete_key,
-            )
-        };
-
-        let create_bottom_board = |board_bottom: u64, delete_row: u8, delete_key: u64| -> u64 {
-            let left_row = BOARD_HEIGHT - delete_row;
-            row_fill_fn(
-                board_bottom & bit_operators::get_row_mask_below_y(left_row),
-                delete_key,
-            )
-        };
-
         // we perform the carry over of the rows to the higher boards here
         let create_new_x_boards =
             // ([board_low, board_high], offset)
             |carry_seq: [([u64; 2], u8); 2]| {
                 [
-                    create_bottom_board(self.0, delete_rows[0], delete_keys[0]),
-                    create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1]),
-                    create_upper_board(carry_seq[0].0[0], carry_seq[0].0[1], delete_rows[1] - carry_seq[1].1, delete_keys[2]),
-                    create_upper_board(carry_seq[1].0[0], carry_seq[1].0[1], delete_rows[2] - carry_seq[1].1, delete_keys[3]),
+                    <dyn Field>::create_bottom_board(self.0, delete_rows[0], delete_keys[0], row_fill_fn),
+                    <dyn Field>::create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1], row_fill_fn),
+                    <dyn Field>::create_upper_board(carry_seq[0].0[0], carry_seq[0].0[1], delete_rows[1] - carry_seq[1].1, delete_keys[2], row_fill_fn),
+                    <dyn Field>::create_upper_board(carry_seq[1].0[0], carry_seq[1].0[1], delete_rows[2] - carry_seq[1].1, delete_keys[3], row_fill_fn),
                 ]
             };
 

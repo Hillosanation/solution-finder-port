@@ -270,6 +270,37 @@ pub trait FieldHelper {
         assert!(index <= 4);
         (delete_key >> index) & bit_operators::get_column_one_row_below_y(6)
     }
+
+    #[inline]
+    fn create_upper_board(
+        board_low: u64,
+        board_high: u64,
+        delete_row: u8,
+        delete_key: u64,
+        row_fill_fn: fn(u64, u64) -> u64,
+    ) -> u64 {
+        let left_row = BOARD_HEIGHT - delete_row;
+        row_fill_fn(
+            <dyn Field>::board_shl(board_high, delete_row)
+                    // why mask and shift? aren't those bits shifted out?
+                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
+            delete_key,
+        )
+    }
+
+    #[inline]
+    fn create_bottom_board(
+        board_bottom: u64,
+        delete_row: u8,
+        delete_key: u64,
+        row_fill_fn: fn(u64, u64) -> u64,
+    ) -> u64 {
+        let left_row = BOARD_HEIGHT - delete_row;
+        row_fill_fn(
+            board_bottom & bit_operators::get_row_mask_below_y(left_row),
+            delete_key,
+        )
+    }
 }
 
 impl FieldHelper for dyn Field {}
