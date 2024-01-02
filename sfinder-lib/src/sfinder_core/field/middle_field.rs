@@ -310,10 +310,10 @@ impl Field for MiddleField {
     }
 
     fn fill_row(&mut self, y: u8) {
-        self.0 |= <dyn Field>::get_row_mask(match y {
-            FIELD_ROW_BORDER_Y.. => y - FIELD_ROW_BORDER_Y,
-            _ => y,
-        })
+        match y {
+            FIELD_ROW_BORDER_Y.. => self.1 |= <dyn Field>::get_row_mask(y - FIELD_ROW_BORDER_Y),
+            _ => self.0 |= <dyn Field>::get_row_mask(y),
+        }
     }
 
     fn get_board(&self, index: u8) -> u64 {
