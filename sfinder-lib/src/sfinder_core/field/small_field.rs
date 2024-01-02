@@ -256,7 +256,7 @@ mod tests {
             neighbor::original_piece::OriginalPiece,
             srs::rotate::Rotate,
         },
-        sfinder_lib::boolean_walker,
+        sfinder_lib::{boolean_walker, randoms},
     };
     use rand::{rngs::ThreadRng, thread_rng, Rng};
 
@@ -282,8 +282,9 @@ mod tests {
     }
 
     fn create_random_small_field(rngs: &mut ThreadRng, empty_minos: u8) -> SmallField {
-        let mut field = SmallField::new();
-        todo!("Randoms");
+        // although gen_field should always return a SmallField here, it is erased by the return type
+        let field = randoms::gen_field(rngs, MAX_FIELD_HEIGHT, empty_minos);
+        SmallField::from(field.get_board(0))
     }
 
     #[test]
@@ -1117,7 +1118,7 @@ mod tests {
                         rngs.gen_range(0..MAX_FIELD_HEIGHT),
                     );
 
-                    assert!(!init_field.contains(field.as_ref()));
+                    assert!(init_field.contains(field.as_ref()));
                 }
             }
 
@@ -1127,7 +1128,7 @@ mod tests {
                     let x = rngs.gen_range(0..FIELD_WIDTH);
                     let y = rngs.gen_range(0..MAX_FIELD_HEIGHT);
 
-                    if field.is_empty_block(x, y) {
+                    if field.exists_block(x, y) {
                         continue;
                     }
                     field.set_block(x, y);
