@@ -77,30 +77,34 @@ pub fn gen_field(rngs: &mut ThreadRng, height: u8, num_of_empty_minos: u8) -> Bo
     let mut prev_start = 0;
     let mut prev_end = 10;
     for y in (0..height).rev() {
-        match num_of_empty_in_rows[y as usize] {
-            // すべてのブロックを埋める
-            0 => field.fill_row(y),
-            // leave blank, do nothing
-            FIELD_WIDTH => {}
-            // 一部に空白をつくる
-            count => {
-                let min = (1u8 + prev_start).checked_sub(count).unwrap_or(0);
-                let max = (FIELD_WIDTH - count).min(prev_end);
+        let count = num_of_empty_in_rows[y as usize];
 
-                let start = rngs.gen_range(min..max);
-                assert!(start < FIELD_WIDTH);
-                let end = start + count;
-                assert!(end < FIELD_WIDTH);
-
-                field.fill_row(y);
-                for x in start..end {
-                    field.remove_block(x, y);
-                }
-
-                prev_start = start;
-                prev_end = end;
-            }
+        if count == FIELD_WIDTH {
+            // empty row
+            continue;
         }
+
+        field.fill_row(y);
+
+        if count == 0 {
+            // filled row
+            continue;
+        }
+
+        let min = (1u8 + prev_start).checked_sub(count).unwrap_or(0);
+        let max = (FIELD_WIDTH - count).min(prev_end);
+
+        let start = rngs.gen_range(min..max);
+        assert!(start < FIELD_WIDTH);
+        let end = start + count;
+        assert!(end < FIELD_WIDTH);
+
+        for x in start..end {
+            field.remove_block(x, y);
+        }
+
+        prev_start = start;
+        prev_end = end;
     }
 
     assert_eq!(

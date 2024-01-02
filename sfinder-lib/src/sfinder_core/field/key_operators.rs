@@ -190,7 +190,6 @@ mod tests {
         sfinder_core::field::{field::Field, small_field::SmallField},
         sfinder_lib::boolean_walker,
     };
-
     use super::*;
     use rand::{thread_rng, Rng};
 

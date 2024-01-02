@@ -283,7 +283,7 @@ mod tests {
     mod legacy {
         use super::*;
 
-        // legacy_bit_to_[xy] seems to be slightly faster from microbenching, but the following are better when there are 4
+        // legacy_bit_to_[xy] seems to be slightly faster from amateur microbenching, but the following are better when there are 4
         // boardのうち1ビットがオンになっているとき、そのビットのy座標を返却
         fn legacy_bit_to_y(bit: u64) -> u8 {
             assert_eq!(bit.count_ones(), 1);
