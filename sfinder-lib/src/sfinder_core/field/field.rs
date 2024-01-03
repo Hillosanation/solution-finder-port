@@ -12,6 +12,8 @@ use std::fmt::Debug;
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
 // Each field is split into multiple bitboards in its internal representation.
+// Rather than keeping the unused bits in a board unset, it is at an unknown state and must be masked off before being shifted into VALID_BOARD_RANGE.
+// THe only function in the Field interface that could alter the unused bits is put.
 pub trait Field: Debug + DynClone /* + PartialOrd */ {
     // フィールドの最大高さを返却
     fn get_max_field_height(&self) -> u8;
@@ -256,8 +258,7 @@ pub trait FieldHelper {
         let left_row = BOARD_HEIGHT - delete_row;
         row_fill_fn(
             bit_operators::board_shl(board_high, delete_row)
-                    // why mask and shift? aren't those bits shifted out?
-                    | bit_operators::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
+                | bit_operators::board_shr(board_low & VALID_BOARD_RANGE, left_row),
             delete_key,
         )
     }

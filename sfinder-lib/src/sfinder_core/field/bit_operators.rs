@@ -306,7 +306,7 @@ mod tests {
 
     mod legacy {
         use super::*;
-        use crate::sfinder_core::field::field_constants::BOARD_HEIGHT;
+        use crate::sfinder_core::field::field_constants::{BOARD_HEIGHT, VALID_BOARD_RANGE};
 
         // legacy_bit_to_[xy] seems to be slightly faster from amateur microbenching, but the following are better when there are 4
         // boardのうち1ビットがオンになっているとき、そのビットのy座標を返却
@@ -349,6 +349,24 @@ mod tests {
                     let bit = get_x_mask(x, y);
                     let actual_y = legacy_bit_to_y(bit);
                     assert_eq!(actual_y, y);
+                }
+            }
+        }
+
+        // this is a refactor from FieldHelper::create_upper_board
+        #[test]
+        fn mask_before_shift_redundant() {
+            let mut rngs = thread_rng();
+
+            for _ in 0..10000 {
+                // unset bits are not guarenteed
+                let board: u64 = rngs.gen();
+
+                for left_row in 0..=BOARD_HEIGHT {
+                    assert_eq!(
+                        board_shr(board & VALID_BOARD_RANGE, left_row),
+                        board_shr(board & get_row_mask_above_y(left_row), left_row)
+                    );
                 }
             }
         }
