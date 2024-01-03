@@ -230,20 +230,20 @@ impl Field for LargeField {
 
                 // MidLowの更新が必要
                 if y_off as i8 + mino.get_max_y() >= BOARD_HEIGHT as i8 {
-                    self.1 |= mino.get_mask(x, y_off as i8 - BOARD_HEIGHT as i8)
+                    self.1 |= mino.get_mask(x, y_off as i8 - BOARD_HEIGHT as i8);
                 }
             }
             Position::MidLow(y_off) => {
                 // Lowの更新が必要
                 if y_off as i8 + mino.get_min_y() < 0 {
-                    self.0 |= mino.get_mask(x, y_off as i8 + BOARD_HEIGHT as i8)
+                    self.0 |= mino.get_mask(x, y_off as i8 + BOARD_HEIGHT as i8);
                 }
 
                 self.1 |= mino.get_mask(x, y_off as i8);
 
                 // MidHighの更新が必要
                 if y_off as i8 + mino.get_max_y() >= BOARD_HEIGHT as i8 {
-                    self.2 |= mino.get_mask(x, y_off as i8 - BOARD_HEIGHT as i8)
+                    self.2 |= mino.get_mask(x, y_off as i8 - BOARD_HEIGHT as i8);
                 }
             }
             Position::MidHigh(y_off) => {
@@ -589,7 +589,7 @@ impl Field for LargeField {
             <dyn Field>::extract_delete_key(delete_key, 1),
             <dyn Field>::extract_delete_key(delete_key, 2),
             <dyn Field>::extract_delete_key(delete_key, 3),
-        )
+        );
     }
 
     fn fill_row(&mut self, y: u8) {
