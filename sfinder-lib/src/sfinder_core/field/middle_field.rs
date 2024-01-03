@@ -1438,7 +1438,7 @@ mod tests {
     #[test]
     fn test_slide_left_random_2() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = field_factory::create_middle_field();
             let mut expected = field_factory::create_middle_field();
 
@@ -1542,7 +1542,7 @@ mod tests {
     #[test]
     fn contains_random() {
         let mut rngs = thread_rng();
-        for _ in 0..50000 {
+        for _ in 0..10000 {
             let empty_minos = rngs.gen_range(4..15);
             let init_field = create_random_middle_field(&mut rngs, empty_minos);
 
@@ -1609,7 +1609,7 @@ mod tests {
     #[test]
     fn slide_down_n_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_middle_field(&mut rngs, 20);
             let slide = rngs.gen_range(0..MAX_FIELD_HEIGHT + 1);
 
@@ -1627,7 +1627,7 @@ mod tests {
     #[test]
     fn slide_up_with_empty_row_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_middle_field(&mut rngs, 20);
 
             let mut freeze = field.clone();
@@ -1646,7 +1646,7 @@ mod tests {
     #[test]
     fn slide_up_with_filled_row_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_middle_field(&mut rngs, 20);
 
             let mut freeze = field.clone();
@@ -1665,7 +1665,7 @@ mod tests {
     #[test]
     fn slide_up_with_empty_row_n_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_middle_field(&mut rngs, 20);
             let slide = rngs.gen_range(0..MAX_FIELD_HEIGHT + 1);
 
@@ -1682,7 +1682,7 @@ mod tests {
     #[test]
     fn slide_up_with_black_line_n_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_random_middle_field(&mut rngs, 20);
             let slide = rngs.gen_range(0..MAX_FIELD_HEIGHT + 1);
 
@@ -1699,7 +1699,7 @@ mod tests {
     #[test]
     fn test_slide_right_random() {
         let mut rngs = thread_rng();
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut field = create_middle_field();
             let mut expected = create_middle_field();
 

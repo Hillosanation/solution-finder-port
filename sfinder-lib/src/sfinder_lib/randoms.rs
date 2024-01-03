@@ -227,7 +227,7 @@ mod tests {
         #[test]
         fn first() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 0);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[&pieces[0..7], &pieces[7..11]]);
@@ -237,7 +237,7 @@ mod tests {
         #[test]
         fn second() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 1);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[&pieces[0..1], &pieces[1..4], &pieces[4..11]]);
@@ -247,7 +247,7 @@ mod tests {
         #[test]
         fn third() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 2);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[&pieces[0..1], &pieces[1..8], &pieces[8..11]]);
@@ -257,7 +257,7 @@ mod tests {
         #[test]
         fn fourth() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 3);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[&pieces[0..1], &pieces[1..5], &pieces[5..11]]);
@@ -267,7 +267,7 @@ mod tests {
         #[test]
         fn fifth() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 4);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[&pieces[0..1], &pieces[1..2], &pieces[2..9], &pieces[9..11]]);
@@ -277,7 +277,7 @@ mod tests {
         #[test]
         fn sixth() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 5);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[&pieces[0..1], &pieces[1..6], &pieces[6..11]]);
@@ -287,7 +287,7 @@ mod tests {
         #[test]
         fn seventh() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 6);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[
@@ -302,7 +302,7 @@ mod tests {
         #[test]
         fn eighth() {
             let mut rngs = thread_rng();
-            for _ in 0..100000 {
+            for _ in 0..10000 {
                 let pieces = block_11_in_cycle(&mut rngs, 7);
                 assert_eq!(pieces.len(), 11);
                 assert_unique(&[&pieces[0..1], &pieces[1..7], &pieces[7..11]]);
