@@ -1,2 +1,3 @@
 pub mod mino;
-mod piece;
+pub mod piece;
+pub mod mino_factory;
