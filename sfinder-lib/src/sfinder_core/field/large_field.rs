@@ -178,46 +178,44 @@ impl LargeField {
         let xbmh = self.2;
         let xbh = self.3;
 
-        let dkl = delete_keys[0];
-        let dkml = delete_keys[1];
-        let dkmh = delete_keys[2];
-        let dkh = delete_keys[3];
-
         let dl1 = delete_rows[0];
         let dl2 = delete_rows[1];
         let dl3 = delete_rows[2];
 
         let create_new_x_boards = |mid_high: (u64, u64, u8), high: (u64, u64, u8)| {
             [
-                <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn),
-                <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn),
+                <dyn Field>::create_bottom_board(xbl, dl1, delete_keys[0], row_fill_fn),
+                <dyn Field>::create_upper_board(xbl, xbml, dl1, delete_keys[1], row_fill_fn),
                 <dyn Field>::create_upper_board(
                     mid_high.0,
                     mid_high.1,
                     dl2 - mid_high.2,
-                    dkmh,
+                    delete_keys[2],
                     row_fill_fn,
                 ),
-                <dyn Field>::create_upper_board(high.0, high.1, dl3 - high.2, dkh, row_fill_fn),
+                <dyn Field>::create_upper_board(
+                    high.0,
+                    high.1,
+                    dl3 - high.2,
+                    delete_keys[3],
+                    row_fill_fn,
+                ),
             ]
         };
 
-        let nxbs = if dl3 < 6 {
-            create_new_x_boards((xbml, xbmh, 0), (xbmh, xbh, 0))
-        } else if dl3 < 12 {
-            if dl2 < 6 {
-                create_new_x_boards((xbml, xbmh, 0), (xbml, xbmh, 6))
-            } else {
+        let new_x_boards = match dl3 {
+            FIELD_ROW_MID_HIGH_BORDER_Y.. => create_new_x_boards((xbl, xbml, 6), (xbl, xbml, 12)),
+            BOARD_HEIGHT.. if dl2 >= BOARD_HEIGHT => {
                 create_new_x_boards((xbl, xbml, 6), (xbml, xbmh, 6))
             }
-        } else {
-            create_new_x_boards((xbl, xbml, 6), (xbl, xbml, 12))
+            BOARD_HEIGHT.. => create_new_x_boards((xbml, xbmh, 0), (xbml, xbmh, 6)),
+            _ => create_new_x_boards((xbml, xbmh, 0), (xbmh, xbh, 0)),
         };
 
-        self.0 = nxbs[0];
-        self.1 = nxbs[1] & VALID_BOARD_RANGE;
-        self.2 = nxbs[2] & VALID_BOARD_RANGE;
-        self.3 = nxbs[3] & VALID_BOARD_RANGE;
+        self.0 = new_x_boards[0];
+        self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+        self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
+        self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
     }
 }
 
