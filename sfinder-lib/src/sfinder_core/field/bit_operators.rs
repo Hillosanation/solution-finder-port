@@ -25,11 +25,10 @@ const COLUMN_ONE_LINE_BELOW: [u64; 7] = [
     0b0000000001_0000000001_0000000001_0000000001_0000000001_0000000001,
 ];
 
-/// Panics if max_y > 6
+/// Panics if max_y > BOARD_HEIGHT
 // y行より下の1列ブロックマスクを取得する（y行を含まない）
 pub const fn get_column_one_row_below_y(max_y: u8) -> u64 {
-    // // replace 6 with FIELD_HEIGHT?
-    // assert!(max_y <= 6);
+    // assert!(max_y <= BOARD_HEIGHT);
     // if max_y == 0 {
     //     0
     // } else {
@@ -86,7 +85,7 @@ const ROW_MASK: [u64; 7] = [
     0b1111111111_1111111111_1111111111_1111111111_1111111111_1111111111,
 ];
 
-/// Panics if max_y > 6
+/// Panics if max_y > BOARD_HEIGHT
 // yより下の行を選択するマスクを作成 (y行は含まない)
 pub const fn get_row_mask_below_y(y: u8) -> u64 {
     ROW_MASK[y as usize]
@@ -171,7 +170,7 @@ mod tests {
             }
 
             // y行を含めた上の行が含まれないことを確認
-            for line in y..=6 {
+            for line in y..=BOARD_HEIGHT {
                 assert_eq!(mask & get_x_mask(0, line), 0);
             }
         }
@@ -219,7 +218,7 @@ mod tests {
 
     #[test]
     fn test_get_row_mask_below_y() {
-        for y in 0..=6 {
+        for y in 0..=BOARD_HEIGHT {
             let mask = get_row_mask_below_y(y);
 
             // y行を含めた下の行が含まれることを確認
@@ -240,7 +239,7 @@ mod tests {
 
     #[test]
     fn test_get_row_mask_above_y() {
-        for y in 0..=6 {
+        for y in 0..=BOARD_HEIGHT {
             let mask = get_row_mask_above_y(y);
 
             // y行より下の行が含まれないことを確認

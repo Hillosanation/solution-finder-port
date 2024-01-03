@@ -241,7 +241,7 @@ pub trait FieldHelper {
     #[inline]
     fn extract_delete_key(delete_key: u64, index: u8) -> u64 {
         assert!(index <= 4);
-        (delete_key >> index) & bit_operators::get_column_one_row_below_y(6)
+        (delete_key >> index) & bit_operators::get_column_one_row_below_y(BOARD_HEIGHT)
     }
 
     #[inline]

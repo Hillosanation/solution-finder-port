@@ -1,4 +1,4 @@
-use crate::sfinder_core::field::bit_operators;
+use crate::sfinder_core::field::{bit_operators, field_constants::BOARD_HEIGHT};
 
 use super::bit_operators::repeat_rows;
 
@@ -130,12 +130,12 @@ pub fn bit_to_y_from_key(key: u64) -> u8 {
     if let low @ 1.. = key & repeat_rows(0b0000000001) {
         bit_operators::get_lowest_y(low)
     } else if let mid_low @ 1.. = key & repeat_rows(0b0000000010) {
-        bit_operators::get_lowest_y(mid_low >> 1) + 6
+        bit_operators::get_lowest_y(mid_low >> 1) + BOARD_HEIGHT
     } else if let mid_high @ 1.. = key & repeat_rows(0b0000000100) {
-        bit_operators::get_lowest_y(mid_high >> 2) + 6 * 2
+        bit_operators::get_lowest_y(mid_high >> 2) + BOARD_HEIGHT * 2
     } else {
         let high = key & repeat_rows(0b0000001000);
-        bit_operators::get_lowest_y(high >> 3) + 6 * 3
+        bit_operators::get_lowest_y(high >> 3) + BOARD_HEIGHT * 3
     }
 }
 
@@ -199,7 +199,7 @@ mod tests {
     fn test_get_delete_key() {
         let mut rngs = thread_rng();
 
-        for booleans in boolean_walker::walk(6) {
+        for booleans in boolean_walker::walk(BOARD_HEIGHT) {
             let mut field = SmallField::new();
             let mut expect_delete_key = 0;
 

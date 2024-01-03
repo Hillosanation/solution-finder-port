@@ -1,7 +1,9 @@
 use super::wrapper::wrapper;
 use crate::{
     sfinder_core::field::{
-        bit_operators, field_constants::FIELD_WIDTH, key_operators::get_bit_key,
+        bit_operators,
+        field_constants::{BOARD_HEIGHT, FIELD_WIDTH},
+        key_operators::get_bit_key,
     },
     sfinder_lib::boolean_walker,
 };
@@ -44,7 +46,7 @@ fn create_operation(
         // dbg!(src_start, row, mask);
 
         if new_start == 0 {
-            if new_start + src_start == 6 {
+            if new_start + src_start == FIELD_WIDTH {
                 operations.push("x".to_owned());
             } else {
                 operations.push(format!("x & {row_mask}"));
@@ -85,7 +87,7 @@ fn create_operation(
 
 // no need to use map, the keys wont collide
 fn create_bit_operation_map(mode: GenerationMode) -> Vec<(u64, String)> {
-    boolean_walker::walk(6)
+    boolean_walker::walk(BOARD_HEIGHT)
         .map(|left_flags| {
             // ブロックで残し始めるインデックスと行数
             let mut left_start = Vec::new();
@@ -163,7 +165,9 @@ mod tests {
     }
 
     fn create_left_flags(pattern: u8) -> Vec<bool> {
-        (0..6).map(|i| (pattern & (1 << i)) == 0).collect()
+        (0..BOARD_HEIGHT)
+            .map(|i| (pattern & (1 << i)) == 0)
+            .collect()
     }
 
     // test function to check intuition
@@ -176,7 +180,7 @@ mod tests {
         }
     }
 
-    // Should be equivalent to column keys, except for it folding the 6 columns into 3.
+    // Should be equivalent to column keys, except for it folding the BOARD_HEIGHT columns into 3.
     #[test]
     fn parse_to_key_agrees() {
         for i in 0..64 {
@@ -188,9 +192,9 @@ mod tests {
     }
 
     fn legacy_create_left_flags(pattern: u8) -> Vec<bool> {
-        let mut booleans = [false; 6];
+        let mut booleans = [false; BOARD_HEIGHT as _];
         let mut value = pattern;
-        for i in 0..6 {
+        for i in 0..BOARD_HEIGHT as _ {
             booleans[i] = (value & 1) != 0;
             value >>= 1;
         }
@@ -200,8 +204,8 @@ mod tests {
 
     #[test]
     fn create_left_flags_agrees() {
-        for pattern in 0..1 << 6 {
-            for i in 0..6 {
+        for pattern in 0..1 << BOARD_HEIGHT {
+            for i in 0..BOARD_HEIGHT as _ {
                 assert_ne!(
                     create_left_flags(pattern)[i],
                     legacy_create_left_flags(pattern)[i]

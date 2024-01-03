@@ -589,7 +589,7 @@ mod tests {
 
     #[test]
     fn test_clear_line_2() {
-        for remove_flags in boolean_walker::walk(6) {
+        for remove_flags in boolean_walker::walk(BOARD_HEIGHT) {
             let delete_rows = remove_flags.iter().filter(|&&flag| flag).count() as u8;
 
             let mut field = field_factory::create_small_field();

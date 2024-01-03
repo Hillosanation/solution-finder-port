@@ -9,7 +9,6 @@ use crate::{
     sfinder_core::field::field_constants::FIELD_WIDTH,
 };
 
-// TODO: replace 6 with MAX_FIELD_HEIGHT
 pub fn create_field(max_height: u8) -> Box<dyn Field> {
     match max_height {
         ..=SMALL_MAX => Box::new(SmallField::new()),

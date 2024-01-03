@@ -14,7 +14,7 @@ const FIELD_ROW_MID_HIGH_BORDER_Y: u8 = BOARD_HEIGHT * 2;
 const FIELD_ROW_HIGH_BORDER_Y: u8 = BOARD_HEIGHT * 3;
 pub const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT * 4;
 
-/// attached u8 is the adjusted y position such that it is less than 6
+/// attached u8 is the adjusted y position such that it is less than BOARD_HEIGHT
 enum Position {
     Low(u8),
     MidLow(u8),
@@ -229,7 +229,7 @@ impl Field for LargeField {
                 self.0 |= mino.get_mask(x, y_off as i8);
 
                 // MidLowの更新が必要
-                if y_off as i8 + mino.get_max_y() >= 6 {
+                if y_off as i8 + mino.get_max_y() >= BOARD_HEIGHT as i8 {
                     self.1 |= mino.get_mask(x, y_off as i8 - BOARD_HEIGHT as i8)
                 }
             }
@@ -613,8 +613,8 @@ impl Field for LargeField {
 
     fn prune(&self, max_height: u8) -> Box<dyn Field> {
         match max_height {
-            ..=6 => Box::new(SmallField::from(self.0)),
-            ..=12 => Box::new(MiddleField::from_parts(self.0, self.1)),
+            ..=BOARD_HEIGHT => Box::new(SmallField::from(self.0)),
+            ..=FIELD_ROW_MID_HIGH_BORDER_Y => Box::new(MiddleField::from_parts(self.0, self.1)),
             _ => Box::new(self.clone()),
         }
     }

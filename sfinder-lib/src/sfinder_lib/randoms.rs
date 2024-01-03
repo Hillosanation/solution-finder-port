@@ -7,7 +7,11 @@
 //! block10InCycle is unused
 
 use crate::sfinder_core::{
-    field::{field::Field, field_constants::FIELD_WIDTH, field_factory, key_operators},
+    field::{
+        field::Field,
+        field_constants::{BOARD_HEIGHT, FIELD_WIDTH},
+        field_factory, key_operators,
+    },
     mino::piece::Piece,
     srs::rotate::Rotate,
 };
@@ -114,8 +118,8 @@ pub fn gen_field(rngs: &mut ThreadRng, height: u8, num_of_empty_minos: u8) -> Bo
 }
 
 pub fn gen_key(rngs: &mut ThreadRng) -> u64 {
-    let value = rngs.gen_range(0..1 << 6);
-    (0..6)
+    let value = rngs.gen_range(0..1 << BOARD_HEIGHT);
+    (0..BOARD_HEIGHT)
         .filter(|i| value & 1 << i != 0)
         .fold(0, |acc, i| acc | key_operators::get_delete_bit_key(i))
 }
