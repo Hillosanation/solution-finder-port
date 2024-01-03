@@ -1680,7 +1680,7 @@ mod tests {
     }
 
     #[test]
-    fn slide_up_with_black_line_n_random() {
+    fn slide_up_with_filled_line_n_random() {
         let mut rngs = thread_rng();
         for _ in 0..10000 {
             let mut field = create_random_middle_field(&mut rngs, 20);
