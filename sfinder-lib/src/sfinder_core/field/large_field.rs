@@ -130,59 +130,185 @@ impl LargeField {
 
     // row_fill_fn is used to factor out the two calls of this function that differ only by this argument.
     fn insert_row_with_key(&mut self, delete_key: u64, row_fill_fn: fn(u64, u64) -> u64) {
-        let delete_keys: [_; 4] =
-            std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
+        // let delete_keys: [_; 4] =
+        //     std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
 
-        let delete_rows = delete_keys[0..3]
-            .iter()
-            .scan(0, |sum, delete_key| {
-                *sum += delete_key.count_ones() as u8;
-                Some(*sum)
-            })
-            .collect::<Vec<_>>();
+        // let delete_rows = delete_keys[0..3]
+        //     .iter()
+        //     .scan(0, |sum, delete_key| {
+        //         *sum += delete_key.count_ones() as u8;
+        //         Some(*sum)
+        //     })
+        //     .collect::<Vec<_>>();
 
-        // we perform the carry over of the rows to the higher boards here
-        let create_new_x_boards =
-            // ([board_low, board_high], offset)
-            |carry_seq: [([u64; 2], u8); 2]| {
-                [
-                    <dyn Field>::create_bottom_board(self.0, delete_rows[0], delete_keys[0], row_fill_fn),
-                    <dyn Field>::create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1], row_fill_fn),
-                    <dyn Field>::create_upper_board(carry_seq[0].0[0], carry_seq[0].0[1], delete_rows[1] - carry_seq[1].1, delete_keys[2], row_fill_fn),
-                    <dyn Field>::create_upper_board(carry_seq[1].0[0], carry_seq[1].0[1], delete_rows[2] - carry_seq[1].1, delete_keys[3], row_fill_fn),
-                ]
-            };
+        // // we perform the carry over of the rows to the higher boards here
+        // let create_new_x_boards =
+        //     // ([board_low, board_high], offset)
+        //     |carry_seq: [([u64; 2], u8); 2]| {
+        //         [
+        //             <dyn Field>::create_bottom_board(self.0, delete_rows[0], delete_keys[0], row_fill_fn),
+        //             <dyn Field>::create_upper_board(self.0, self.1, delete_rows[0], delete_keys[1], row_fill_fn),
+        //             <dyn Field>::create_upper_board(carry_seq[0].0[0], carry_seq[0].0[1], delete_rows[1] - carry_seq[1].1, delete_keys[2], row_fill_fn),
+        //             <dyn Field>::create_upper_board(carry_seq[1].0[0], carry_seq[1].0[1], delete_rows[2] - carry_seq[1].1, delete_keys[3], row_fill_fn),
+        //         ]
+        //     };
 
-        let new_x_boards = match delete_rows[2] {
-            FIELD_ROW_HIGH_BORDER_Y.. => {
-                // Low & MidLow
-                create_new_x_boards([
-                    ([self.0, self.1], BOARD_HEIGHT),
-                    ([self.0, self.1], FIELD_ROW_MID_HIGH_BORDER_Y),
-                ])
-            }
-            // Low & MidLow & MidHigh
-            BOARD_HEIGHT.. if delete_rows[1] >= BOARD_HEIGHT => {
-                // Low & MidLow
-                create_new_x_boards([
-                    ([self.0, self.1], BOARD_HEIGHT),
-                    ([self.1, self.2], BOARD_HEIGHT),
-                ])
-            }
-            BOARD_HEIGHT.. => {
-                // Low & MidLow & MidHigh
-                create_new_x_boards([([self.1, self.2], 0), ([self.1, self.2], BOARD_HEIGHT)])
-            }
-            _ => {
-                // Low & MidLow & MidHigh & High
-                create_new_x_boards([([self.1, self.2], 0), ([self.2, self.3], 0)])
-            }
-        };
+        // let new_x_boards = create_new_x_boards(match delete_rows[2] {
+        //     FIELD_ROW_MID_HIGH_BORDER_Y.. => {
+        //         // Low & MidLow
+        //         [
+        //             ([self.0, self.1], BOARD_HEIGHT),
+        //             ([self.0, self.1], FIELD_ROW_MID_HIGH_BORDER_Y),
+        //         ]
+        //     }
+        //     // Low & MidLow & MidHigh
+        //     BOARD_HEIGHT.. if delete_rows[1] >= BOARD_HEIGHT => {
+        //         // Low & MidLow
+        //         [
+        //             ([self.0, self.1], BOARD_HEIGHT),
+        //             ([self.1, self.2], BOARD_HEIGHT),
+        //         ]
+        //     }
+        //     BOARD_HEIGHT.. => {
+        //         // Low & MidLow & MidHigh
+        //         // [3, 5, 7] overflows because 5 - 6
+        //         [([self.1, self.2], 0), ([self.1, self.2], BOARD_HEIGHT)]
+        //     }
+        //     _ => {
+        //         // Low & MidLow & MidHigh & High
+        //         [([self.1, self.2], 0), ([self.2, self.3], 0)]
+        //     }
+        // });
 
-        self.0 = new_x_boards[0];
-        self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-        self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-        self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
+        // self.0 = new_x_boards[0];
+        // self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
+        // self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
+        // self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
+
+        let xbl = self.0;
+        let xbml = self.1;
+        let xbmh = self.2;
+        let xbh = self.3;
+
+        let dkl = <dyn Field>::extract_delete_key(delete_key, 0);
+        let dll = dkl.count_ones();
+
+        let dkml = <dyn Field>::extract_delete_key(delete_key, 1);
+        let dlml = dkml.count_ones();
+
+        let dkmh = <dyn Field>::extract_delete_key(delete_key, 2);
+        let dlmh = dkmh.count_ones();
+
+        let dkh = <dyn Field>::extract_delete_key(delete_key, 3);
+        // let dlh = dkh.count_ones();
+
+        let dl1 = dll as u8;
+        let dl2 = dl1 + dlml as u8;
+        let dl3 = dl2 + dlmh as u8;
+
+        if dl3 < 6 {
+            let ll3 = 6 - dl3;
+            let nxbh = row_fill_fn(
+                xbh << 10 * dl3 | (xbmh & bit_operators::get_row_mask_above_y(ll3)) >> 10 * ll3,
+                dkh,
+            );
+
+            let ll2 = 6 - dl2;
+            let nxbmh = row_fill_fn(
+                xbmh << 10 * dl2 | (xbml & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
+                dkmh,
+            );
+
+            let ll1 = 6 - dl1;
+            let nxbml = row_fill_fn(
+                xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
+                dkml,
+            );
+
+            let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+
+            self.0 = nxbl;
+            self.1 = nxbml & VALID_BOARD_RANGE;
+            self.2 = nxbmh & VALID_BOARD_RANGE;
+            self.3 = nxbh & VALID_BOARD_RANGE;
+        } else if dl3 < 12 {
+            let dl3_6 = dl3 - 6;
+            let ll3 = 6 - dl3_6;
+            let nxbh = row_fill_fn(
+                xbmh << 10 * dl3_6 | (xbml & bit_operators::get_row_mask_above_y(ll3)) >> 10 * ll3,
+                dkh,
+            );
+
+            if dl2 < 6 {
+                let ll2 = 6 - dl2;
+                let nxbmh = row_fill_fn(
+                    xbmh << 10 * dl2
+                        | (xbml & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
+                    dkmh,
+                );
+
+                let ll1 = 6 - dl1;
+                let nxbml = row_fill_fn(
+                    xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
+                    dkml,
+                );
+
+                let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+
+                self.0 = nxbl;
+                self.1 = nxbml & VALID_BOARD_RANGE;
+                self.2 = nxbmh & VALID_BOARD_RANGE;
+                self.3 = nxbh & VALID_BOARD_RANGE;
+            } else {
+                let dl2_6 = dl2 - 6;
+                let ll2 = 6 - dl2_6;
+                let nxbmh = row_fill_fn(
+                    xbml << 10 * dl2_6
+                        | (xbl & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
+                    dkmh,
+                );
+
+                let ll1 = 6 - dl1;
+                let nxbml = row_fill_fn(
+                    xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
+                    dkml,
+                );
+
+                let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+
+                self.0 = nxbl;
+                self.1 = nxbml & VALID_BOARD_RANGE;
+                self.2 = nxbmh & VALID_BOARD_RANGE;
+                self.3 = nxbh & VALID_BOARD_RANGE;
+            }
+        } else {
+            let dl3_12 = dl3 - 12;
+            let ll3 = 6 - dl3_12;
+            let nxbh = row_fill_fn(
+                xbml << 10 * dl3_12 | (xbl & bit_operators::get_row_mask_above_y(ll3)) >> 10 * ll3,
+                dkh,
+            );
+
+            let dl2_6 = dl2 - 6;
+            let ll2 = 6 - dl2_6;
+            let nxbmh = row_fill_fn(
+                xbml << 10 * dl2_6 | (xbl & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
+                dkmh,
+            );
+
+            let ll1 = 6 - dl1;
+            let nxbml = row_fill_fn(
+                xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
+                dkml,
+            );
+
+            let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+
+            self.0 = nxbl;
+            self.1 = nxbml & VALID_BOARD_RANGE;
+            self.2 = nxbmh & VALID_BOARD_RANGE;
+            self.3 = nxbh & VALID_BOARD_RANGE;
+        }
     }
 }
 
@@ -344,7 +470,7 @@ impl Field for LargeField {
                     self.1 &= !mino.get_mask(x, y_off as i8 + BOARD_HEIGHT as i8);
                 }
 
-                self.2 |= !mino.get_mask(x, y_off as i8);
+                self.2 &= !mino.get_mask(x, y_off as i8);
 
                 // Highの更新が必要
                 if y_off as i8 + mino.get_max_y() >= BOARD_HEIGHT as i8 {
@@ -814,7 +940,7 @@ impl Debug for LargeField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "LargeField {:#062x} {:#062x} {:#062x} {:#062x}",
+            "LargeField {:#062b} {:#062b} {:#062b} {:#062b}",
             self.0, self.1, self.2, self.3
         )
     }
@@ -823,5 +949,794 @@ impl Debug for LargeField {
 impl PartialEq for LargeField {
     fn eq(&self, other: &Self) -> bool {
         self as &dyn Field == other as &_
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{
+        common::{
+            datastore::{action::action::Action, mino_operation::MinoOperation},
+            tetfu::{
+                common::color_type::ColorType,
+                field::{array_colored_field::ArrayColoredField, colored_field::ColoredField},
+            },
+        },
+        sfinder_core::{
+            field::field_factory,
+            mino::{mino_factory::MinoFactory, piece::Piece},
+            neighbor::original_piece::create_all_pieces,
+            srs::rotate::Rotate,
+        },
+        sfinder_lib::randoms,
+    };
+    use rand::{rngs::ThreadRng, thread_rng, Rng};
+
+    fn create_random_large_field(rngs: &mut ThreadRng, empty_minos: u8) -> LargeField {
+        let random_field = randoms::gen_field(rngs, MAX_FIELD_HEIGHT, empty_minos);
+        LargeField::from_parts(
+            random_field.get_board(0),
+            random_field.get_board(1),
+            random_field.get_board(2),
+            random_field.get_board(3),
+        )
+    }
+
+    #[test]
+    fn get_max_field_height() {
+        assert_eq!(LargeField::new().get_max_field_height(), MAX_FIELD_HEIGHT);
+    }
+
+    #[test]
+    fn block() {
+        let mut field = field_factory::create_large_field();
+
+        for index in 0..MAX_FIELD_HEIGHT {
+            field.set_block(index % FIELD_WIDTH, index);
+        }
+
+        assert_eq!(field.get_num_of_all_blocks(), MAX_FIELD_HEIGHT as u32);
+
+        for y in 0..MAX_FIELD_HEIGHT {
+            for x in 0..FIELD_WIDTH {
+                assert_eq!(field.is_empty_block(x, y), x != y % FIELD_WIDTH);
+            }
+        }
+
+        for index in 0..MAX_FIELD_HEIGHT {
+            field.remove_block(index % FIELD_WIDTH, index);
+        }
+
+        for y in 0..MAX_FIELD_HEIGHT {
+            for x in 0..FIELD_WIDTH {
+                assert!(field.is_empty_block(x, y));
+            }
+        }
+    }
+
+    #[test]
+    fn put() {
+        for y in 1..MAX_FIELD_HEIGHT - 2 {
+            for x in 0..FIELD_WIDTH - 2 {
+                let mut field = field_factory::create_large_field();
+
+                field.put(&Mino::new(Piece::T, Rotate::Right), x, y);
+                assert!(!field.is_empty_block(x, y));
+                assert!(!field.is_empty_block(x, y - 1));
+                assert!(!field.is_empty_block(x, y + 1));
+                assert!(!field.is_empty_block(x + 1, y));
+            }
+        }
+    }
+
+    #[test]
+    fn put_2() {
+        for piece in create_all_pieces(&MinoFactory::new(), MAX_FIELD_HEIGHT) {
+            let mut field1 = field_factory::create_large_field();
+
+            assert!(field1.can_put(piece.get_mino(), piece.get_x(), piece.get_y()));
+            field1.put(piece.get_mino(), piece.get_x(), piece.get_y());
+            assert!(!field1.can_put(piece.get_mino(), piece.get_x(), piece.get_y()));
+
+            let mut field2 = field_factory::create_large_field();
+
+            assert!(field2.can_put(piece.get_mino(), piece.get_x(), piece.get_y()));
+            field2.put(piece.get_mino(), piece.get_x(), piece.get_y());
+            assert!(!field2.can_put(piece.get_mino(), piece.get_x(), piece.get_y()));
+
+            assert_eq!(field1.get_board(0), field2.get_board(0));
+            assert_eq!(field1.get_board(1), field2.get_board(1));
+            assert_eq!(field1.get_board(2), field2.get_board(2));
+            assert_eq!(field1.get_board(3), field2.get_board(3));
+
+            assert!(!field1.is_empty());
+        }
+    }
+
+    #[test]
+    fn remove() {
+        for y in 1..MAX_FIELD_HEIGHT - 2 {
+            for x in 0..FIELD_WIDTH - 2 {
+                let mut field = field_factory::create_large_field();
+                field.invert();
+
+                field.remove(&Mino::new(Piece::T, Rotate::Right), x, y);
+                // println!("{x} {y} {field:?}");
+
+                assert!(field.is_empty_block(x, y));
+                assert!(field.is_empty_block(x, y - 1));
+                assert!(field.is_empty_block(x, y + 1));
+                assert!(field.is_empty_block(x + 1, y));
+            }
+        }
+    }
+
+    #[test]
+    fn remove_2() {
+        for piece in create_all_pieces(&MinoFactory::new(), MAX_FIELD_HEIGHT) {
+            let mut field1 = field_factory::create_large_field();
+            field1.invert();
+            field1.remove(piece.get_mino(), piece.get_x(), piece.get_y());
+
+            let mut field2 = field_factory::create_large_field();
+            field2.invert();
+            field2.remove_piece(&piece);
+
+            assert_eq!(field1.get_board(0), field2.get_board(0));
+            assert_eq!(field1.get_board(1), field2.get_board(1));
+            assert_eq!(field1.get_board(2), field2.get_board(2));
+            assert_eq!(field1.get_board(3), field2.get_board(3));
+        }
+    }
+
+    #[test]
+    fn get_y_on_harddrop() {
+        let field = field_factory::create_large_field_with_marks(
+            String::new()
+                + "X_________"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "_________X"
+                + "____X_____"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "__________",
+        );
+
+        assert_eq!(
+            field.get_y_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 1, MAX_FIELD_HEIGHT),
+            12
+        );
+        assert_eq!(
+            field.get_y_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 2, MAX_FIELD_HEIGHT),
+            0
+        );
+        assert_eq!(
+            field.get_y_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 3, MAX_FIELD_HEIGHT),
+            7
+        );
+        assert_eq!(
+            field.get_y_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 8, MAX_FIELD_HEIGHT),
+            8
+        );
+    }
+
+    #[test]
+    fn can_reach_on_harddrop() {
+        let field = field_factory::create_large_field_with_marks(
+            String::new()
+                + "X_________"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "_________X"
+                + "____X_____"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "__________"
+                + "__________",
+        );
+
+        assert!(!field.can_reach_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 1, 4));
+        assert!(field.can_reach_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 2, 4));
+        assert!(field.can_reach_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 2, 3));
+        assert!(!field.can_reach_on_harddrop(&Mino::new(Piece::T, Rotate::Spawn), 1, 1));
+    }
+
+    #[test]
+    fn can_reach_on_harddrop_2() {
+        let mut rngs = thread_rng();
+        let field = create_random_large_field(&mut rngs, 50);
+
+        for pieces in create_all_pieces(&MinoFactory::new(), MAX_FIELD_HEIGHT) {
+            let mino = pieces.get_mino();
+            let x = pieces.get_x();
+            let y = pieces.get_y();
+
+            assert_eq!(
+                field.can_reach_on_harddrop_piece(&pieces),
+                field.can_put(mino, x, y) && field.can_reach_on_harddrop(mino, x, y)
+            );
+        }
+    }
+
+    #[test]
+    fn exist_above_row() {
+        for y in 0..MAX_FIELD_HEIGHT {
+            let mut field = field_factory::create_large_field();
+            field.set_block(0, y);
+
+            for y2 in 0..MAX_FIELD_HEIGHT {
+                assert_eq!(field.exists_above_row(y2), y2 <= y);
+            }
+        }
+    }
+
+    #[test]
+    fn is_empty() {
+        assert!(field_factory::create_large_field().is_empty());
+    }
+
+    #[test]
+    fn is_filled_in_column() {
+        for y in 0..MAX_FIELD_HEIGHT {
+            for x in 1..FIELD_WIDTH {
+                let mut field = field_factory::create_large_field();
+                for i in 0..y {
+                    field.set_block(x, i);
+                }
+
+                for i in 0..MAX_FIELD_HEIGHT {
+                    assert_eq!(field.is_filled_in_column(x, i), i <= y);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn is_wall_between_left() {
+        let mut rngs = thread_rng();
+        for y in 0..MAX_FIELD_HEIGHT {
+            for x in 1..FIELD_WIDTH {
+                // println!("testing {x}");
+
+                let mut field = field_factory::create_large_field();
+                for i in 0..y {
+                    if rngs.gen_bool(0.5) {
+                        field.set_block(x, i);
+                    } else {
+                        field.set_block(x - 1, i);
+                    }
+                }
+
+                for i in 0..MAX_FIELD_HEIGHT {
+                    assert_eq!(field.is_wall_between_left(x, i), i <= y, "{field:?} {i}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn is_on_ground() {
+        let field = field_factory::create_large_field();
+        assert!(field.is_on_ground(&Mino::new(Piece::I, Rotate::Spawn), 3, 0));
+        assert!(!field.is_on_ground(&Mino::new(Piece::I, Rotate::Spawn), 3, 1));
+
+        for y in 2..MAX_FIELD_HEIGHT {
+            let mut field = field_factory::create_large_field();
+            field.set_block(4, y - 2);
+
+            assert!(!field.is_on_ground(&Mino::new(Piece::I, Rotate::Spawn), 4, y));
+            assert!(field.is_on_ground(&Mino::new(Piece::I, Rotate::Spawn), 4, y - 1));
+        }
+    }
+
+    #[test]
+    fn get_block_count_in_column() {
+        let mut rngs = thread_rng();
+        let field = create_random_large_field(&mut rngs, 25);
+
+        for y in 0..MAX_FIELD_HEIGHT {
+            for x in 0..FIELD_WIDTH {
+                assert_eq!(
+                    field.get_block_count_in_column(x, y),
+                    (0..y).filter(|&y2| field.exists_block(x, y2)).count() as u32
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn clear_filled_rows() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(5..20);
+            let mut field = create_random_large_field(&mut rngs, empty_minos);
+
+            // 配列ベースのフィールドに変換
+            let mut colored_field = ArrayColoredField::new(MAX_FIELD_HEIGHT);
+            for y in 0..MAX_FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    colored_field.set_color(
+                        x,
+                        y,
+                        if field.is_empty_block(x, y) {
+                            ColorType::Empty
+                        } else {
+                            ColorType::Gray
+                        },
+                    );
+                }
+            }
+
+            // ライン消去
+            field.clear_filled_rows();
+            colored_field.clear_filled_rows();
+
+            // 確認
+            for y in 0..MAX_FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    assert_eq!(
+                        field.is_empty_block(x, y),
+                        colored_field.get_color(x, y) == ColorType::Empty
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn insert_filled_row_with_key() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(5..20);
+            let mut field = create_random_large_field(&mut rngs, empty_minos);
+
+            let freeze = field.prune(MAX_FIELD_HEIGHT);
+
+            let key = field.clear_filled_rows_return_key();
+            field.insert_filled_row_with_key(key);
+
+            assert_eq!(&field as &dyn Field, freeze.as_ref(), "{key:#b}");
+        }
+    }
+
+    #[test]
+    fn insert_blank_row_with_key() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(5..20);
+            let mut field = create_random_large_field(&mut rngs, empty_minos);
+
+            for y in 0..MAX_FIELD_HEIGHT {
+                if (0..FIELD_WIDTH).all(|x| field.exists_block(x, y)) {
+                    for x in 0..FIELD_WIDTH {
+                        field.remove_block(x, y);
+                    }
+                }
+            }
+
+            let freeze = field.prune(MAX_FIELD_HEIGHT);
+
+            let key = field.clear_filled_rows_return_key();
+            field.insert_blank_row_with_key(key);
+
+            assert_eq!(&field as &dyn Field, freeze.as_ref());
+        }
+    }
+
+    #[test]
+    fn fill_row() {
+        for y in 0..MAX_FIELD_HEIGHT {
+            let mut field = field_factory::create_large_field();
+            field.fill_row(y);
+
+            for x in 0..FIELD_WIDTH {
+                assert!(field.exists_block(x, y));
+            }
+
+            field.clear_filled_rows();
+            assert!(field.is_empty());
+        }
+    }
+
+    #[test]
+    fn get_upper_y_with_4_blocks_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = field_factory::create_large_field();
+            let mut max_y = None;
+
+            while field.get_num_of_all_blocks() != 4 {
+                let x = rngs.gen_range(0..FIELD_WIDTH);
+                let y = rngs.gen_range(0..MAX_FIELD_HEIGHT);
+                field.set_block(x, y);
+
+                max_y = max_y.max(Some(y))
+            }
+
+            assert_eq!(field.get_upper_y_with_4_blocks(), max_y.unwrap());
+        }
+    }
+
+    #[test]
+    fn get_min_y_random() {
+        // empty
+        assert_eq!(field_factory::create_large_field().get_min_y(), None);
+
+        // 10 blocks
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = field_factory::create_large_field();
+            let mut min_y: Option<u8> = None;
+            for i in 0..FIELD_WIDTH {
+                let x = rngs.gen_range(0..FIELD_WIDTH);
+                let y = rngs.gen_range(0..MAX_FIELD_HEIGHT);
+                field.set_block(x, y);
+
+                if let Some(min) = min_y {
+                    min_y = Some(min.min(y));
+                } else {
+                    min_y = Some(y);
+                }
+            }
+
+            assert_eq!(field.get_min_y(), min_y);
+        }
+    }
+
+    #[test]
+    fn contains_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(5..20);
+            let init_field = create_random_large_field(&mut rngs, empty_minos);
+
+            let mut field = init_field.prune(MAX_FIELD_HEIGHT);
+            for _ in 0..100 {
+                let x = rngs.gen_range(0..FIELD_WIDTH);
+                let y = rngs.gen_range(0..MAX_FIELD_HEIGHT);
+                field.remove_block(x, y);
+
+                assert!(init_field.contains(field.as_ref()));
+            }
+
+            let mut field = init_field.prune(MAX_FIELD_HEIGHT);
+            for _ in 0..100 {
+                let x = rngs.gen_range(0..FIELD_WIDTH);
+                let y = rngs.gen_range(0..MAX_FIELD_HEIGHT);
+
+                if field.exists_block(x, y) {
+                    continue;
+                }
+                field.set_block(x, y);
+
+                assert!(!init_field.contains(field.as_ref()));
+            }
+        }
+    }
+
+    #[test]
+    fn slide_down_one_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = field_factory::create_large_field();
+            let mut expected = field_factory::create_large_field();
+
+            for x in 0..FIELD_WIDTH {
+                if rngs.gen_bool(0.5) {
+                    field.set_block(x, 0);
+                }
+            }
+
+            for y in 1..MAX_FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    if rngs.gen_bool(0.5) {
+                        field.set_block(x, y);
+                        expected.set_block(x, y - 1);
+                    }
+                }
+            }
+
+            field.slide_down_one();
+
+            assert_eq!(field, expected);
+        }
+    }
+
+    #[test]
+    fn slide_down_n_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = create_random_large_field(&mut rngs, 30);
+            let slide = rngs.gen_range(0..MAX_FIELD_HEIGHT + 1);
+
+            let mut expected = field.clone();
+            for _ in 0..slide {
+                expected.slide_down_one();
+            }
+
+            field.slide_down(slide);
+
+            assert_eq!(field, expected);
+        }
+    }
+
+    #[test]
+    fn slide_up_with_empty_row_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = create_random_large_field(&mut rngs, 30);
+
+            let mut freeze = field.clone();
+            freeze.slide_down_one();
+            freeze.slide_up_with_empty_row(1);
+
+            for x in 0..FIELD_WIDTH {
+                field.remove_block(x, 0);
+            }
+
+            assert_eq!(field, freeze);
+        }
+    }
+
+    #[test]
+    fn slide_up_with_filled_row_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = create_random_large_field(&mut rngs, 30);
+
+            let mut freeze = field.clone();
+            freeze.slide_down_one();
+            freeze.slide_up_with_filled_row(1);
+
+            for x in 0..FIELD_WIDTH {
+                field.set_block(x, 0);
+            }
+
+            assert_eq!(field, freeze);
+        }
+    }
+
+    #[test]
+    fn slide_up_with_empty_row_n_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = create_random_large_field(&mut rngs, 30);
+            let slide = rngs.gen_range(0..MAX_FIELD_HEIGHT + 1);
+
+            let mut freeze = field.clone();
+            for _ in 0..slide {
+                freeze.slide_up_with_empty_row(1);
+            }
+
+            field.slide_up_with_empty_row(slide);
+            assert_eq!(field, freeze, "{slide}");
+        }
+    }
+
+    #[test]
+    fn slide_up_with_filled_row_n_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = create_random_large_field(&mut rngs, 30);
+            let slide = rngs.gen_range(0..MAX_FIELD_HEIGHT + 1);
+
+            let mut freeze = field.clone();
+            for _ in 0..slide {
+                freeze.slide_up_with_filled_row(1);
+            }
+
+            field.slide_up_with_filled_row(slide);
+            assert_eq!(field, freeze, "{slide}");
+        }
+    }
+
+    #[test]
+    fn slide_left_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = field_factory::create_large_field();
+            let mut expected = field_factory::create_large_field();
+
+            let slide = rngs.gen_range(0..FIELD_WIDTH);
+            for x in 0..slide {
+                for y in 0..MAX_FIELD_HEIGHT {
+                    if rngs.gen_bool(0.5) {
+                        field.set_block(x, y);
+                    }
+                }
+            }
+
+            for x in slide..FIELD_WIDTH {
+                for y in 0..MAX_FIELD_HEIGHT {
+                    if rngs.gen_bool(0.5) {
+                        field.set_block(x, y);
+                        expected.set_block(x - slide, y);
+                    }
+                }
+            }
+
+            field.slide_left(slide);
+            assert_eq!(field, expected);
+        }
+    }
+
+    #[test]
+    fn slide_right_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let mut field = field_factory::create_large_field();
+            let mut expected = field_factory::create_large_field();
+
+            let slide = rngs.gen_range(0..FIELD_WIDTH);
+            for x in FIELD_WIDTH - slide..FIELD_WIDTH {
+                for y in 0..MAX_FIELD_HEIGHT {
+                    if rngs.gen_bool(0.5) {
+                        field.set_block(x, y);
+                    }
+                }
+            }
+
+            for x in 0..FIELD_WIDTH - slide {
+                for y in 0..MAX_FIELD_HEIGHT {
+                    if rngs.gen_bool(0.5) {
+                        field.set_block(x, y);
+                        expected.set_block(x + slide, y);
+                    }
+                }
+            }
+
+            field.slide_right(slide);
+            assert_eq!(field, expected);
+        }
+    }
+
+    #[test]
+    fn invert() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(5..20);
+            let init_field = create_random_large_field(&mut rngs, empty_minos);
+            let mut field = init_field.clone();
+
+            field.invert();
+
+            for y in 0..MAX_FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    assert_ne!(field.is_empty_block(x, y), init_field.is_empty_block(x, y));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn mirror() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(3..10);
+            let init_field = create_random_large_field(&mut rngs, empty_minos);
+
+            let mut field = init_field.prune(MAX_FIELD_HEIGHT);
+            field.mirror();
+
+            for y in 0..MAX_FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    assert_eq!(
+                        field.is_empty_block(x, y),
+                        init_field.is_empty_block(FIELD_WIDTH - 1 - x, y)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn get_min_x() {
+        assert_eq!(field_factory::create_large_field().get_min_x(), None);
+
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(3..10);
+            let init_field = create_random_large_field(&mut rngs, empty_minos);
+
+            let field = init_field.prune(MAX_FIELD_HEIGHT);
+            let expected_min_x =
+                (0..FIELD_WIDTH).find(|&x| (0..MAX_FIELD_HEIGHT).any(|y| field.exists_block(x, y)));
+
+            assert_eq!(field.get_min_x(), expected_min_x);
+        }
+    }
+
+    #[test]
+    fn exists_block_in_row() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(3..10);
+            let init_field = create_random_large_field(&mut rngs, empty_minos);
+
+            for y in 0..MAX_FIELD_HEIGHT {
+                let expected = (0..FIELD_WIDTH).any(|x| init_field.exists_block(x, y));
+
+                assert_eq!(init_field.exists_block_in_row(y), expected);
+            }
+        }
+    }
+
+    #[test]
+    fn delete_row() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            // 適度にフィールドのラインが揃うようにランダムに地形を作る
+            let empty_minos = rngs.gen_range(3..10);
+            let mut field = create_random_large_field(&mut rngs, empty_minos);
+
+            let max_count = rngs.gen_range(0..MAX_FIELD_HEIGHT * 2);
+            for _ in 0..max_count {
+                field.fill_row(rngs.gen_range(0..MAX_FIELD_HEIGHT));
+            }
+
+            let mut expected = field.clone();
+            let deleted_key = expected.clear_filled_rows_return_key();
+
+            field.delete_rows_with_key(deleted_key);
+            assert_eq!(field, expected);
+        }
+    }
+
+    #[test]
+    fn mask_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            // 適度にフィールドのラインが揃うようにランダムに地形を作る
+            let empty_minos1 = rngs.gen_range(3..10);
+            let field1 = create_random_large_field(&mut rngs, empty_minos1);
+            let empty_minos2 = rngs.gen_range(3..10);
+            let field2 = create_random_large_field(&mut rngs, empty_minos2);
+
+            // 期待値
+            let mut expected = field_factory::create_large_field();
+            for y in 0..MAX_FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    if !field1.is_empty_block(x, y) && !field2.is_empty_block(x, y) {
+                        expected.set_block(x, y);
+                    }
+                }
+            }
+
+            let mut freeze = field1.clone();
+            freeze.mask(&field2);
+            assert_eq!(freeze, expected);
+
+            let mut freeze = field2.clone();
+            freeze.mask(&field1);
+            assert_eq!(freeze, expected);
+        }
+    }
+
+    #[test]
+    fn get_using_key_random() {
+        let mut rngs = thread_rng();
+        for _ in 0..10000 {
+            let empty_minos = rngs.gen_range(1..10);
+            let field = create_random_large_field(&mut rngs, empty_minos);
+
+            // 期待値
+            let mut expected = 0;
+            for y in 0..MAX_FIELD_HEIGHT {
+                if (0..FIELD_WIDTH).any(|x| field.exists_block(x, y)) {
+                    expected |= key_operators::get_delete_bit_key(y);
+                }
+            }
+
+            assert_eq!(field.get_using_key(), expected);
+        }
     }
 }
