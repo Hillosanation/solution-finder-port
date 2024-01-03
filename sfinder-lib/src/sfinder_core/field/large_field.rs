@@ -130,16 +130,16 @@ impl LargeField {
 
     // row_fill_fn is used to factor out the two calls of this function that differ only by this argument.
     fn insert_row_with_key(&mut self, delete_key: u64, row_fill_fn: fn(u64, u64) -> u64) {
-        // let delete_keys: [_; 4] =
-        //     std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
+        let delete_keys: [_; 4] =
+            std::array::from_fn(|index| <dyn Field>::extract_delete_key(delete_key, index as u8));
 
-        // let delete_rows = delete_keys[0..3]
-        //     .iter()
-        //     .scan(0, |sum, delete_key| {
-        //         *sum += delete_key.count_ones() as u8;
-        //         Some(*sum)
-        //     })
-        //     .collect::<Vec<_>>();
+        let delete_rows = delete_keys[0..3]
+            .iter()
+            .scan(0, |sum, delete_key| {
+                *sum += delete_key.count_ones() as u8;
+                Some(*sum)
+            })
+            .collect::<Vec<_>>();
 
         // // we perform the carry over of the rows to the higher boards here
         // let create_new_x_boards =
@@ -190,21 +190,14 @@ impl LargeField {
         let xbmh = self.2;
         let xbh = self.3;
 
-        let dkl = <dyn Field>::extract_delete_key(delete_key, 0);
-        let dll = dkl.count_ones();
+        let dkl = delete_keys[0];
+        let dkml = delete_keys[1];
+        let dkmh = delete_keys[2];
+        let dkh = delete_keys[3];
 
-        let dkml = <dyn Field>::extract_delete_key(delete_key, 1);
-        let dlml = dkml.count_ones();
-
-        let dkmh = <dyn Field>::extract_delete_key(delete_key, 2);
-        let dlmh = dkmh.count_ones();
-
-        let dkh = <dyn Field>::extract_delete_key(delete_key, 3);
-        // let dlh = dkh.count_ones();
-
-        let dl1 = dll as u8;
-        let dl2 = dl1 + dlml as u8;
-        let dl3 = dl2 + dlmh as u8;
+        let dl1 = delete_rows[0];
+        let dl2 = delete_rows[1];
+        let dl3 = delete_rows[2];
 
         let nxbs = if dl3 < 6 {
             let nxbh = <dyn Field>::create_upper_board(xbmh, xbh, dl3, dkh, row_fill_fn);
