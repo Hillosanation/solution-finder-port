@@ -141,34 +141,7 @@ impl LargeField {
             })
             .collect::<Vec<_>>();
 
-        // let new_x_boards = create_new_x_boards(match delete_rows[2] {
-        //     FIELD_ROW_MID_HIGH_BORDER_Y.. => {
-        //         // Low & MidLow
-        //         [
-        //             ([self.0, self.1], BOARD_HEIGHT),
-        //             ([self.0, self.1], FIELD_ROW_MID_HIGH_BORDER_Y),
-        //         ]
-        //     }
-        //     // Low & MidLow & MidHigh
-        //     BOARD_HEIGHT.. if delete_rows[1] >= BOARD_HEIGHT => {
-        //         // Low & MidLow
-        //         [
-        //             ([self.0, self.1], BOARD_HEIGHT),
-        //             ([self.1, self.2], BOARD_HEIGHT),
-        //         ]
-        //     }
-        //     BOARD_HEIGHT.. => {
-        //         // Low & MidLow & MidHigh
-        //         // [3, 5, 7] overflows because 5 - 6
-        //         [([self.1, self.2], 0), ([self.1, self.2], BOARD_HEIGHT)]
-        //     }
-        //     _ => {
-        //         // Low & MidLow & MidHigh & High
-        //         [([self.1, self.2], 0), ([self.2, self.3], 0)]
-        //     }
-        // });
-
-        let create_new_x_boards = |mid_high: (u64, u64, u8), high: (u64, u64, u8)| {
+        let create_new_x_boards = |[mid_high, high]: [(u64, u64, u8); 2]| {
             [
                 <dyn Field>::create_bottom_board(
                     self.0,
@@ -200,20 +173,18 @@ impl LargeField {
             ]
         };
 
-        let new_x_boards = match delete_rows[2] {
-            FIELD_ROW_MID_HIGH_BORDER_Y.. => create_new_x_boards(
+        let new_x_boards = create_new_x_boards(match delete_rows[2] {
+            FIELD_ROW_MID_HIGH_BORDER_Y.. => [
                 (self.0, self.1, BOARD_HEIGHT),
                 (self.0, self.1, FIELD_ROW_MID_HIGH_BORDER_Y),
-            ),
-            BOARD_HEIGHT.. if delete_rows[1] >= BOARD_HEIGHT => create_new_x_boards(
+            ],
+            BOARD_HEIGHT.. if delete_rows[1] >= BOARD_HEIGHT => [
                 (self.0, self.1, BOARD_HEIGHT),
                 (self.1, self.2, BOARD_HEIGHT),
-            ),
-            BOARD_HEIGHT.. => {
-                create_new_x_boards((self.1, self.2, 0), (self.1, self.2, BOARD_HEIGHT))
-            }
-            _ => create_new_x_boards((self.1, self.2, 0), (self.2, self.3, 0)),
-        };
+            ],
+            BOARD_HEIGHT.. => [(self.1, self.2, 0), (self.1, self.2, BOARD_HEIGHT)],
+            _ => [(self.1, self.2, 0), (self.2, self.3, 0)],
+        });
 
         self.0 = new_x_boards[0];
         self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
