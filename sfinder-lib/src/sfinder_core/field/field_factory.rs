@@ -8,7 +8,7 @@ pub fn create_field(max_height: u8) -> Box<dyn Field> {
     match max_height {
         ..=6 => Box::new(SmallField::new()),
         7..=12 => Box::new(MiddleField::new()),
-        13..=24 => todo!("LargeField"),
+        13..=24 => Box::new(LargeField::new()),
         _ => panic!("Field height should be equal or less than 24: height={max_height}"),
     }
 }
@@ -103,7 +103,7 @@ pub fn create_large_field() -> LargeField {
     LargeField::new()
 }
 
-fn create_large_field_with_marks(marks: String, is_block: bool) -> LargeField {
+fn create_large_field_with_marks_and_block(marks: String, is_block: bool) -> LargeField {
     assert!(marks.len() <= 240, "marks is too long for LargeField");
     assert_eq!(
         marks.len() % 10,
@@ -116,6 +116,10 @@ fn create_large_field_with_marks(marks: String, is_block: bool) -> LargeField {
     set_marks_to_field(marks, &mut field, is_block);
 
     field
+}
+
+pub fn create_large_field_with_marks(marks: String) -> LargeField {
+    create_large_field_with_marks_and_block(marks, true)
 }
 
 // TODO: niche use
