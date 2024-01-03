@@ -154,11 +154,10 @@ pub fn from_colored_field(colored_field: &dyn ColoredField, height: u8) -> Box<d
 
 #[cfg(test)]
 mod tests {
-    use rand::{thread_rng, Rng};
-
-    use crate::sfinder_core::field::field::BoardCount;
+    use crate::sfinder_core::field::field_constants::BoardCount;
 
     use super::*;
+    use rand::{thread_rng, Rng};
 
     #[test]
     fn test_small() {

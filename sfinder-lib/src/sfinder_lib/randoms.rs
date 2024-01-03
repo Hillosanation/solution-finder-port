@@ -7,10 +7,7 @@
 //! block10InCycle is unused
 
 use crate::sfinder_core::{
-    field::{
-        field::{Field, FIELD_WIDTH},
-        field_factory, key_operators,
-    },
+    field::{field::Field, field_constants::FIELD_WIDTH, field_factory, key_operators},
     mino::piece::Piece,
     srs::rotate::Rotate,
 };

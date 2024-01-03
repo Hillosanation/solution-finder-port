@@ -1,6 +1,7 @@
 use super::{
     bit_operators,
-    field::{BoardCount, Field, FieldHelper, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field::{Field, FieldHelper},
+    field_constants::{BoardCount, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
     middle_field::MiddleField,
     small_field::SmallField,
@@ -717,11 +718,14 @@ impl Field for LargeField {
     }
 
     fn slide_down_one(&mut self) {
-        self.0 = (self.0 >> FIELD_WIDTH | <dyn Field>::board_shl(self.1, BOARD_HEIGHT - 1))
+        self.0 = (<dyn Field>::board_shr(self.0, 1)
+            | <dyn Field>::board_shl(self.1, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
-        self.1 = (self.1 >> FIELD_WIDTH | <dyn Field>::board_shl(self.2, BOARD_HEIGHT - 1))
+        self.1 = (<dyn Field>::board_shr(self.1, 1)
+            | <dyn Field>::board_shl(self.2, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
-        self.2 = (self.2 >> FIELD_WIDTH | <dyn Field>::board_shl(self.3, BOARD_HEIGHT - 1))
+        self.2 = (<dyn Field>::board_shr(self.2, 1)
+            | <dyn Field>::board_shl(self.3, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
         self.3 >>= FIELD_WIDTH;
     }
@@ -845,7 +849,7 @@ mod test {
             },
         },
         sfinder_core::{
-            field::field_factory,
+            field::{field_constants::FIELD_WIDTH, field_factory},
             mino::{mino_factory::MinoFactory, piece::Piece},
             neighbor::original_piece::create_all_pieces,
             srs::rotate::Rotate,

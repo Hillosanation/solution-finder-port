@@ -1,22 +1,13 @@
+use super::{
+    bit_operators,
+    field_constants::{BoardCount, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
+};
 use crate::{
     extras::hash_code::HashCode,
-    sfinder_core::{
-        field::bit_operators, mino::mino::Mino, neighbor::original_piece::OriginalPiece,
-    },
+    sfinder_core::{mino::mino::Mino, neighbor::original_piece::OriginalPiece},
 };
 use dyn_clone::DynClone;
 use std::fmt::Debug;
-
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
-pub enum BoardCount {
-    Small = 1,
-    Middle = 2,
-    Large = 4,
-}
-
-pub const FIELD_WIDTH: u8 = 10;
-pub const BOARD_HEIGHT: u8 = 6;
-pub const VALID_BOARD_RANGE: u64 = 0xfffffffffffffff;
 
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece

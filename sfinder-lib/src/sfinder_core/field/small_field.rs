@@ -1,9 +1,10 @@
 use super::{
     bit_operators,
-    field::{BoardCount, Field, FieldHelper, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field::{Field, FieldHelper},
+    field_constants::{BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
 };
-use crate::sfinder_core::mino::mino::Mino;
+use crate::sfinder_core::{field::field_constants::BoardCount, mino::mino::Mino};
 use std::fmt::Debug;
 
 const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT;
@@ -251,7 +252,7 @@ mod tests {
     use crate::{
         common::datastore::{action::action::Action, mino_operation::MinoOperation},
         sfinder_core::{
-            field::field_factory,
+            field::{field_constants::BoardCount, field_factory},
             mino::{mino_factory::MinoFactory, piece::Piece},
             neighbor::original_piece::create_all_pieces,
             srs::rotate::Rotate,

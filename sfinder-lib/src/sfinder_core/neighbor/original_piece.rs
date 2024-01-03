@@ -128,7 +128,7 @@ pub fn create_all_pieces<'a>(
     field_height: u8,
 ) -> Vec<OriginalPiece<'a>> {
     // A reference to a Mino in MinoFactory is needed because OriginalPiece stores a reference of a Mino
-    use crate::sfinder_core::{field::field::FIELD_WIDTH, mino::piece::Piece};
+    use crate::sfinder_core::{field::field_constants::FIELD_WIDTH, mino::piece::Piece};
 
     Piece::value_list()
         .iter()

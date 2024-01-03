@@ -1,6 +1,7 @@
 use super::{
     bit_operators,
-    field::{BoardCount, Field, FieldHelper, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field::{Field, FieldHelper},
+    field_constants::{BoardCount, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
     key_operators, long_board_map,
     small_field::SmallField,
 };
@@ -393,9 +394,10 @@ impl Field for MiddleField {
     }
 
     fn slide_down_one(&mut self) {
-        self.0 = (self.0 >> FIELD_WIDTH | <dyn Field>::board_shl(self.1, BOARD_HEIGHT - 1))
+        self.0 = (<dyn Field>::board_shr(self.0, 1)
+            | <dyn Field>::board_shl(self.1, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
-        self.1 = self.1 >> FIELD_WIDTH;
+        self.1 = <dyn Field>::board_shr(self.1, 1);
     }
 
     fn slide_down(&mut self, slide: u8) {
@@ -486,7 +488,10 @@ mod tests {
     use crate::{
         common::datastore::{action::action::Action, mino_operation::MinoOperation},
         sfinder_core::{
-            field::field_factory::{self, create_middle_field},
+            field::{
+                field_constants::FIELD_WIDTH,
+                field_factory::{self, create_middle_field},
+            },
             mino::{mino_factory::MinoFactory, piece::Piece},
             neighbor::original_piece::create_all_pieces,
             srs::rotate::Rotate,

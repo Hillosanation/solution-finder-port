@@ -1,7 +1,7 @@
 use super::colored_field::ColoredField;
 use crate::{
     common::tetfu::common::color_type::ColorType,
-    sfinder_core::{field::field::FIELD_WIDTH, mino::mino::Mino},
+    sfinder_core::{field::field_constants::FIELD_WIDTH, mino::mino::Mino},
 };
 
 #[derive(Clone)]
