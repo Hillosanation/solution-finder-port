@@ -200,40 +200,40 @@ impl LargeField {
         let dl3 = delete_rows[2];
 
         let nxbs = if dl3 < 6 {
-            let nxbh = <dyn Field>::create_upper_board(xbmh, xbh, dl3, dkh, row_fill_fn);
-            let nxbmh = <dyn Field>::create_upper_board(xbml, xbmh, dl2, dkmh, row_fill_fn);
-            let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
-            let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
-
-            [nxbl, nxbml, nxbmh, nxbh]
+            [
+                <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn),
+                <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn),
+                <dyn Field>::create_upper_board(xbml, xbmh, dl2, dkmh, row_fill_fn),
+                <dyn Field>::create_upper_board(xbmh, xbh, dl3, dkh, row_fill_fn),
+            ]
         } else if dl3 < 12 {
             if dl2 < 6 {
                 let dl3_6 = dl3 - 6;
-                let nxbh = <dyn Field>::create_upper_board(xbml, xbmh, dl3_6, dkh, row_fill_fn);
-                let nxbmh = <dyn Field>::create_upper_board(xbml, xbmh, dl2, dkmh, row_fill_fn);
-                let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
-                let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
-
-                [nxbl, nxbml, nxbmh, nxbh]
+                [
+                    <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn),
+                    <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn),
+                    <dyn Field>::create_upper_board(xbml, xbmh, dl2, dkmh, row_fill_fn),
+                    <dyn Field>::create_upper_board(xbml, xbmh, dl3_6, dkh, row_fill_fn),
+                ]
             } else {
                 let dl3_6 = dl3 - 6;
-                let nxbh = <dyn Field>::create_upper_board(xbml, xbmh, dl3_6, dkh, row_fill_fn);
                 let dl2_6 = dl2 - 6;
-                let nxbmh = <dyn Field>::create_upper_board(xbl, xbml, dl2_6, dkmh, row_fill_fn);
-                let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
-                let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
-
-                [nxbl, nxbml, nxbmh, nxbh]
+                [
+                    <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn),
+                    <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn),
+                    <dyn Field>::create_upper_board(xbl, xbml, dl2_6, dkmh, row_fill_fn),
+                    <dyn Field>::create_upper_board(xbml, xbmh, dl3_6, dkh, row_fill_fn),
+                ]
             }
         } else {
             let dl3_12 = dl3 - 12;
-            let nxbh = <dyn Field>::create_upper_board(xbl, xbml, dl3_12, dkh, row_fill_fn);
             let dl2_6 = dl2 - 6;
-            let nxbmh = <dyn Field>::create_upper_board(xbl, xbml, dl2_6, dkmh, row_fill_fn);
-            let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
-            let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
-
-            [nxbl, nxbml, nxbmh, nxbh]
+            [
+                <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn),
+                <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn),
+                <dyn Field>::create_upper_board(xbl, xbml, dl2_6, dkmh, row_fill_fn),
+                <dyn Field>::create_upper_board(xbl, xbml, dl3_12, dkh, row_fill_fn),
+            ]
         };
 
         self.0 = nxbs[0];
