@@ -13,7 +13,7 @@ pub trait ColoredField {
     // Porting note: putBlockNumber is dropped in favor of converting yourself
     fn set_color(&mut self, x: u8, y: u8, color: ColorType);
 
-    fn clear_row(&mut self);
+    fn clear_filled_rows(&mut self);
 
     fn block_up(&mut self);
 

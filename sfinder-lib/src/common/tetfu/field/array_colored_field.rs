@@ -50,7 +50,7 @@ impl ColoredField for ArrayColoredField {
         self.field[y as usize][x as usize] = color;
     }
 
-    fn clear_row(&mut self) {
+    fn clear_filled_rows(&mut self) {
         let length = self.field.len();
         self.field
             .retain(|row| row.iter().any(|color| *color == ColorType::Empty));
