@@ -207,93 +207,38 @@ impl LargeField {
         let dl3 = dl2 + dlmh as u8;
 
         let nxbs = if dl3 < 6 {
-            let ll3 = 6 - dl3;
-            let nxbh = row_fill_fn(
-                xbh << 10 * dl3 | (xbmh & bit_operators::get_row_mask_above_y(ll3)) >> 10 * ll3,
-                dkh,
-            );
-
-            let ll2 = 6 - dl2;
-            let nxbmh = row_fill_fn(
-                xbmh << 10 * dl2 | (xbml & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
-                dkmh,
-            );
-
-            let ll1 = 6 - dl1;
-            let nxbml = row_fill_fn(
-                xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
-                dkml,
-            );
-
-            let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+            let nxbh = <dyn Field>::create_upper_board(xbmh, xbh, dl3, dkh, row_fill_fn);
+            let nxbmh = <dyn Field>::create_upper_board(xbml, xbmh, dl2, dkmh, row_fill_fn);
+            let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
+            let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
 
             [nxbl, nxbml, nxbmh, nxbh]
         } else if dl3 < 12 {
-            let dl3_6 = dl3 - 6;
-            let ll3 = 6 - dl3_6;
-            let nxbh = row_fill_fn(
-                xbmh << 10 * dl3_6 | (xbml & bit_operators::get_row_mask_above_y(ll3)) >> 10 * ll3,
-                dkh,
-            );
-
             if dl2 < 6 {
-                let ll2 = 6 - dl2;
-                let nxbmh = row_fill_fn(
-                    xbmh << 10 * dl2
-                        | (xbml & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
-                    dkmh,
-                );
-
-                let ll1 = 6 - dl1;
-                let nxbml = row_fill_fn(
-                    xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
-                    dkml,
-                );
-
-                let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+                let dl3_6 = dl3 - 6;
+                let nxbh = <dyn Field>::create_upper_board(xbml, xbmh, dl3_6, dkh, row_fill_fn);
+                let nxbmh = <dyn Field>::create_upper_board(xbml, xbmh, dl2, dkmh, row_fill_fn);
+                let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
+                let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
 
                 [nxbl, nxbml, nxbmh, nxbh]
             } else {
+                let dl3_6 = dl3 - 6;
+                let nxbh = <dyn Field>::create_upper_board(xbml, xbmh, dl3_6, dkh, row_fill_fn);
                 let dl2_6 = dl2 - 6;
-                let ll2 = 6 - dl2_6;
-                let nxbmh = row_fill_fn(
-                    xbml << 10 * dl2_6
-                        | (xbl & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
-                    dkmh,
-                );
-
-                let ll1 = 6 - dl1;
-                let nxbml = row_fill_fn(
-                    xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
-                    dkml,
-                );
-
-                let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+                let nxbmh = <dyn Field>::create_upper_board(xbl, xbml, dl2_6, dkmh, row_fill_fn);
+                let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
+                let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
 
                 [nxbl, nxbml, nxbmh, nxbh]
             }
         } else {
             let dl3_12 = dl3 - 12;
-            let ll3 = 6 - dl3_12;
-            let nxbh = row_fill_fn(
-                xbml << 10 * dl3_12 | (xbl & bit_operators::get_row_mask_above_y(ll3)) >> 10 * ll3,
-                dkh,
-            );
-
+            let nxbh = <dyn Field>::create_upper_board(xbl, xbml, dl3_12, dkh, row_fill_fn);
             let dl2_6 = dl2 - 6;
-            let ll2 = 6 - dl2_6;
-            let nxbmh = row_fill_fn(
-                xbml << 10 * dl2_6 | (xbl & bit_operators::get_row_mask_above_y(ll2)) >> 10 * ll2,
-                dkmh,
-            );
-
-            let ll1 = 6 - dl1;
-            let nxbml = row_fill_fn(
-                xbml << 10 * dl1 | (xbl & bit_operators::get_row_mask_above_y(ll1)) >> 10 * ll1,
-                dkml,
-            );
-
-            let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
+            let nxbmh = <dyn Field>::create_upper_board(xbl, xbml, dl2_6, dkmh, row_fill_fn);
+            let nxbml = <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn);
+            let nxbl = <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn);
 
             [nxbl, nxbml, nxbmh, nxbh]
         };
