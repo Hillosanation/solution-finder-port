@@ -168,48 +168,51 @@ impl LargeField {
         //     }
         // });
 
-        // self.0 = new_x_boards[0];
-        // self.1 = new_x_boards[1] & VALID_BOARD_RANGE;
-        // self.2 = new_x_boards[2] & VALID_BOARD_RANGE;
-        // self.3 = new_x_boards[3] & VALID_BOARD_RANGE;
-
-        let xbl = self.0;
-        let xbml = self.1;
-        let xbmh = self.2;
-        let xbh = self.3;
-
-        let dl1 = delete_rows[0];
-        let dl2 = delete_rows[1];
-        let dl3 = delete_rows[2];
-
         let create_new_x_boards = |mid_high: (u64, u64, u8), high: (u64, u64, u8)| {
             [
-                <dyn Field>::create_bottom_board(xbl, dl1, delete_keys[0], row_fill_fn),
-                <dyn Field>::create_upper_board(xbl, xbml, dl1, delete_keys[1], row_fill_fn),
+                <dyn Field>::create_bottom_board(
+                    self.0,
+                    delete_rows[0],
+                    delete_keys[0],
+                    row_fill_fn,
+                ),
+                <dyn Field>::create_upper_board(
+                    self.0,
+                    self.1,
+                    delete_rows[0],
+                    delete_keys[1],
+                    row_fill_fn,
+                ),
                 <dyn Field>::create_upper_board(
                     mid_high.0,
                     mid_high.1,
-                    dl2 - mid_high.2,
+                    delete_rows[1] - mid_high.2,
                     delete_keys[2],
                     row_fill_fn,
                 ),
                 <dyn Field>::create_upper_board(
                     high.0,
                     high.1,
-                    dl3 - high.2,
+                    delete_rows[2] - high.2,
                     delete_keys[3],
                     row_fill_fn,
                 ),
             ]
         };
 
-        let new_x_boards = match dl3 {
-            FIELD_ROW_MID_HIGH_BORDER_Y.. => create_new_x_boards((xbl, xbml, 6), (xbl, xbml, 12)),
-            BOARD_HEIGHT.. if dl2 >= BOARD_HEIGHT => {
-                create_new_x_boards((xbl, xbml, 6), (xbml, xbmh, 6))
+        let new_x_boards = match delete_rows[2] {
+            FIELD_ROW_MID_HIGH_BORDER_Y.. => create_new_x_boards(
+                (self.0, self.1, BOARD_HEIGHT),
+                (self.0, self.1, FIELD_ROW_MID_HIGH_BORDER_Y),
+            ),
+            BOARD_HEIGHT.. if delete_rows[1] >= BOARD_HEIGHT => create_new_x_boards(
+                (self.0, self.1, BOARD_HEIGHT),
+                (self.1, self.2, BOARD_HEIGHT),
+            ),
+            BOARD_HEIGHT.. => {
+                create_new_x_boards((self.1, self.2, 0), (self.1, self.2, BOARD_HEIGHT))
             }
-            BOARD_HEIGHT.. => create_new_x_boards((xbml, xbmh, 0), (xbml, xbmh, 6)),
-            _ => create_new_x_boards((xbml, xbmh, 0), (xbmh, xbh, 0)),
+            _ => create_new_x_boards((self.1, self.2, 0), (self.2, self.3, 0)),
         };
 
         self.0 = new_x_boards[0];
