@@ -187,66 +187,31 @@ impl LargeField {
         let dl2 = delete_rows[1];
         let dl3 = delete_rows[2];
 
-        let create_new_x_boards = |low: (u64, u8, u64),
-                                   mid_low: (u64, u64, u8, u64),
-                                   mid_high: (u64, u64, u8, u64),
-                                   high: (u64, u64, u8, u64)| {
+        let create_new_x_boards = |mid_high: (u64, u64, u8), high: (u64, u64, u8)| {
             [
-                <dyn Field>::create_bottom_board(low.0, low.1, low.2, row_fill_fn),
-                <dyn Field>::create_upper_board(
-                    mid_low.0,
-                    mid_low.1,
-                    mid_low.2,
-                    mid_low.3,
-                    row_fill_fn,
-                ),
+                <dyn Field>::create_bottom_board(xbl, dl1, dkl, row_fill_fn),
+                <dyn Field>::create_upper_board(xbl, xbml, dl1, dkml, row_fill_fn),
                 <dyn Field>::create_upper_board(
                     mid_high.0,
                     mid_high.1,
-                    mid_high.2,
-                    mid_high.3,
+                    dl2 - mid_high.2,
+                    dkmh,
                     row_fill_fn,
                 ),
-                <dyn Field>::create_upper_board(high.0, high.1, high.2, high.3, row_fill_fn),
+                <dyn Field>::create_upper_board(high.0, high.1, dl3 - high.2, dkh, row_fill_fn),
             ]
         };
 
         let nxbs = if dl3 < 6 {
-            create_new_x_boards(
-                (xbl, dl1, dkl),
-                (xbl, xbml, dl1, dkml),
-                (xbml, xbmh, dl2, dkmh),
-                (xbmh, xbh, dl3, dkh),
-            )
+            create_new_x_boards((xbml, xbmh, 0), (xbmh, xbh, 0))
         } else if dl3 < 12 {
             if dl2 < 6 {
-                let dl3_6 = dl3 - 6;
-
-                create_new_x_boards(
-                    (xbl, dl1, dkl),
-                    (xbl, xbml, dl1, dkml),
-                    (xbml, xbmh, dl2, dkmh),
-                    (xbml, xbmh, dl3_6, dkh),
-                )
+                create_new_x_boards((xbml, xbmh, 0), (xbml, xbmh, 6))
             } else {
-                let dl3_6 = dl3 - 6;
-                let dl2_6 = dl2 - 6;
-                create_new_x_boards(
-                    (xbl, dl1, dkl),
-                    (xbl, xbml, dl1, dkml),
-                    (xbl, xbml, dl2_6, dkmh),
-                    (xbml, xbmh, dl3_6, dkh),
-                )
+                create_new_x_boards((xbl, xbml, 6), (xbml, xbmh, 6))
             }
         } else {
-            let dl3_12 = dl3 - 12;
-            let dl2_6 = dl2 - 6;
-            create_new_x_boards(
-                (xbl, dl1, dkl),
-                (xbl, xbml, dl1, dkml),
-                (xbl, xbml, dl2_6, dkmh),
-                (xbl, xbml, dl3_12, dkh),
-            )
+            create_new_x_boards((xbl, xbml, 6), (xbl, xbml, 12))
         };
 
         self.0 = nxbs[0];
