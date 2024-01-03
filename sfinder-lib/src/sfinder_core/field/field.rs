@@ -272,6 +272,7 @@ pub trait FieldHelper {
     }
 
     #[inline]
+    // used for boards that are not the bottommost
     fn create_upper_board(
         board_low: u64,
         board_high: u64,

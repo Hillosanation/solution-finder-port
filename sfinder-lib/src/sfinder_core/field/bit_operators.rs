@@ -33,7 +33,6 @@ pub const fn get_column_one_row_below_y(max_y: u8) -> u64 {
     COLUMN_ONE_LINE_BELOW[max_y as usize]
 }
 
-/// TODO: refactor using this function, usually you want to use this, but it can block refactoring of bitshifts cancelling out
 pub const fn get_column_mask(max_y: u8, x: u8) -> u64 {
     get_column_one_row_below_y(max_y) << x
 }
