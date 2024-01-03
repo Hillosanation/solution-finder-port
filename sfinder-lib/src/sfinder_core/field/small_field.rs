@@ -7,7 +7,7 @@ use super::{
 use crate::sfinder_core::{field::field_constants::BoardCount, mino::mino::Mino};
 use std::fmt::Debug;
 
-const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT;
+pub const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT;
 
 /// Porting note: clone replaces copy constructor
 #[derive(Clone)]

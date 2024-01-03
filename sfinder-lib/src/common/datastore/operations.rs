@@ -73,7 +73,9 @@ mod tests {
     use super::*;
     use crate::{
         common::datastore::simple_operation::SimpleOperation,
-        sfinder_core::{mino::piece::Piece, srs::rotate::Rotate},
+        sfinder_core::{
+            field::field_constants::FIELD_WIDTH, mino::piece::Piece, srs::rotate::Rotate,
+        },
     };
     use rand::{rngs::ThreadRng, thread_rng, Rng};
 
@@ -95,7 +97,7 @@ mod tests {
         SimpleOperation::new(
             Piece::new(rngs.gen_range(0..Piece::get_size()) as u8),
             Rotate::new(rngs.gen_range(0..Rotate::get_size()) as u8),
-            rngs.gen_range(0..10),
+            rngs.gen_range(0..FIELD_WIDTH),
             rngs.gen_range(0..y),
         )
     }

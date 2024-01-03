@@ -186,11 +186,13 @@ pub fn to_bit_key(column_key: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::{
-        sfinder_core::field::{field::Field, small_field::SmallField},
+        sfinder_core::field::{
+            field::Field, field_constants::FIELD_WIDTH, small_field::SmallField,
+        },
         sfinder_lib::boolean_walker,
     };
-    use super::*;
     use rand::{thread_rng, Rng};
 
     #[test]
@@ -204,18 +206,18 @@ mod tests {
             for y in 0..booleans.len() as u8 {
                 if booleans[y as usize] {
                     // ラインを全て埋める
-                    for x in 0..10 {
+                    for x in 0..FIELD_WIDTH {
                         field.set_block(x, y);
                     }
                     expect_delete_key |= get_delete_bit_key(y);
                 } else {
                     // ラインを全て埋めない
-                    for x in 0..10 {
+                    for x in 0..FIELD_WIDTH {
                         if rngs.gen_bool(0.8) {
                             field.set_block(x, y);
                         }
                     }
-                    field.remove_block(rngs.gen_range(0..10), y);
+                    field.remove_block(rngs.gen_range(0..FIELD_WIDTH), y);
                 }
 
                 let board = field.get_x_board();
@@ -232,12 +234,12 @@ mod tests {
 
             // y行より下の行が含まれることを確認
             for line in 0..y {
-                assert_ne!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+                assert_ne!(mask & bit_operators::get_x_mask(line / 6, line % 6), 0);
             }
 
             // y行を含めた上の行が含まれないことを確認
             for line in y..24 {
-                assert_eq!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+                assert_eq!(mask & bit_operators::get_x_mask(line / 6, line % 6), 0);
             }
         }
     }
@@ -250,12 +252,12 @@ mod tests {
 
             // y行より下の行が含まれないことを確認
             for line in 0..y {
-                assert_eq!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+                assert_eq!(mask & bit_operators::get_x_mask(line / 6, line % 6), 0);
             }
 
             // y行を含めた上の行が含まれることを確認
             for line in y..24 {
-                assert_ne!(mask & 1 << ((line % 6) * 10 + (line / 6)), 0);
+                assert_ne!(mask & bit_operators::get_x_mask(line / 6, line % 6), 0);
             }
         }
     }
@@ -263,7 +265,10 @@ mod tests {
     #[test]
     fn test_get_delete_bit_key() {
         for y in 0..24 {
-            assert_eq!(get_delete_bit_key(y), 1 << ((y % 6) * 10 + (y / 6)));
+            assert_eq!(
+                get_delete_bit_key(y),
+                bit_operators::get_x_mask(y / 6, y % 6)
+            );
         }
     }
 

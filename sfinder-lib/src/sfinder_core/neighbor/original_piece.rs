@@ -9,7 +9,7 @@ use crate::{
     },
     extras::hash_code::HashCode,
     sfinder_core::{
-        field::{field::Field, field_factory},
+        field::{field::Field, field_constants::FIELD_WIDTH, field_factory},
         mino::mino::Mino,
         srs::rotate::Rotate,
     },
@@ -36,7 +36,7 @@ impl OriginalPiece<'_> {
             field.put(mino, x, y_index);
         }
         for y_index in field_height..(field.get_max_field_height()) {
-            for x_index in 0..10 {
+            for x_index in 0..FIELD_WIDTH {
                 field.remove_block(x_index, y_index);
             }
         }

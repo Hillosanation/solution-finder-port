@@ -1,6 +1,6 @@
 use super::{
     bit_operators,
-    field_constants::{BoardCount, BOARD_HEIGHT, VALID_BOARD_RANGE},
+    field_constants::{BoardCount, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
 };
 use crate::{
     extras::hash_code::HashCode,
@@ -229,7 +229,7 @@ pub trait FieldHelper {
         let max_x = x + mino.get_max_x();
         let min_y = y + mino.get_min_y();
 
-        0 <= min_x && max_x < 10 && 0 <= min_y
+        0 <= min_x && max_x < FIELD_WIDTH as i8 && 0 <= min_y
     }
 
     // returns a mask of the rows above y

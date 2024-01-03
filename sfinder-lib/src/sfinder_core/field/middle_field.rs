@@ -9,7 +9,7 @@ use crate::sfinder_core::mino::mino::Mino;
 use std::fmt::Debug;
 
 const FIELD_ROW_BORDER_Y: u8 = BOARD_HEIGHT;
-const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT * 2;
+pub const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT * 2;
 
 enum Position {
     Low(u8),

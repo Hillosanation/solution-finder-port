@@ -1,7 +1,11 @@
 use super::piece::{MinMaxBounds, Piece, Positions};
 use crate::{
-    common::datastore::coordinate::Coordinate, extras::hash_code::HashCode,
-    sfinder_core::srs::rotate::Rotate,
+    common::datastore::coordinate::Coordinate,
+    extras::hash_code::HashCode,
+    sfinder_core::{
+        field::{bit_operators::get_x_mask, field_constants::FIELD_WIDTH},
+        srs::rotate::Rotate,
+    },
 };
 
 /// Primitive for the shape of the tetromino.
@@ -36,8 +40,12 @@ impl Mino {
     fn calc_mask(positions: &Positions) -> u64 {
         positions
             .iter()
-            // TODO: replace 10 with FIELD_WIDTH in Field, or replace with Field::get_x_mask entirely
-            .map(|position| 1 << ((MASK_CENTER_Y + position.y) * 10 + (MASK_CENTER_X + position.x)))
+            .map(|position| {
+                get_x_mask(
+                    u8::try_from(MASK_CENTER_X + position.x).unwrap(),
+                    u8::try_from(MASK_CENTER_Y + position.y).unwrap(),
+                )
+            })
             .fold(0, core::ops::BitOr::bitor)
     }
 
@@ -122,10 +130,10 @@ impl Mino {
     }
 
     pub fn get_mask(&self, x: u8, y: i8) -> u64 {
-        assert!(x < 10);
+        assert!(x < FIELD_WIDTH);
         assert!(-4 < y && y < 8);
 
-        let slide = (x as i8 - MASK_CENTER_X) + (y as i8 - MASK_CENTER_Y) * 10;
+        let slide = (x as i8 - MASK_CENTER_X) + (y as i8 - MASK_CENTER_Y) * FIELD_WIDTH as i8;
         if slide >= 0 {
             self.mask << slide
         } else {

@@ -38,25 +38,25 @@ pub fn gen_rotate(rngs: &mut ThreadRng) -> Rotate {
 }
 
 pub fn gen_field(rngs: &mut ThreadRng, height: u8, num_of_empty_minos: u8) -> Box<dyn Field> {
-    assert!(num_of_empty_minos <= 10 * height / 4);
+    assert!(num_of_empty_minos <= FIELD_WIDTH * height / 4);
 
     let total_num_of_empty = num_of_empty_minos * 4;
 
     let mut num_of_empty_in_rows = vec![0; height as usize];
-    let num_of_blocks = 10 * height - total_num_of_empty;
+    let num_of_blocks = FIELD_WIDTH * height - total_num_of_empty;
     if total_num_of_empty < num_of_blocks {
         // 空白のほうが少ないとき
         let mut count = 0;
         while count < total_num_of_empty {
             let index = rngs.gen_range(0..height) as usize;
-            if num_of_empty_in_rows[index] < 10 {
+            if num_of_empty_in_rows[index] < FIELD_WIDTH {
                 num_of_empty_in_rows[index] += 1;
                 count += 1;
             }
         }
     } else {
         // ブロックのほうが少ないとき
-        num_of_empty_in_rows = vec![10; height as usize];
+        num_of_empty_in_rows = vec![FIELD_WIDTH; height as usize];
 
         let mut count = 0;
         while count < num_of_blocks {
@@ -72,7 +72,7 @@ pub fn gen_field(rngs: &mut ThreadRng, height: u8, num_of_empty_minos: u8) -> Bo
 
     let mut field = field_factory::create_field(height);
     let mut prev_start = 0;
-    let mut prev_end = 10;
+    let mut prev_end = FIELD_WIDTH;
     for y in (0..height).rev() {
         let count = num_of_empty_in_rows[y as usize];
 
@@ -188,11 +188,11 @@ mod tests {
         let mut rngs = thread_rng();
         for _ in 0..10000 {
             let height = rngs.gen_range(1..=12);
-            let num_of_minos = rngs.gen_range(1..height * 10 / 4);
+            let num_of_minos = rngs.gen_range(1..height * FIELD_WIDTH / 4);
             let random_field = gen_field(&mut rngs, height, num_of_minos);
             assert_eq!(
                 random_field.get_num_of_all_blocks(),
-                (10 * height - 4 * num_of_minos) as u32,
+                (FIELD_WIDTH * height - 4 * num_of_minos) as u32,
                 "{random_field:?}"
             );
         }

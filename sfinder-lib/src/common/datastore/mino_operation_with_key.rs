@@ -2,13 +2,13 @@ use super::operation_with_key::OperationWithKey;
 use crate::{
     common::datastore::mino_operation::MinoOperation,
     extras::hash_code::HashCode,
-    sfinder_core::field::{field::Field, field_factory},
+    sfinder_core::field::{field::Field, field_constants::FIELD_WIDTH, field_factory},
 };
 
 pub trait MinoOperationWithKey: OperationWithKey<u8> + MinoOperation<u8> {
     fn default_hash(&self) -> u32 {
         let mut result = u32::from(self.get_y());
-        result = 10 * result + u32::from(self.get_x());
+        result = FIELD_WIDTH as u32 * result + u32::from(self.get_x());
         result = 31 * result + self.get_mino().hash_code() as u32;
 
         let need_deleted_key = self.get_need_deleted_key();

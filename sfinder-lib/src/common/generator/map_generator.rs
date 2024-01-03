@@ -1,5 +1,10 @@
 use super::wrapper::wrapper;
-use crate::{sfinder_core::field::key_operators::get_bit_key, sfinder_lib::boolean_walker};
+use crate::{
+    sfinder_core::field::{
+        bit_operators, field_constants::FIELD_WIDTH, key_operators::get_bit_key,
+    },
+    sfinder_lib::boolean_walker,
+};
 
 #[derive(Clone, Copy)]
 enum GenerationMode {
@@ -45,7 +50,7 @@ fn create_operation(
                 operations.push(format!("x & {row_mask}"));
             }
         } else {
-            let slide = (new_start - src_start) * 10;
+            let slide = (new_start - src_start) * FIELD_WIDTH;
 
             match mode {
                 GenerationMode::InsertFilled | GenerationMode::InsertBlank => {
@@ -66,7 +71,7 @@ fn create_operation(
                 .iter()
                 .enumerate()
                 .filter(|(_, &flag)| flag)
-                .map(|(i, _)| 0x3ffu64 << (10 * i))
+                .map(|(i, _)| bit_operators::get_row_mask(i as u8))
                 .fold(0, std::ops::BitOr::bitor),
         ));
     }
@@ -145,7 +150,7 @@ mod tests {
         let mut key = 0;
 
         for i in (0..left_flags.len()).rev() {
-            key <<= 10;
+            key <<= FIELD_WIDTH;
 
             if !left_flags[i] {
                 key |= 1;

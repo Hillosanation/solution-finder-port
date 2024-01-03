@@ -6,7 +6,12 @@ pub const fn repeat_rows(row_mask: u64) -> u64 {
     if row_mask & !0x3ff != 0 {
         panic!("invalid row mask");
     }
-    row_mask | row_mask << 10 | row_mask << 20 | row_mask << 30 | row_mask << 40 | row_mask << 50
+    row_mask
+        | row_mask << FIELD_WIDTH
+        | row_mask << 2 * FIELD_WIDTH
+        | row_mask << 3 * FIELD_WIDTH
+        | row_mask << 4 * FIELD_WIDTH
+        | row_mask << 5 * FIELD_WIDTH
 }
 
 // Note this is the same as the first entries in KEY_MASKS by coincidence
@@ -28,7 +33,7 @@ pub const fn get_column_one_row_below_y(max_y: u8) -> u64 {
     // if max_y == 0 {
     //     0
     // } else {
-    //     repeat_rows(0b0000000001) & (1 << (max_y - 1) * 10 - 1)
+    //     repeat_rows(0b0000000001) & (1 << (max_y - 1) * FIELD_WIDTH - 1)
     // }
 
     // TODO: try removing precomputation
@@ -54,7 +59,7 @@ const COLUMN_KEYS_RIGHT: [u64; 11] = [
 ];
 
 // x列より右の列を選択するマスクを作成（x列を含む）
-/// Panics if x > 10
+/// Panics if x > FIELD_WIDTH
 /// Porting note: replaces getColumnMaskRightX
 pub const fn get_column_mask_right_of_row(min_x: u8) -> u64 {
     COLUMN_KEYS_RIGHT[min_x as usize]
@@ -63,7 +68,7 @@ pub const fn get_column_mask_right_of_row(min_x: u8) -> u64 {
     // repeat_rows(0b1111111111 - (1 << min_x - 1))
 }
 
-/// Panics if max_x > 10
+/// Panics if max_x > FIELD_WIDTH
 /// Porting note: replaces getColumnMaskLeftX
 // x列より左の列を選択するマスクを作成（x列を含まない）
 pub const fn get_column_mask_left_of_row(min_x: u8) -> u64 {
@@ -97,7 +102,7 @@ pub fn get_lowest_y(board: u64) -> u8 {
 }
 
 pub fn try_get_lowest_y(board: u64) -> Option<u8> {
-    (board != 0).then(|| (board.trailing_zeros() / 10) as _)
+    (board != 0).then(|| board.trailing_zeros() as u8 / FIELD_WIDTH)
 }
 
 /// Panics if board == 0
@@ -106,15 +111,15 @@ pub fn get_highest_y(board: u64) -> u8 {
 }
 
 pub fn try_get_highest_y(board: u64) -> Option<u8> {
-    board.checked_ilog2().map(|index| (index / 10) as _)
+    board.checked_ilog2().map(|index| index as u8 / FIELD_WIDTH)
 }
 
 pub fn try_get_lowest_x(mut board: u64) -> Option<u8> {
     (board != 0).then(|| {
         // fold the 60 bits into a single row
-        board |= board >> 20;
-        board |= board >> 20;
-        board |= board >> 10;
+        board |= board >> (2 * FIELD_WIDTH);
+        board |= board >> (2 * FIELD_WIDTH);
+        board |= board >> FIELD_WIDTH;
 
         board.trailing_zeros() as _
     })
@@ -150,42 +155,44 @@ pub const fn get_row_mask(y: u8) -> u64 {
 
 #[cfg(test)]
 mod tests {
+    use crate::sfinder_core::field::field_constants::BOARD_HEIGHT;
+
     use super::*;
     use rand::{thread_rng, Rng};
 
     #[test]
     fn test_get_column_one_row_below_y() {
-        for y in 0..=6 {
+        for y in 0..=BOARD_HEIGHT {
             let mask = get_column_one_row_below_y(y);
 
             // y行より下の行が含まれることを確認
             for line in 0..y {
-                assert_ne!(mask & 1 << (line * 10), 0);
+                assert_ne!(mask & get_x_mask(0, line), 0);
             }
 
             // y行を含めた上の行が含まれないことを確認
             for line in y..=6 {
-                assert_eq!(mask & 1 << (line * 10), 0);
+                assert_eq!(mask & get_x_mask(0, line), 0);
             }
         }
     }
 
     #[test]
     fn test_get_column_mask_right_of_row() {
-        for x in 0..=10 {
+        for x in 0..=FIELD_WIDTH {
             let mask = get_column_mask_right_of_row(x);
 
             // x列より左の列が含まれないことを確認
             for column in 0..x {
-                for y in 0..6 {
-                    assert_eq!(mask & 1 << (y * 10 + column), 0);
+                for y in 0..BOARD_HEIGHT {
+                    assert_eq!(mask & get_x_mask(column, y), 0);
                 }
             }
 
             // x列を含めた右の列が含まれることを確認
-            for column in x..10 {
-                for y in 0..6 {
-                    assert_ne!(mask & 1 << (y * 10 + column), 0);
+            for column in x..FIELD_WIDTH {
+                for y in 0..BOARD_HEIGHT {
+                    assert_ne!(mask & get_x_mask(column, y), 0);
                 }
             }
         }
@@ -193,18 +200,18 @@ mod tests {
 
     #[test]
     fn test_get_column_mask_left_of_row() {
-        for x in 0..=10 {
+        for x in 0..=FIELD_WIDTH {
             let mask = get_column_mask_left_of_row(x);
 
             for column in 0..x {
-                for y in 0..6 {
-                    assert_ne!(mask & 1 << (y * 10 + column), 0);
+                for y in 0..BOARD_HEIGHT {
+                    assert_ne!(mask & get_x_mask(column, y), 0);
                 }
             }
 
-            for column in x..10 {
-                for y in 0..6 {
-                    assert_eq!(mask & 1 << (y * 10 + column), 0);
+            for column in x..FIELD_WIDTH {
+                for y in 0..BOARD_HEIGHT {
+                    assert_eq!(mask & get_x_mask(column, y), 0);
                 }
             }
         }
@@ -217,15 +224,15 @@ mod tests {
 
             // y行を含めた下の行が含まれることを確認
             for line in 0..y {
-                for x in 0..10 {
-                    assert_ne!(mask & 1 << (line * 10 + x), 0);
+                for x in 0..FIELD_WIDTH {
+                    assert_ne!(mask & get_x_mask(x, line), 0);
                 }
             }
 
             // y行より上の行が含まれないことを確認
-            for line in y..6 {
-                for x in 0..10 {
-                    assert_eq!(mask & 1 << (line * 10 + x), 0);
+            for line in y..BOARD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    assert_eq!(mask & get_x_mask(x, line), 0);
                 }
             }
         }
@@ -238,15 +245,15 @@ mod tests {
 
             // y行より下の行が含まれないことを確認
             for line in 0..y {
-                for x in 0..10 {
-                    assert_eq!(mask & 1 << (line * 10 + x), 0);
+                for x in 0..FIELD_WIDTH {
+                    assert_eq!(mask & get_x_mask(x, line), 0);
                 }
             }
 
             // y行を含めた上の行が含まれることを確認
-            for line in y..6 {
-                for x in 0..10 {
-                    assert_ne!(mask & 1 << (line * 10 + x), 0);
+            for line in y..BOARD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    assert_ne!(mask & get_x_mask(x, line), 0);
                 }
             }
         }
@@ -291,32 +298,33 @@ mod tests {
             let min_x = try_get_lowest_x(board).unwrap();
 
             // println!("{board:060b}, min: {min_x}");
-            assert_ne!(board & get_column_mask(6, min_x), 0);
+            assert_ne!(board & get_column_mask(BOARD_HEIGHT, min_x), 0);
             for x in 0..min_x {
-                assert_eq!(board & get_column_mask(6, x), 0);
+                assert_eq!(board & get_column_mask(BOARD_HEIGHT, x), 0);
             }
         }
     }
 
     mod legacy {
         use super::*;
+        use crate::sfinder_core::field::field_constants::BOARD_HEIGHT;
 
         // legacy_bit_to_[xy] seems to be slightly faster from amateur microbenching, but the following are better when there are 4
         // boardのうち1ビットがオンになっているとき、そのビットのy座標を返却
         fn legacy_bit_to_y(bit: u64) -> u8 {
             assert_eq!(bit.count_ones(), 1);
-            (bit.trailing_zeros() / 10) as _
+            bit.trailing_zeros() as u8 / FIELD_WIDTH
         }
 
         fn legacy_bit_to_x(bit: u64) -> u8 {
             assert_eq!(bit.count_ones(), 1);
-            (bit.trailing_zeros() % 10) as _
+            bit.trailing_zeros() as u8 % FIELD_WIDTH
         }
 
         #[test]
         fn bit_to_y_agrees() {
-            for y in 0..6 {
-                for x in 0..10 {
+            for y in 0..BOARD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
                     let bit = get_x_mask(x, y);
                     assert_eq!(legacy_bit_to_y(bit), get_lowest_y(bit));
                     assert_eq!(legacy_bit_to_y(bit), get_highest_y(bit));
@@ -326,8 +334,8 @@ mod tests {
 
         #[test]
         fn bit_to_x_agrees() {
-            for y in 0..6 {
-                for x in 0..10 {
+            for y in 0..BOARD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
                     let bit = get_x_mask(x, y);
                     // println!("{bit:060b}");
                     assert_eq!(legacy_bit_to_x(bit), try_get_lowest_x(bit).unwrap());
@@ -337,8 +345,8 @@ mod tests {
 
         #[test]
         fn test_bit_to_y() {
-            for y in 0..6 {
-                for x in 0..10 {
+            for y in 0..BOARD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
                     let bit = get_x_mask(x, y);
                     let actual_y = legacy_bit_to_y(bit);
                     assert_eq!(actual_y, y);

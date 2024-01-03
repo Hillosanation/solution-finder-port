@@ -12,7 +12,7 @@ use std::fmt::Debug;
 const FIELD_ROW_MID_LOW_BORDER_Y: u8 = BOARD_HEIGHT;
 const FIELD_ROW_MID_HIGH_BORDER_Y: u8 = BOARD_HEIGHT * 2;
 const FIELD_ROW_HIGH_BORDER_Y: u8 = BOARD_HEIGHT * 3;
-const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT * 4;
+pub const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT * 4;
 
 /// attached u8 is the adjusted y position such that it is less than 6
 enum Position {
