@@ -206,7 +206,7 @@ impl LargeField {
         let dl2 = dl1 + dlml as u8;
         let dl3 = dl2 + dlmh as u8;
 
-        if dl3 < 6 {
+        let nxbs = if dl3 < 6 {
             let ll3 = 6 - dl3;
             let nxbh = row_fill_fn(
                 xbh << 10 * dl3 | (xbmh & bit_operators::get_row_mask_above_y(ll3)) >> 10 * ll3,
@@ -227,10 +227,7 @@ impl LargeField {
 
             let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
 
-            self.0 = nxbl;
-            self.1 = nxbml & VALID_BOARD_RANGE;
-            self.2 = nxbmh & VALID_BOARD_RANGE;
-            self.3 = nxbh & VALID_BOARD_RANGE;
+            [nxbl, nxbml, nxbmh, nxbh]
         } else if dl3 < 12 {
             let dl3_6 = dl3 - 6;
             let ll3 = 6 - dl3_6;
@@ -255,10 +252,7 @@ impl LargeField {
 
                 let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
 
-                self.0 = nxbl;
-                self.1 = nxbml & VALID_BOARD_RANGE;
-                self.2 = nxbmh & VALID_BOARD_RANGE;
-                self.3 = nxbh & VALID_BOARD_RANGE;
+                [nxbl, nxbml, nxbmh, nxbh]
             } else {
                 let dl2_6 = dl2 - 6;
                 let ll2 = 6 - dl2_6;
@@ -276,10 +270,7 @@ impl LargeField {
 
                 let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
 
-                self.0 = nxbl;
-                self.1 = nxbml & VALID_BOARD_RANGE;
-                self.2 = nxbmh & VALID_BOARD_RANGE;
-                self.3 = nxbh & VALID_BOARD_RANGE;
+                [nxbl, nxbml, nxbmh, nxbh]
             }
         } else {
             let dl3_12 = dl3 - 12;
@@ -304,11 +295,13 @@ impl LargeField {
 
             let nxbl = row_fill_fn(xbl & bit_operators::get_row_mask_below_y(ll1), dkl);
 
-            self.0 = nxbl;
-            self.1 = nxbml & VALID_BOARD_RANGE;
-            self.2 = nxbmh & VALID_BOARD_RANGE;
-            self.3 = nxbh & VALID_BOARD_RANGE;
-        }
+            [nxbl, nxbml, nxbmh, nxbh]
+        };
+
+        self.0 = nxbs[0];
+        self.1 = nxbs[1] & VALID_BOARD_RANGE;
+        self.2 = nxbs[2] & VALID_BOARD_RANGE;
+        self.3 = nxbs[3] & VALID_BOARD_RANGE;
     }
 }
 
