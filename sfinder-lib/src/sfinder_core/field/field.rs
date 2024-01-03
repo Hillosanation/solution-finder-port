@@ -229,6 +229,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
     fn mask(&mut self, mask_field: &dyn Field);
 }
 
+// Porting note: This collection of helper functions is distinct from the FieldHelper class, which is dropped.
 pub trait FieldHelper {
     /// TODO: is_in should be the only function that should be exposed
     fn is_in(mino: &Mino, x: i8, y: i8) -> bool {
