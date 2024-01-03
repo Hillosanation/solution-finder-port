@@ -54,9 +54,9 @@ impl MiddleField {
         let delete_row_low = delete_key_low.count_ones() as u8;
 
         self.0 = (new_x_board_low
-            | <dyn Field>::board_shl(new_x_board_high, BOARD_HEIGHT - delete_row_low))
+            | bit_operators::board_shl(new_x_board_high, BOARD_HEIGHT - delete_row_low))
             & VALID_BOARD_RANGE;
-        self.1 = <dyn Field>::board_shr(new_x_board_high, delete_row_low);
+        self.1 = bit_operators::board_shr(new_x_board_high, delete_row_low);
     }
 
     fn clear_all(&mut self) {
@@ -108,15 +108,15 @@ impl Field for MiddleField {
 
     fn set_block(&mut self, x: u8, y: u8) {
         match Self::select(y) {
-            Position::Low(y_off) => self.0 |= <dyn Field>::get_x_mask(x, y_off),
-            Position::High(y_off) => self.1 |= <dyn Field>::get_x_mask(x, y_off),
+            Position::Low(y_off) => self.0 |= bit_operators::get_x_mask(x, y_off),
+            Position::High(y_off) => self.1 |= bit_operators::get_x_mask(x, y_off),
         }
     }
 
     fn remove_block(&mut self, x: u8, y: u8) {
         match Self::select(y) {
-            Position::Low(y_off) => self.0 &= !<dyn Field>::get_x_mask(x, y_off),
-            Position::High(y_off) => self.1 &= !<dyn Field>::get_x_mask(x, y_off),
+            Position::Low(y_off) => self.0 &= !bit_operators::get_x_mask(x, y_off),
+            Position::High(y_off) => self.1 &= !bit_operators::get_x_mask(x, y_off),
         }
     }
 
@@ -169,8 +169,8 @@ impl Field for MiddleField {
 
     fn is_empty_block(&self, x: u8, y: u8) -> bool {
         match Self::select(y) {
-            Position::Low(y_off) => self.0 & <dyn Field>::get_x_mask(x, y_off) == 0,
-            Position::High(y_off) => self.1 & <dyn Field>::get_x_mask(x, y_off) == 0,
+            Position::Low(y_off) => self.0 & bit_operators::get_x_mask(x, y_off) == 0,
+            Position::High(y_off) => self.1 & bit_operators::get_x_mask(x, y_off) == 0,
         }
     }
 
@@ -247,16 +247,16 @@ impl Field for MiddleField {
 
     fn get_block_count_in_row(&self, y: u8) -> u32 {
         match Self::select(y) {
-            Position::Low(y_off) => self.0 & <dyn Field>::get_row_mask(y_off),
-            Position::High(y_off) => self.1 & <dyn Field>::get_row_mask(y_off),
+            Position::Low(y_off) => self.0 & bit_operators::get_row_mask(y_off),
+            Position::High(y_off) => self.1 & bit_operators::get_row_mask(y_off),
         }
         .count_ones()
     }
 
     fn exists_block_in_row(&self, y: u8) -> bool {
         (match Self::select(y) {
-            Position::Low(y_off) => self.0 & <dyn Field>::get_row_mask(y_off),
-            Position::High(y_off) => self.1 & <dyn Field>::get_row_mask(y_off),
+            Position::Low(y_off) => self.0 & bit_operators::get_row_mask(y_off),
+            Position::High(y_off) => self.1 & bit_operators::get_row_mask(y_off),
         }) != 0
     }
 
@@ -304,8 +304,8 @@ impl Field for MiddleField {
 
     fn fill_row(&mut self, y: u8) {
         match Self::select(y) {
-            Position::Low(y_off) => self.0 |= <dyn Field>::get_row_mask(y_off),
-            Position::High(y_off) => self.1 |= <dyn Field>::get_row_mask(y_off),
+            Position::Low(y_off) => self.0 |= bit_operators::get_row_mask(y_off),
+            Position::High(y_off) => self.1 |= bit_operators::get_row_mask(y_off),
         }
     }
 
@@ -394,10 +394,10 @@ impl Field for MiddleField {
     }
 
     fn slide_down_one(&mut self) {
-        self.0 = (<dyn Field>::board_shr(self.0, 1)
-            | <dyn Field>::board_shl(self.1, BOARD_HEIGHT - 1))
+        self.0 = (bit_operators::board_shr(self.0, 1)
+            | bit_operators::board_shl(self.1, BOARD_HEIGHT - 1))
             & VALID_BOARD_RANGE;
-        self.1 = <dyn Field>::board_shr(self.1, 1);
+        self.1 = bit_operators::board_shr(self.1, 1);
     }
 
     fn slide_down(&mut self, slide: u8) {

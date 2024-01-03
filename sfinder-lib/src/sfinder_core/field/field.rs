@@ -1,6 +1,6 @@
 use super::{
     bit_operators,
-    field_constants::{BoardCount, BOARD_HEIGHT, FIELD_WIDTH, VALID_BOARD_RANGE},
+    field_constants::{BoardCount, BOARD_HEIGHT, VALID_BOARD_RANGE},
 };
 use crate::{
     extras::hash_code::HashCode,
@@ -11,6 +11,7 @@ use std::fmt::Debug;
 
 // TODO: add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
+// Each field is split into multiple bitboards in its internal representation.
 pub trait Field: Debug + DynClone /* + PartialOrd */ {
     // フィールドの最大高さを返却
     fn get_max_field_height(&self) -> u8;
@@ -231,30 +232,10 @@ pub trait FieldHelper {
         0 <= min_x && max_x < 10 && 0 <= min_y
     }
 
-    fn get_x_mask(x: u8, y: u8) -> u64 {
-        1 << (x + y * FIELD_WIDTH)
-    }
-
-    // TODO: move these to bit_operators?
-    #[inline]
-    fn board_shl(board: u64, shift: u8) -> u64 {
-        board << (shift * FIELD_WIDTH)
-    }
-
-    #[inline]
-    fn board_shr(board: u64, shift: u8) -> u64 {
-        board >> (shift * FIELD_WIDTH)
-    }
-
-    #[inline]
-    fn get_row_mask(y: u8) -> u64 {
-        Self::board_shl(0x3ff, y)
-    }
-
     // returns a mask of the rows above y
     #[inline]
     fn get_valid_mask(y: u8) -> u64 {
-        Self::board_shl(VALID_BOARD_RANGE, y)
+        bit_operators::board_shl(VALID_BOARD_RANGE, y)
     }
 
     #[inline]
@@ -274,9 +255,9 @@ pub trait FieldHelper {
     ) -> u64 {
         let left_row = BOARD_HEIGHT - delete_row;
         row_fill_fn(
-            <dyn Field>::board_shl(board_high, delete_row)
+            bit_operators::board_shl(board_high, delete_row)
                     // why mask and shift? aren't those bits shifted out?
-                    | <dyn Field>::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
+                    | bit_operators::board_shr(board_low & bit_operators::get_row_mask_above_y(left_row), left_row),
             delete_key,
         )
     }

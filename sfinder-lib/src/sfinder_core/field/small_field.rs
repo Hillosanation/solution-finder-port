@@ -39,11 +39,11 @@ impl Field for SmallField {
     }
 
     fn set_block(&mut self, x: u8, y: u8) {
-        self.0 |= <dyn Field>::get_x_mask(x, y);
+        self.0 |= bit_operators::get_x_mask(x, y);
     }
 
     fn remove_block(&mut self, x: u8, y: u8) {
-        self.0 &= !<dyn Field>::get_x_mask(x, y);
+        self.0 &= !bit_operators::get_x_mask(x, y);
     }
 
     fn put(&mut self, mino: &Mino, x: u8, y: u8) {
@@ -63,7 +63,7 @@ impl Field for SmallField {
     }
 
     fn is_empty_block(&self, x: u8, y: u8) -> bool {
-        self.0 & <dyn Field>::get_x_mask(x, y) == 0
+        self.0 & bit_operators::get_x_mask(x, y) == 0
     }
 
     fn exists_above_row(&self, y: u8) -> bool {
@@ -92,11 +92,11 @@ impl Field for SmallField {
     }
 
     fn get_block_count_in_row(&self, y: u8) -> u32 {
-        (self.0 & <dyn Field>::get_row_mask(y)).count_ones()
+        (self.0 & bit_operators::get_row_mask(y)).count_ones()
     }
 
     fn exists_block_in_row(&self, y: u8) -> bool {
-        (self.0 & <dyn Field>::get_row_mask(y)) != 0
+        (self.0 & bit_operators::get_row_mask(y)) != 0
     }
 
     fn get_num_of_all_blocks(&self) -> u32 {
@@ -132,7 +132,7 @@ impl Field for SmallField {
     }
 
     fn fill_row(&mut self, y: u8) {
-        self.0 |= <dyn Field>::get_row_mask(y);
+        self.0 |= bit_operators::get_row_mask(y);
     }
 
     fn get_board(&self, index: u8) -> u64 {

@@ -1,3 +1,5 @@
+use super::field_constants::FIELD_WIDTH;
+
 /// Porting note: Helper function to writing repeating a bit pattern for all rows on a board. This should be evaluated at compile time.
 pub const fn repeat_rows(row_mask: u64) -> u64 {
     // assert cannot be used in const fn
@@ -128,10 +130,27 @@ pub fn is_wall_between_left(x: u8, max_y: u8, board: u64) -> bool {
     (left_high << 1) & right_high == 0
 }
 
+// Common functions manipulating a board.
+
+pub const fn get_x_mask(x: u8, y: u8) -> u64 {
+    1 << (x + y * FIELD_WIDTH)
+}
+
+pub const fn board_shl(board: u64, shift: u8) -> u64 {
+    board << (shift * FIELD_WIDTH)
+}
+
+pub const fn board_shr(board: u64, shift: u8) -> u64 {
+    board >> (shift * FIELD_WIDTH)
+}
+
+pub const fn get_row_mask(y: u8) -> u64 {
+    board_shl(0x3ff, y)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sfinder_core::field::field::{Field, FieldHelper};
     use rand::{thread_rng, Rng};
 
     #[test]
@@ -240,9 +259,9 @@ mod tests {
         for _ in 0..1000 {
             let board = rngs.gen_range(1..1 << 60);
             let y = get_lowest_y(board);
-            assert_ne!(board & <dyn Field>::get_row_mask(y), 0);
+            assert_ne!(board & get_row_mask(y), 0);
             assert!(
-                y == 0 || board & <dyn Field>::get_row_mask(y - 1) == 0,
+                y == 0 || board & get_row_mask(y - 1) == 0,
                 "y: {y}, board: {board:060b}",
             )
         }
@@ -255,9 +274,9 @@ mod tests {
         for _ in 0..1000 {
             let board = rngs.gen_range(1..1 << 60);
             let y = get_highest_y(board);
-            assert_ne!(board & <dyn Field>::get_row_mask(y), 0);
+            assert_ne!(board & get_row_mask(y), 0);
             assert!(
-                y == 6 || board & <dyn Field>::get_row_mask(y + 1) == 0,
+                y == 6 || board & get_row_mask(y + 1) == 0,
                 "y: {y}, board: {board:060b}",
             )
         }
@@ -298,7 +317,7 @@ mod tests {
         fn bit_to_y_agrees() {
             for y in 0..6 {
                 for x in 0..10 {
-                    let bit = <dyn Field>::get_x_mask(x, y);
+                    let bit = get_x_mask(x, y);
                     assert_eq!(legacy_bit_to_y(bit), get_lowest_y(bit));
                     assert_eq!(legacy_bit_to_y(bit), get_highest_y(bit));
                 }
@@ -309,7 +328,7 @@ mod tests {
         fn bit_to_x_agrees() {
             for y in 0..6 {
                 for x in 0..10 {
-                    let bit = <dyn Field>::get_x_mask(x, y);
+                    let bit = get_x_mask(x, y);
                     // println!("{bit:060b}");
                     assert_eq!(legacy_bit_to_x(bit), try_get_lowest_x(bit).unwrap());
                 }
@@ -320,7 +339,7 @@ mod tests {
         fn test_bit_to_y() {
             for y in 0..6 {
                 for x in 0..10 {
-                    let bit = <dyn Field>::get_x_mask(x, y);
+                    let bit = get_x_mask(x, y);
                     let actual_y = legacy_bit_to_y(bit);
                     assert_eq!(actual_y, y);
                 }
