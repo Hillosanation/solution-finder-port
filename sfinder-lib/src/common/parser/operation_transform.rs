@@ -58,12 +58,11 @@ pub fn to_full_operation_with_key(
     let upper_y = vanilla.get_upper_y_with_4_blocks();
 
     // 接着に必ず消去されている必要がある行を抽出
-    // TODO: clean up the bit twiddling here
     let above_lower_y = key_operators::get_mask_for_key_above_y(lower_y);
     let below_upper_y = key_operators::get_mask_for_key_below_y(upper_y + 1);
     let key_line = above_lower_y & below_upper_y;
     let need_deleted_key = delete_key & key_line;
-    let using_key = key_line & !need_deleted_key;
+    let using_key = !delete_key & key_line;
 
     // 操作・消去されている必要がある行をセットで記録
     FullOperationWithKey::new_with_lower_y(mino, x, need_deleted_key, using_key, lower_y)
