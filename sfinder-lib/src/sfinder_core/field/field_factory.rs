@@ -146,7 +146,6 @@ pub fn create_inverse_field(marks: String) -> Box<dyn Field> {
     }
 }
 
-// TODO: move this to From<ColoredField>?
 pub fn from_colored_field(colored_field: &dyn ColoredField, height: u8) -> Box<dyn Field> {
     let mut field = create_field(height);
 

@@ -50,7 +50,6 @@ impl LargeField {
         self.3
     }
 
-    // TODO: do this for MiddleField as well
     fn select(y: u8) -> Position {
         match y {
             FIELD_ROW_HIGH_BORDER_Y.. => Position::High(y - FIELD_ROW_HIGH_BORDER_Y),
@@ -65,7 +64,6 @@ impl LargeField {
     }
 
     fn delete_row(&mut self, key_low: u64, key_mid_low: u64, key_mid_high: u64, key_high: u64) {
-        // TODO: refactor, make non-dependant stuff be run first
         let new_x_boards = [
             long_board_map::delete_row(self.0, key_low),
             long_board_map::delete_row(self.1, key_mid_low),
