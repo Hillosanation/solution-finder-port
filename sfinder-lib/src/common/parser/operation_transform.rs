@@ -15,7 +15,7 @@ use crate::{
 
 // List<OperationWithKey>に変換する。正しく組み立てられるかはチェックしない
 // Porting note: replaces parseToOperationWithKeys
-pub fn parse_to_operations_with_key<'a, O: Operation<u8>>(
+pub fn parse_to_operations_with_key<'a, O: Operation>(
     field_origin: &'a dyn Field,
     operations: &'a Operations<O>,
     mino_factory: &'a MinoFactory,
@@ -58,12 +58,11 @@ pub fn to_full_operation_with_key(
     let upper_y = vanilla.get_upper_y_with_4_blocks();
 
     // 接着に必ず消去されている必要がある行を抽出
-    // TODO: clean up the bit twiddling here
     let above_lower_y = key_operators::get_mask_for_key_above_y(lower_y);
     let below_upper_y = key_operators::get_mask_for_key_below_y(upper_y + 1);
     let key_line = above_lower_y & below_upper_y;
     let need_deleted_key = delete_key & key_line;
-    let using_key = key_line & !need_deleted_key;
+    let using_key = !delete_key & key_line;
 
     // 操作・消去されている必要がある行をセットで記録
     FullOperationWithKey::new_with_lower_y(mino, x, need_deleted_key, using_key, lower_y)
@@ -138,7 +137,7 @@ pub fn parse_to_field(
 }
 
 // 最も低いブロックのy座標を取得
-pub fn get_min_y(mino_factory: &MinoFactory, operations_list: &[impl Operation<u8>]) -> Option<u8> {
+pub fn get_min_y(mino_factory: &MinoFactory, operations_list: &[impl Operation]) -> Option<u8> {
     operations_list
         .iter()
         .map(|operation| {
@@ -149,7 +148,7 @@ pub fn get_min_y(mino_factory: &MinoFactory, operations_list: &[impl Operation<u
 }
 
 // 最も高いブロックのy座標を取得
-pub fn get_max_y(mino_factory: &MinoFactory, operations_list: &[impl Operation<u8>]) -> Option<u8> {
+pub fn get_max_y(mino_factory: &MinoFactory, operations_list: &[impl Operation]) -> Option<u8> {
     operations_list
         .iter()
         .map(|operation| {
@@ -167,7 +166,7 @@ mod tests {
         sfinder_core::{mino::piece::Piece, srs::rotate::Rotate},
     };
 
-    fn assert_operations_with_put<O: Operation<u8>>(
+    fn assert_operations_with_put<O: Operation>(
         mino_factory: &MinoFactory,
         init_field: &dyn Field,
         operations: &Operations<O>,
@@ -201,7 +200,7 @@ mod tests {
         assert_eq!(&f2, expected);
     }
 
-    fn assert_operations<O: Operation<u8>>(
+    fn assert_operations<O: Operation>(
         mino_factory: &MinoFactory,
         init_field: &dyn Field,
         operations: &Operations<O>,

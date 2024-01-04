@@ -4,11 +4,7 @@ use crate::sfinder_core::{
 };
 use std::fmt::Display;
 
-pub trait Operation<Coord>: Action<Coord> + std::fmt::Debug
-where
-    u32: From<Coord>,
-    u64: From<Coord>,
-{
+pub trait Operation: Action + std::fmt::Debug {
     fn get_piece(&self) -> Piece;
 
     fn default_hash_code(&self) -> u32 {
@@ -28,12 +24,7 @@ where
     }
 }
 
-impl<Coord> PartialEq for dyn Operation<Coord> + '_
-where
-    u32: From<Coord>,
-    u64: From<Coord>,
-    Coord: PartialEq,
-{
+impl PartialEq for dyn Operation + '_ {
     fn eq(&self, other: &Self) -> bool {
         self.get_piece() == other.get_piece()
             && self.get_rotate() == other.get_rotate()
@@ -42,12 +33,7 @@ where
     }
 }
 
-impl<Coord> PartialOrd for dyn Operation<Coord> + '_
-where
-    u32: From<Coord>,
-    u64: From<Coord>,
-    Coord: Ord,
-{
+impl PartialOrd for dyn Operation + '_ {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.get_piece().cmp(&other.get_piece()).then_with(|| {
             self.get_rotate().cmp(&other.get_rotate()).then_with(|| {
@@ -60,12 +46,7 @@ where
 }
 
 // Porting note: moved from OperationInterpreter
-impl<Coord> Display for dyn Operation<Coord> + '_
-where
-    u32: From<Coord>,
-    u64: From<Coord>,
-    Coord: Display,
-{
+impl Display for dyn Operation + '_ {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -87,8 +68,8 @@ mod tests {
     };
 
     fn test_operations(
-        operation1: &dyn Operation<u8>,
-        operation2: &dyn Operation<u8>,
+        operation1: &dyn Operation,
+        operation2: &dyn Operation,
     ) -> Option<std::cmp::Ordering> {
         operation1.partial_cmp(operation2)
     }

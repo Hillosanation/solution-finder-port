@@ -5,7 +5,7 @@ use crate::{
     sfinder_core::field::{field::Field, field_constants::FIELD_WIDTH, field_factory},
 };
 
-pub trait MinoOperationWithKey: OperationWithKey<u8> + MinoOperation<u8> {
+pub trait MinoOperationWithKey: OperationWithKey + MinoOperation {
     fn default_hash(&self) -> u32 {
         let mut result = u32::from(self.get_y());
         result = FIELD_WIDTH as u32 * result + u32::from(self.get_x());

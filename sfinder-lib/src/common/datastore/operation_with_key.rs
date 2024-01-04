@@ -2,12 +2,7 @@ use super::operation::Operation;
 use crate::sfinder_core::field::key_operators;
 use std::fmt::Display;
 
-pub trait OperationWithKey<Coord>: Operation<Coord>
-where
-    u32: From<Coord>,
-    u64: From<Coord>,
-    Coord: Display,
-{
+pub trait OperationWithKey: Operation {
     fn get_using_key(&self) -> u64;
 
     fn get_need_deleted_key(&self) -> u64;
@@ -26,7 +21,7 @@ where
     }
 }
 
-impl Display for dyn OperationWithKey<u8> + '_ {
+impl Display for dyn OperationWithKey + '_ {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {
             // Porting note: the alternate formatting replaces parseToStringSimple

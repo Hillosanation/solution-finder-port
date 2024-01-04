@@ -39,7 +39,7 @@ const KEY_MASKS: [u64; 25] = [
 ];
 
 // y行上のブロックは対象に含まない
-// TODO: Make a better type wrapper for Keys
+// TODO(#7): Make a better type wrapper for Keys
 /// Crashes if y > 24
 pub const fn get_mask_for_key_below_y(y: u8) -> u64 {
     KEY_MASKS[y as usize]
