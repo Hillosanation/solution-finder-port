@@ -32,6 +32,7 @@ impl BlockField {
             .merge(field);
     }
 
+    // TODO: Some weird lifetime thing happens if you use Option<&dyn Field> where it assumes the reference must be 'static
     pub fn get(&self, piece: Piece) -> Option<&Box<dyn Field>> {
         self.map[piece as usize].as_ref()
     }

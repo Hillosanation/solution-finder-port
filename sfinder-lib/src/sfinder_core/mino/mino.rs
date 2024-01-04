@@ -133,7 +133,7 @@ impl Mino {
         assert!(x < FIELD_WIDTH);
         assert!(-4 < y && y < 8);
 
-        let slide = (x as i8 - MASK_CENTER_X) + (y as i8 - MASK_CENTER_Y) * FIELD_WIDTH as i8;
+        let slide = (x as i8 - MASK_CENTER_X) + (y - MASK_CENTER_Y) * FIELD_WIDTH as i8;
         if slide >= 0 {
             self.mask << slide
         } else {

@@ -8,10 +8,10 @@ pub const fn repeat_rows(row_mask: u64) -> u64 {
     }
     row_mask
         | row_mask << FIELD_WIDTH
-        | row_mask << 2 * FIELD_WIDTH
-        | row_mask << 3 * FIELD_WIDTH
-        | row_mask << 4 * FIELD_WIDTH
-        | row_mask << 5 * FIELD_WIDTH
+        | row_mask << (2 * FIELD_WIDTH)
+        | row_mask << (3 * FIELD_WIDTH)
+        | row_mask << (4 * FIELD_WIDTH)
+        | row_mask << (5 * FIELD_WIDTH)
 }
 
 // Note this is the same as the first entries in KEY_MASKS by coincidence
