@@ -106,9 +106,9 @@ pub fn parse_to_operations(
     Operations::from_vec(operations)
 }
 
-pub fn parse_to_block_field<'a>(
+pub fn parse_to_block_field(
     operation_with_keys: &[impl MinoOperationWithKey],
-    mino_factory: &'a MinoFactory,
+    mino_factory: &MinoFactory,
     height: u8,
 ) -> BlockField {
     let mut block_field = BlockField::new(height);
