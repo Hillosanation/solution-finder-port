@@ -15,7 +15,7 @@ use crate::{
 
 // List<OperationWithKey>に変換する。正しく組み立てられるかはチェックしない
 // Porting note: replaces parseToOperationWithKeys
-pub fn parse_to_operations_with_key<'a, O: Operation<u8>>(
+pub fn parse_to_operations_with_key<'a, O: Operation>(
     field_origin: &'a dyn Field,
     operations: &'a Operations<O>,
     mino_factory: &'a MinoFactory,
@@ -138,7 +138,7 @@ pub fn parse_to_field(
 }
 
 // 最も低いブロックのy座標を取得
-pub fn get_min_y(mino_factory: &MinoFactory, operations_list: &[impl Operation<u8>]) -> Option<u8> {
+pub fn get_min_y(mino_factory: &MinoFactory, operations_list: &[impl Operation]) -> Option<u8> {
     operations_list
         .iter()
         .map(|operation| {
@@ -149,7 +149,7 @@ pub fn get_min_y(mino_factory: &MinoFactory, operations_list: &[impl Operation<u
 }
 
 // 最も高いブロックのy座標を取得
-pub fn get_max_y(mino_factory: &MinoFactory, operations_list: &[impl Operation<u8>]) -> Option<u8> {
+pub fn get_max_y(mino_factory: &MinoFactory, operations_list: &[impl Operation]) -> Option<u8> {
     operations_list
         .iter()
         .map(|operation| {
@@ -167,7 +167,7 @@ mod tests {
         sfinder_core::{mino::piece::Piece, srs::rotate::Rotate},
     };
 
-    fn assert_operations_with_put<O: Operation<u8>>(
+    fn assert_operations_with_put<O: Operation>(
         mino_factory: &MinoFactory,
         init_field: &dyn Field,
         operations: &Operations<O>,
@@ -201,7 +201,7 @@ mod tests {
         assert_eq!(&f2, expected);
     }
 
-    fn assert_operations<O: Operation<u8>>(
+    fn assert_operations<O: Operation>(
         mino_factory: &MinoFactory,
         init_field: &dyn Field,
         operations: &Operations<O>,

@@ -66,7 +66,7 @@ impl<'a> FullOperationWithKey<'a> {
     }
 }
 
-impl Action<u8> for FullOperationWithKey<'_> {
+impl Action for FullOperationWithKey<'_> {
     fn get_x(&self) -> u8 {
         self.x
     }
@@ -80,19 +80,19 @@ impl Action<u8> for FullOperationWithKey<'_> {
     }
 }
 
-impl Operation<u8> for FullOperationWithKey<'_> {
+impl Operation for FullOperationWithKey<'_> {
     fn get_piece(&self) -> Piece {
         self.mino.get_piece()
     }
 }
 
-impl MinoOperation<u8> for FullOperationWithKey<'_> {
+impl MinoOperation for FullOperationWithKey<'_> {
     fn get_mino(&self) -> &Mino {
         self.mino
     }
 }
 
-impl OperationWithKey<u8> for FullOperationWithKey<'_> {
+impl OperationWithKey for FullOperationWithKey<'_> {
     fn get_need_deleted_key(&self) -> u64 {
         self.need_deleted_key
     }
@@ -120,6 +120,6 @@ impl PartialEq for FullOperationWithKey<'_> {
 
 impl Display for FullOperationWithKey<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self as &dyn OperationWithKey<u8>)
+        write!(f, "{}", self as &dyn OperationWithKey)
     }
 }

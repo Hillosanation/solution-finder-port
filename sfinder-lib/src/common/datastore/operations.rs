@@ -3,14 +3,14 @@ use crate::extras::hash_code::HashCode;
 use std::{convert::Infallible, fmt::Display, str::FromStr};
 
 #[derive(Debug, PartialEq, PartialOrd)]
-pub struct Operations<O: Operation<u8>> {
+pub struct Operations<O: Operation> {
     // Porting note: I don't think you need to accomodate for each operation being a different concrete type.
     // In practive, Operations should be getting a vec of operations that are of the same concrete type, we just don't know which one.
     // TODO: check this
     operations: Vec<O>,
 }
 
-impl<O: Operation<u8>> Operations<O> {
+impl<O: Operation> Operations<O> {
     pub fn from_vec(operations: Vec<O>) -> Self {
         Self { operations }
     }
@@ -20,7 +20,7 @@ impl<O: Operation<u8>> Operations<O> {
     }
 }
 
-impl<O: Operation<u8>> FromIterator<O> for Operations<O> {
+impl<O: Operation> FromIterator<O> for Operations<O> {
     fn from_iter<I: IntoIterator<Item = O>>(iter: I) -> Self {
         Self {
             operations: iter.into_iter().collect(),
@@ -28,7 +28,7 @@ impl<O: Operation<u8>> FromIterator<O> for Operations<O> {
     }
 }
 
-impl<T, O: Operation<u8> + HashCode<Output = T>> HashCode for Operations<O>
+impl<T, O: Operation + HashCode<Output = T>> HashCode for Operations<O>
 where
     u32: std::ops::Add<T, Output = u32>,
 {
@@ -44,7 +44,7 @@ where
 }
 
 // Porting note: moved from OperationInterpreter
-impl<O: Operation<u8> + Display> Display for Operations<O> {
+impl<O: Operation + Display> Display for Operations<O> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,

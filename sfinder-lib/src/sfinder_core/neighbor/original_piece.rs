@@ -68,7 +68,7 @@ impl<'a> OriginalPiece<'a> {
     }
 }
 
-impl Action<u8> for OriginalPiece<'_> {
+impl Action for OriginalPiece<'_> {
     fn get_x(&self) -> u8 {
         self.operation_with_key.get_x()
     }
@@ -82,19 +82,19 @@ impl Action<u8> for OriginalPiece<'_> {
     }
 }
 
-impl Operation<u8> for OriginalPiece<'_> {
+impl Operation for OriginalPiece<'_> {
     fn get_piece(&self) -> crate::sfinder_core::mino::piece::Piece {
         self.operation_with_key.get_piece()
     }
 }
 
-impl MinoOperation<u8> for OriginalPiece<'_> {
+impl MinoOperation for OriginalPiece<'_> {
     fn get_mino(&self) -> &Mino {
         self.operation_with_key.get_mino()
     }
 }
 
-impl OperationWithKey<u8> for OriginalPiece<'_> {
+impl OperationWithKey for OriginalPiece<'_> {
     fn get_using_key(&self) -> u64 {
         self.operation_with_key.get_using_key()
     }

@@ -26,7 +26,7 @@ impl SimpleOperation {
     }
 }
 
-impl Action<u8> for SimpleOperation {
+impl Action for SimpleOperation {
     fn get_x(&self) -> u8 {
         self.x
     }
@@ -40,7 +40,7 @@ impl Action<u8> for SimpleOperation {
     }
 }
 
-impl Operation<u8> for SimpleOperation {
+impl Operation for SimpleOperation {
     fn get_piece(&self) -> Piece {
         self.piece
     }
@@ -56,13 +56,13 @@ impl HashCode for SimpleOperation {
 
 impl PartialEq for SimpleOperation {
     fn eq(&self, other: &Self) -> bool {
-        (self as &dyn Operation<u8>).eq(other)
+        (self as &dyn Operation).eq(other)
     }
 }
 
 impl PartialOrd for SimpleOperation {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        (self as &dyn Operation<u8>).partial_cmp(other)
+        (self as &dyn Operation).partial_cmp(other)
     }
 }
 
@@ -86,7 +86,7 @@ impl FromStr for SimpleOperation {
 
 impl Display for SimpleOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self as &dyn Operation<u8>)
+        write!(f, "{}", self as &dyn Operation)
     }
 }
 
@@ -129,11 +129,11 @@ mod tests {
     #[test]
     #[rustfmt::skip]
     fn test_compare_to() {
-        let binding = Box::new(SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 5)) as Box<dyn Operation<u8>>;
+        let binding = Box::new(SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 5)) as Box<dyn Operation>;
         let operation1 = binding.as_ref();
-        let operation2 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 5) as &dyn Operation<u8>;
-        let operation3 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 13) as &dyn Operation<u8>;
-        let operation4 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 5, 13) as &dyn Operation<u8>;
+        let operation2 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 5) as &dyn Operation;
+        let operation3 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 4, 13) as &dyn Operation;
+        let operation4 = &SimpleOperation::new(Piece::T, Rotate::Spawn, 5, 13) as &dyn Operation;
 
         assert_eq!(operation1, operation2);
         assert_ne!(operation1, operation3);
