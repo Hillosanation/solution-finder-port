@@ -13,7 +13,6 @@ use crate::{
 };
 use std::fmt::{Debug, Display};
 
-// TODO: the lifetime of Mino should be static, elide this lifetime
 #[derive(Debug)]
 pub struct FullOperationWithKey<'m> {
     mino: &'m Mino,

@@ -9,7 +9,7 @@ use crate::{
 use dyn_clone::DynClone;
 use std::fmt::Debug;
 
-// TODO: add translated documentation
+// TODO(#8): add translated documentation
 // Porting note: Altered the naming convention to: no suffix for Mino, -block for xy coordinates, -piece for OriginalPiece
 // Each field is split into multiple bitboards in its internal representation.
 // Rather than keeping the unused bits in a board unset, it is at an unknown state and must be masked off before being shifted into VALID_BOARD_RANGE.
@@ -23,7 +23,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
     // 6列分のフィールドを表現するボードの個数を返却
     fn get_board_count(&self) -> BoardCount;
 
-    // TODO: Bundle coordinates with Coordinate struct
+    // TODO(#9): Bundle coordinates with Coordinate struct
     // 指定した位置にブロックをおく
     fn set_block(&mut self, x: u8, y: u8);
 
@@ -129,7 +129,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
         self.clear_filled_rows_return_key().count_ones()
     }
 
-    // TODO: wrap in newtype for functions that return a Key representing the cleared rows
+    // TODO(#7): wrap in newtype for functions that return a Key representing the cleared rows
 
     // Porting note: replaces clearLineReturnKey
     // ブロックがそろった行を削除し、削除した行を表すマスクを返却

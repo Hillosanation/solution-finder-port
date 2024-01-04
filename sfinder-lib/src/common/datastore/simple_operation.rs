@@ -5,7 +5,7 @@ use crate::{
 };
 use std::{convert::Infallible, fmt::Display, str::FromStr};
 
-// TODO: merge with MinoOperation?
+// TODO(#9): merge with MinoOperation?
 // Porting note: This doesn't check if the operation is valid.
 #[derive(Clone, Debug)]
 pub struct SimpleOperation {
