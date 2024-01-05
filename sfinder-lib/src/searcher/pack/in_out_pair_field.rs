@@ -44,7 +44,7 @@ impl InOutPairField {
         }
 
         // 対応部分にブロックがひとつでもないときは、Outerからブロックを削除
-        for start_x in width..FIELD_WIDTH {
+        for start_x in (width..FIELD_WIDTH).step_by(width as usize) {
             for y in 0..height {
                 for x in 0..3 {
                     let x1 = start_x + x;
@@ -239,5 +239,224 @@ mod tests {
             fields.iter().map(|f| f.get_outer()).collect::<Vec<_>>(),
             vec![&outer_field1, &outer_field2, &outer_field3]
         );
+    }
+
+    #[test]
+    fn create_in_out_pair_fields2x5() {
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "____X___X_"
+                + "___X___XX_"
+                + "__X___XX_X"
+                + "_X___XX__X"
+                + "X____X___X",
+        );
+
+        let sized_bit = SizedBit::new(2, 5);
+
+        // Create pairs
+        let fields = InOutPairField::create_in_out_pair_fields(&sized_bit, field.as_ref());
+        assert_eq!(fields.len(), 4);
+
+        // Check inner
+        #[rustfmt::skip]
+        let inner_field1 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "__"
+                + "__"
+                + "__"
+                + "_X"
+                + "X_",
+            5,
+        );
+        #[rustfmt::skip]
+        let inner_field2 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "__"
+                + "_X"
+                + "X_"
+                + "__"
+                + "__",
+            5,
+        );
+        #[rustfmt::skip]
+        let inner_field3 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "X_"
+                + "__"
+                + "__"
+                + "_X"
+                + "_X",
+            5,
+        );
+        #[rustfmt::skip]
+        let inner_field4 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "__"
+                + "_X"
+                + "XX"
+                + "X_"
+                + "__",
+            5,
+        );
+
+        assert_eq!(
+            fields.iter().map(|f| f.get_inner()).collect::<Vec<_>>(),
+            vec![&inner_field1, &inner_field2, &inner_field3, &inner_field4]
+        );
+
+        // Check outer
+        #[rustfmt::skip]
+        let outer_field1 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "_____"
+                + "___X_"
+                + "__X__"
+                + "_____"
+                + "_____",
+            5,
+        );
+        #[rustfmt::skip]
+        let outer_field2 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "__X__"
+                + "_____"
+                + "_____"
+                + "___X_"
+                + "___X_",
+            5,
+        );
+        #[rustfmt::skip]
+        let outer_field3 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "_____"
+                + "___X_"
+                + "__XX_"
+                + "__X__"
+                + "_____",
+            5,
+        );
+        #[rustfmt::skip]
+        let outer_field4 = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "__X_X"
+                + "__X_X"
+                + "___XX"
+                + "___XX"
+                + "___XX",
+            5,
+        );
+
+        assert_eq!(
+            fields.iter().map(|f| f.get_outer()).collect::<Vec<_>>(),
+            vec![&outer_field1, &outer_field2, &outer_field3, &outer_field4]
+        );
+    }
+
+    #[test]
+    fn create_max_outer_board3x4() {
+        #[rustfmt::skip]
+        let field = field_factory::create_field_with_marks(
+            String::new()
+            + "___X__X_XX"
+            + "__X__XXXX_"
+            + "_X__XX_XX_"
+            + "X___X__X_X",
+        );
+        let sized_bit = SizedBit::new(3, 4);
+
+        let max_outer_board = InOutPairField::create_max_outer_board(&sized_bit, field.as_ref());
+        #[rustfmt::skip]
+        let expects = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "___X__"
+                + "_____X"
+                + "____XX"
+                + "____X_",
+            4,
+        );
+
+        assert_eq!(max_outer_board, expects);
+    }
+
+    #[test]
+    fn create_max_outer_board3x4_2() {
+        #[rustfmt::skip]
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "___X__X_X_"
+                + "__X__XXXX_"
+                + "_X__XX_XX_"
+                + "X___X__X_X",
+        );
+        let sized_bit = SizedBit::new(3, 4);
+
+        let max_outer_board = InOutPairField::create_max_outer_board(&sized_bit, field.as_ref());
+        #[rustfmt::skip]
+        let expects = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "______"
+                + "_____X"
+                + "____XX"
+                + "____X_",
+            4,
+        );
+
+        assert_eq!(max_outer_board, expects);
+    }
+
+    #[test]
+    fn create_max_outer_board2x5() {
+        #[rustfmt::skip]
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "____X___X_"
+                + "___X___XX_"
+                + "__X___XX_X"
+                + "_X___XX__X"
+                + "X____X___X",
+        );
+        let sized_bit = SizedBit::new(2, 5);
+
+        let max_outer_board = InOutPairField::create_max_outer_board(&sized_bit, field.as_ref());
+        #[rustfmt::skip]
+        let expects = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "_____"
+                + "_____"
+                + "_____"
+                + "_____"
+                + "_____",
+            5,
+        );
+
+        assert_eq!(max_outer_board, expects);
+    }
+
+    #[test]
+    fn create_max_outer_board2x5_2() {
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "___XX_XXXX"
+                + "XXXXX_XXXX"
+                + "_XXX_XXX_X"
+                + "__XXXXXXXX"
+                + "X_XXXXXXXX",
+        );
+        let sized_bit = SizedBit::new(2, 5);
+
+        let max_outer_board = InOutPairField::create_max_outer_board(&sized_bit, field.as_ref());
+        #[rustfmt::skip]
+        let expects = column_field_factory::create_small_field_with_marks(
+            String::new()
+                + "____X"
+                + "__X_X"
+                + "___X_"
+                + "__XXX"
+                + "__XXX",
+            5,
+        );
+
+        assert_eq!(max_outer_board, expects);
     }
 }

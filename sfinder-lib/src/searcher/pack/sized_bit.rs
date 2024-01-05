@@ -1,4 +1,4 @@
-// Porting note: In normal use only the sizes 4x3 and 5x2 are used, but in testing other sizes are used.
+// Porting note: In normal use only the sizes 3x4 and 2x5 are used, but in testing other sizes are used.
 // This is just Plain Old Data, so no need for accessors, just don't mutate them
 #[derive(Debug, Clone)]
 pub struct SizedBit {
