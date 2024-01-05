@@ -9,7 +9,6 @@ use crate::sfinder_core::{
 pub struct InOutPairField {
     // Porting note: All constructors use ColumnSmallField, so just store them directly
     inner: ColumnSmallField,
-    // the first `width` columns are always empty in the outer field
     outer: ColumnSmallField,
 }
 
@@ -47,10 +46,10 @@ impl InOutPairField {
         // 対応部分にブロックがひとつでもないときは、Outerからブロックを削除
         for start_x in (width..FIELD_WIDTH).step_by(width as usize) {
             for y in 0..height {
-                for x in start_x..(start_x + 3).min(FIELD_WIDTH) {
-                    if init_field.is_empty_block(x, y) {
-                        let x_off = x - start_x;
-                        max_outer_board.remove_block(width + x_off, y, height);
+                for x in 0..3 {
+                    let x1 = start_x + x;
+                    if x1 < FIELD_WIDTH && init_field.is_empty_block(x1, y) {
+                        max_outer_board.remove_block(width + x, y, height);
                     }
                 }
             }
@@ -68,10 +67,7 @@ impl InOutPairField {
 
         let mut field = init_field.prune(height);
         for _ in 0..max - 1 {
-            pairs.push(Self::new(
-                Self::read_to_column_field(field.as_ref(), width, height, 0, false),
-                Self::read_to_column_field(field.as_ref(), width, height, width, false),
-            ));
+            pairs.push(Self::parse(field.as_ref(), width, height));
             field.slide_left(width);
         }
 
@@ -81,26 +77,49 @@ impl InOutPairField {
             }
         }
 
-        pairs.push(Self::new(
-            Self::read_to_column_field(field.as_ref(), width, height, 0, false),
-            Self::read_to_column_field(field.as_ref(), 3, height, width, false),
-        ));
+        pairs.push(Self::parse_last(field.as_ref(), width, height));
 
         pairs
     }
 
     fn parse(field: &dyn Field, width: u8, height: u8) -> Self {
-        Self::new(
-            Self::read_to_column_field(field, width, height, 0, false),
-            Self::read_to_column_field(field, width, height, width, false),
-        )
+        let mut inner = column_field_factory::create_small_field();
+        let mut outer = column_field_factory::create_small_field();
+
+        for y in 0..height {
+            for x in 0..width {
+                if field.exists_block(x, y) {
+                    inner.set_block(x, y, height);
+                }
+            }
+            for x in width..width * 2 {
+                if field.exists_block(x, y) {
+                    outer.set_block(x, y, height);
+                }
+            }
+        }
+
+        Self::new(inner, outer)
     }
 
     fn parse_last(field: &dyn Field, width: u8, height: u8) -> Self {
-        Self::new(
-            Self::read_to_column_field(field, width, height, 0, false),
-            Self::read_to_column_field(field, 3, height, width, false),
-        )
+        let mut inner = column_field_factory::create_small_field();
+        let mut outer = column_field_factory::create_small_field();
+
+        for y in 0..height {
+            for x in 0..width {
+                if field.exists_block(x, y) {
+                    inner.set_block(x, y, height);
+                }
+            }
+            for x in width..width + 3 {
+                if field.exists_block(x, y) {
+                    outer.set_block(x, y, height);
+                }
+            }
+        }
+
+        Self::new(inner, outer)
     }
 
     pub fn create_inner_fields(
@@ -110,43 +129,24 @@ impl InOutPairField {
         let width = sized_bit.width;
         let height = sized_bit.height;
         let max = 9 / width + 1;
-        let mut fields = Vec::with_capacity(max as usize);
+        let mut fields = Vec::new();
 
         let mut field = init_field.prune(height);
         for _ in 0..max {
-            fields.push(Self::read_to_column_field(
-                init_field, width, height, 0, false,
-            ));
+            let mut inner_field = column_field_factory::create_small_field();
+            for y in 0..height {
+                for x in 0..width {
+                    if field.exists_block(x, y) {
+                        inner_field.set_block(x, y, height);
+                    }
+                }
+            }
+
+            fields.push(inner_field);
             field.slide_left(width);
         }
 
         fields
-    }
-
-    fn read_to_column_field(
-        field: &dyn Field,
-        width: u8,
-        height: u8,
-        offset: u8,
-        fill_out_of_bounds: bool,
-    ) -> ColumnSmallField {
-        let mut column_field = column_field_factory::create_small_field();
-
-        for y in 0..height {
-            for x in 0..width {
-                let actual_x = x + offset;
-                // we need to do the bounds checking ourselves
-                if actual_x >= FIELD_WIDTH {
-                    if fill_out_of_bounds {
-                        column_field.set_block(actual_x, y, height);
-                    }
-                } else if field.exists_block(actual_x, y) {
-                    column_field.set_block(actual_x, y, height);
-                }
-            }
-        }
-
-        column_field
     }
 }
 
