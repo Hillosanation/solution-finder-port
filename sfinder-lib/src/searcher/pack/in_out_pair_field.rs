@@ -6,6 +6,7 @@ use crate::sfinder_core::{
     field::{field::Field, field_constants::FIELD_WIDTH},
 };
 
+#[derive(Debug, PartialEq)]
 pub struct InOutPairField {
     // Porting note: All constructors use ColumnSmallField, so just store them directly
     inner: ColumnSmallField,
@@ -83,43 +84,38 @@ impl InOutPairField {
     }
 
     fn parse(field: &dyn Field, width: u8, height: u8) -> Self {
-        let mut inner = column_field_factory::create_small_field();
-        let mut outer = column_field_factory::create_small_field();
-
-        for y in 0..height {
-            for x in 0..width {
-                if field.exists_block(x, y) {
-                    inner.set_block(x, y, height);
-                }
-            }
-            for x in width..width * 2 {
-                if field.exists_block(x, y) {
-                    outer.set_block(x, y, height);
-                }
-            }
-        }
-
-        Self::new(inner, outer)
+        Self::new(
+            Self::read_to_column_field(
+                field,
+                &SizedBit::new(width, height),
+                width,
+                0,
+                false,
+                false,
+            ),
+            Self::read_to_column_field(
+                field,
+                &SizedBit::new(width, height),
+                width,
+                width,
+                true,
+                false,
+            ),
+        )
     }
 
     fn parse_last(field: &dyn Field, width: u8, height: u8) -> Self {
-        let mut inner = column_field_factory::create_small_field();
-        let mut outer = column_field_factory::create_small_field();
-
-        for y in 0..height {
-            for x in 0..width {
-                if field.exists_block(x, y) {
-                    inner.set_block(x, y, height);
-                }
-            }
-            for x in width..width + 3 {
-                if field.exists_block(x, y) {
-                    outer.set_block(x, y, height);
-                }
-            }
-        }
-
-        Self::new(inner, outer)
+        Self::new(
+            Self::read_to_column_field(
+                field,
+                &SizedBit::new(width, height),
+                width,
+                0,
+                false,
+                false,
+            ),
+            Self::read_to_column_field(field, &SizedBit::new(width, height), 3, width, true, true),
+        )
     }
 
     pub fn create_inner_fields(
@@ -133,20 +129,47 @@ impl InOutPairField {
 
         let mut field = init_field.prune(height);
         for _ in 0..max {
-            let mut inner_field = column_field_factory::create_small_field();
-            for y in 0..height {
-                for x in 0..width {
-                    if field.exists_block(x, y) {
-                        inner_field.set_block(x, y, height);
-                    }
-                }
-            }
+            let inner_field =
+                Self::read_to_column_field(field.as_ref(), sized_bit, width, 0, false, false);
 
             fields.push(inner_field);
             field.slide_left(width);
         }
 
         fields
+    }
+
+    fn read_to_column_field(
+        field: &dyn Field,
+        sized_bit: &SizedBit,
+        column_size: u8,
+        offset: u8,
+        outer_padding: bool,
+        fill_out_of_bounds: bool,
+    ) -> ColumnSmallField {
+        let width = sized_bit.width;
+        let height = sized_bit.height;
+
+        let mut column_field = column_field_factory::create_small_field();
+
+        for y in 0..height {
+            for x in 0..column_size {
+                let actual_x = x + offset;
+                if actual_x >= FIELD_WIDTH && fill_out_of_bounds
+                // we need to do the bounds checking ourselves
+                    || actual_x < FIELD_WIDTH && field.exists_block(actual_x, y)
+                {
+                    if outer_padding {
+                        // dbg!(("actual", width + x, y));
+                        column_field.set_block(width + x, y, height);
+                    } else {
+                        column_field.set_block(x, y, height);
+                    }
+                }
+            }
+        }
+
+        column_field
     }
 }
 
