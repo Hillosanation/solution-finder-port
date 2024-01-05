@@ -9,7 +9,7 @@ pub struct SizedBit {
 }
 
 impl SizedBit {
-    const fn new(width: u8, height: u8) -> Self {
+    pub const fn new(width: u8, height: u8) -> Self {
         let max_bit_digit = width * height;
         let fill_board = (1 << max_bit_digit) - 1;
 
