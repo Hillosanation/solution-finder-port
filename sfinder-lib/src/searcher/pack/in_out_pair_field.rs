@@ -61,42 +61,32 @@ impl InOutPairField {
 
     pub fn create_in_out_pair_fields(sized_bit: &SizedBit, init_field: &dyn Field) -> Vec<Self> {
         let width = sized_bit.width;
-        let height = sized_bit.height;
+        // let height = sized_bit.height;
         let max = 9 / width;
 
         let mut pairs = Vec::with_capacity(max as usize);
 
-        let mut field = init_field.prune(height);
-        for _ in 0..max - 1 {
-            pairs.push(Self::parse(field.as_ref(), width, height));
-            field.slide_left(width);
+        // let mut field = init_field.prune(height);
+        for i in 0..max - 1 {
+            pairs.push(Self::new(
+                Self::read_to_inner_field(init_field, &sized_bit, i * width + 0),
+                Self::read_to_outer_field(init_field, &sized_bit, width, i * width + width),
+            ));
         }
 
-        for y in 0..height {
-            for x in FIELD_WIDTH - (width * (max - 1))..width + 3 {
-                field.set_block(x, y);
-            }
-        }
+        // field.slide_left(width * (max - 1));
+        // for y in 0..height {
+        //     for x in FIELD_WIDTH - (width * (max - 1))..width + 3 {
+        //         field.set_block(x, y);
+        //     }
+        // }
 
-        pairs.push(Self::parse_last(field.as_ref(), width, height));
+        pairs.push(Self::new(
+            Self::read_to_inner_field(init_field, &sized_bit, width * (max - 1) + 0),
+            Self::read_to_outer_field(init_field, &sized_bit, 3, width * (max - 1) + width),
+        ));
 
         pairs
-    }
-
-    fn parse(field: &dyn Field, width: u8, height: u8) -> Self {
-        let sized_bit = SizedBit::new(width, height);
-        Self::new(
-            Self::read_to_inner_field(field, &sized_bit, 0),
-            Self::read_to_outer_field(field, &sized_bit, width, width),
-        )
-    }
-
-    fn parse_last(field: &dyn Field, width: u8, height: u8) -> Self {
-        let sized_bit = SizedBit::new(width, height);
-        Self::new(
-            Self::read_to_inner_field(field, &sized_bit, 0),
-            Self::read_to_outer_field(field, &sized_bit, 3, width),
-        )
     }
 
     pub fn create_inner_fields(
@@ -104,19 +94,10 @@ impl InOutPairField {
         init_field: &dyn Field,
     ) -> Vec<ColumnSmallField> {
         let width = sized_bit.width;
-        let height = sized_bit.height;
-        let max = 9 / width + 1;
-        let mut fields = Vec::new();
 
-        let mut field = init_field.prune(height);
-        for _ in 0..max {
-            let inner_field = Self::read_to_inner_field(field.as_ref(), sized_bit, 0);
-
-            fields.push(inner_field);
-            field.slide_left(width);
-        }
-
-        fields
+        (0..(9 / width + 1))
+            .map(|i| Self::read_to_inner_field(init_field, &sized_bit, i * width))
+            .collect()
     }
 
     fn read_to_inner_field(
