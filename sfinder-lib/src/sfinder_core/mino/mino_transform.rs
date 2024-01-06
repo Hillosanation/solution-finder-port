@@ -32,7 +32,6 @@ impl MinoTransform {
 
     pub fn set(&mut self, rotate: Rotate, offset_x: i8, offset_y: i8, new_rotate: Rotate) {
         let index = rotate as usize;
-        assert_eq!(self.rotates.len(), index);
 
         self.offsets[index] = Coordinate::new(offset_x, offset_y);
         self.rotates[index] = new_rotate;
