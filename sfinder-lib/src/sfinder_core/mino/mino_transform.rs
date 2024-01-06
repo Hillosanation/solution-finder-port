@@ -1,15 +1,11 @@
 //! Helper struct for MinoShifter
 
-use super::mino_factory::MinoFactory;
 use crate::{
-    common::datastore::{
-        action::minimal_action::MinimalAction, coordinate::Coordinate,
-        mino_operation::MinoOperation, simple_mino_operation::SimpleMinoOperation,
-    },
-    sfinder_core::{field::field_constants::FIELD_WIDTH, srs::rotate::Rotate},
+    common::datastore::{action::minimal_action::MinimalAction, coordinate::Coordinate},
+    sfinder_core::srs::rotate::Rotate,
 };
 
-#[derive(Debug)]
+// #[derive(Debug)]
 pub struct MinoTransform {
     offsets: Vec<Coordinate>,
     rotates: Vec<Rotate>,
