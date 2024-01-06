@@ -13,7 +13,7 @@ use crate::{
 };
 use std::fmt::{Debug, Display};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FullOperationWithKey<'m> {
     mino: &'m Mino,
     x: u8,
