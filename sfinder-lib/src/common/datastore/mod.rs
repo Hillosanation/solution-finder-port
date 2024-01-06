@@ -8,4 +8,5 @@ pub mod mino_operation_with_key;
 pub mod operation;
 pub mod operation_with_key;
 pub mod operations;
+pub mod simple_mino_operation;
 pub mod simple_operation;
