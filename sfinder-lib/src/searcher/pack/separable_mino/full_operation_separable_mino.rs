@@ -9,7 +9,7 @@ use crate::{
         column_field::{
             column_field::ColumnField, column_field_factory, column_small_field::ColumnSmallField,
         },
-        field::{field::Field, field_factory},
+        field::field::Field,
     },
 };
 
