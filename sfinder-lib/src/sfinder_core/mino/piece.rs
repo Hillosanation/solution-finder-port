@@ -100,6 +100,16 @@ impl Piece {
     pub fn max_y(self) -> i8 {
         MINMAX_MAP[self as usize].max_y
     }
+
+    pub const fn mirror(self) -> Self {
+        match self {
+            Piece::J => Piece::L,
+            Piece::L => Piece::J,
+            Piece::S => Piece::Z,
+            Piece::Z => Piece::S,
+            _ => self,
+        }
+    }
 }
 
 impl HashCode for Piece {

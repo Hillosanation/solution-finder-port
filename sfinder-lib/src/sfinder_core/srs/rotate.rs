@@ -80,6 +80,14 @@ impl Rotate {
             Rotate::Left => Rotate::Right,
         }
     }
+
+    pub fn mirror(self) -> Self {
+        match self {
+            Rotate::Right => Rotate::Left,
+            Rotate::Left => Rotate::Right,
+            _ => self,
+        }
+    }
 }
 
 impl HashCode for Rotate {

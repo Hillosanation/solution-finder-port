@@ -1,3 +1,4 @@
 pub mod mino;
-pub mod piece;
 pub mod mino_factory;
+pub mod mino_transform;
+pub mod piece;
