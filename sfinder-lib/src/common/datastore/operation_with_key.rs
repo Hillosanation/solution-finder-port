@@ -21,6 +21,43 @@ pub trait OperationWithKey: Operation {
     }
 }
 
+impl PartialEq for dyn OperationWithKey + '_ {
+    fn eq(&self, other: &Self) -> bool {
+        self.get_piece() == other.get_piece()
+            && self.get_rotate() == other.get_rotate()
+            && self.get_x() == other.get_x()
+            && self.get_y() == other.get_y()
+            && self.get_need_deleted_key() == other.get_need_deleted_key()
+    }
+}
+
+impl PartialOrd for dyn OperationWithKey + '_ {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.get_piece().cmp(&other.get_piece()) {
+            std::cmp::Ordering::Equal => {}
+            ordering => return Some(ordering),
+        }
+
+        match self.get_rotate().cmp(&other.get_rotate()) {
+            std::cmp::Ordering::Equal => {}
+            ordering => return Some(ordering),
+        }
+
+        match self.get_x().cmp(&other.get_x()) {
+            std::cmp::Ordering::Equal => {}
+            ordering => return Some(ordering),
+        }
+
+        match self.get_y().cmp(&other.get_y()) {
+            std::cmp::Ordering::Equal => {}
+            ordering => return Some(ordering),
+        }
+
+        self.get_need_deleted_key()
+            .partial_cmp(&other.get_need_deleted_key())
+    }
+}
+
 impl Display for dyn OperationWithKey + '_ {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {

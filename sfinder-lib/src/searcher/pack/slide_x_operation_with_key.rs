@@ -6,6 +6,7 @@ use crate::{
         mino_operation_with_key::MinoOperationWithKey, operation::Operation,
         operation_with_key::OperationWithKey,
     },
+    extras::hash_code::HashCode,
     sfinder_core::mino::mino::Mino,
 };
 
@@ -24,7 +25,7 @@ impl<'a> SlideXOperationWithKey<'a> {
     }
 }
 
-impl<'a> Action for SlideXOperationWithKey<'a> {
+impl Action for SlideXOperationWithKey<'_> {
     fn get_x(&self) -> u8 {
         self.operation_with_key.get_x() + self.slide_x
     }
@@ -38,13 +39,13 @@ impl<'a> Action for SlideXOperationWithKey<'a> {
     }
 }
 
-impl<'a> Operation for SlideXOperationWithKey<'a> {
+impl Operation for SlideXOperationWithKey<'_> {
     fn get_piece(&self) -> crate::sfinder_core::mino::piece::Piece {
         self.operation_with_key.get_piece()
     }
 }
 
-impl<'a> OperationWithKey for SlideXOperationWithKey<'a> {
+impl OperationWithKey for SlideXOperationWithKey<'_> {
     fn get_using_key(&self) -> u64 {
         self.operation_with_key.get_using_key()
     }
@@ -54,17 +55,25 @@ impl<'a> OperationWithKey for SlideXOperationWithKey<'a> {
     }
 }
 
-impl<'a> MinoOperation for SlideXOperationWithKey<'a> {
+impl MinoOperation for SlideXOperationWithKey<'_> {
     fn get_mino(&self) -> &Mino {
         self.operation_with_key.get_mino()
     }
 }
 
-impl<'a> MinoOperationWithKey for SlideXOperationWithKey<'a> {}
+impl MinoOperationWithKey for SlideXOperationWithKey<'_> {}
 
-impl<'a> PartialEq for SlideXOperationWithKey<'a> {
+impl PartialEq for SlideXOperationWithKey<'_> {
     fn eq(&self, other: &Self) -> bool {
         <dyn MinoOperationWithKey>::eq(self, other)
+    }
+}
+
+impl HashCode for SlideXOperationWithKey<'_> {
+    type Output = u32;
+
+    fn hash_code(&self) -> Self::Output {
+        <dyn MinoOperationWithKey>::default_hash(self)
     }
 }
 

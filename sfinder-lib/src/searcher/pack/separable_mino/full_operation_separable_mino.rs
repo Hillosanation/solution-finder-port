@@ -76,3 +76,15 @@ impl SeparableMino for FullOperationSeparableMino<'_> {
         self.field.as_ref()
     }
 }
+
+impl PartialEq for FullOperationSeparableMino<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        <dyn OperationWithKey>::eq(&self.operation, &other.operation)
+    }
+}
+
+impl PartialOrd for FullOperationSeparableMino<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        <dyn OperationWithKey>::partial_cmp(&self.operation, &other.operation)
+    }
+}
