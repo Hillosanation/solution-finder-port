@@ -1,3 +1,5 @@
+// #![feature(test)]
+
 mod common;
 pub mod extras;
 pub mod searcher;
