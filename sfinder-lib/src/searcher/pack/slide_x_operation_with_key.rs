@@ -10,13 +10,13 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub struct SlideXOperationWithKey<Op: MinoOperationWithKey> {
-    operation_with_key: Op,
+pub struct SlideXOperationWithKey<'op> {
+    operation_with_key: &'op dyn MinoOperationWithKey,
     slide_x: u8,
 }
 
-impl<Op: MinoOperationWithKey> SlideXOperationWithKey<Op> {
-    pub fn new(operation_with_key: Op, slide_x: u8) -> Self {
+impl<'a> SlideXOperationWithKey<'a> {
+    pub fn new(operation_with_key: &'a dyn MinoOperationWithKey, slide_x: u8) -> Self {
         Self {
             operation_with_key,
             slide_x,
@@ -24,7 +24,7 @@ impl<Op: MinoOperationWithKey> SlideXOperationWithKey<Op> {
     }
 }
 
-impl<Op: MinoOperationWithKey> Action for SlideXOperationWithKey<Op> {
+impl<'a> Action for SlideXOperationWithKey<'a> {
     fn get_x(&self) -> u8 {
         self.operation_with_key.get_x() + self.slide_x
     }
@@ -38,13 +38,13 @@ impl<Op: MinoOperationWithKey> Action for SlideXOperationWithKey<Op> {
     }
 }
 
-impl<Op: MinoOperationWithKey> Operation for SlideXOperationWithKey<Op> {
+impl<'a> Operation for SlideXOperationWithKey<'a> {
     fn get_piece(&self) -> crate::sfinder_core::mino::piece::Piece {
         self.operation_with_key.get_piece()
     }
 }
 
-impl<Op: MinoOperationWithKey> OperationWithKey for SlideXOperationWithKey<Op> {
+impl<'a> OperationWithKey for SlideXOperationWithKey<'a> {
     fn get_using_key(&self) -> u64 {
         self.operation_with_key.get_using_key()
     }
@@ -54,15 +54,15 @@ impl<Op: MinoOperationWithKey> OperationWithKey for SlideXOperationWithKey<Op> {
     }
 }
 
-impl<Op: MinoOperationWithKey> MinoOperation for SlideXOperationWithKey<Op> {
+impl<'a> MinoOperation for SlideXOperationWithKey<'a> {
     fn get_mino(&self) -> &Mino {
         self.operation_with_key.get_mino()
     }
 }
 
-impl<Op: MinoOperationWithKey> MinoOperationWithKey for SlideXOperationWithKey<Op> {}
+impl<'a> MinoOperationWithKey for SlideXOperationWithKey<'a> {}
 
-impl<Op: MinoOperationWithKey> PartialEq for SlideXOperationWithKey<Op> {
+impl<'a> PartialEq for SlideXOperationWithKey<'a> {
     fn eq(&self, other: &Self) -> bool {
         <dyn MinoOperationWithKey>::eq(self, other)
     }
@@ -97,7 +97,7 @@ mod tests {
             );
 
             let slide = rngs.gen_range(0..4);
-            let slide_mopk = SlideXOperationWithKey::new(operation_with_key.clone(), slide);
+            let slide_mopk = SlideXOperationWithKey::new(&operation_with_key, slide);
 
             assert_eq!(slide_mopk.get_x(), operation_with_key.get_x() + slide);
             assert_eq!(slide_mopk.get_y(), operation_with_key.get_y());
