@@ -4,28 +4,41 @@ use crate::{
 };
 use std::collections::HashSet;
 
+#[derive(Debug)]
 pub struct MinoShifter {
     transformers: [MinoTransform; Piece::get_size()],
 }
 
 impl MinoShifter {
     pub fn new() -> Self {
-        let mut transformers = std::array::from_fn(|i| MinoTransform::new());
-
-        transformers[Piece::I as usize].set(Rotate::Right, 0, -1, Rotate::Left);
-        transformers[Piece::I as usize].set(Rotate::Reverse, -1, 0, Rotate::Spawn);
-
-        transformers[Piece::O as usize].set(Rotate::Right, 0, -1, Rotate::Spawn);
-        transformers[Piece::O as usize].set(Rotate::Reverse, -1, -1, Rotate::Spawn);
-        transformers[Piece::O as usize].set(Rotate::Left, -1, 0, Rotate::Spawn);
-
-        transformers[Piece::S as usize].set(Rotate::Right, 1, 0, Rotate::Left);
-        transformers[Piece::S as usize].set(Rotate::Reverse, 0, -1, Rotate::Spawn);
-
-        transformers[Piece::Z as usize].set(Rotate::Left, -1, 0, Rotate::Right);
-        transformers[Piece::Z as usize].set(Rotate::Reverse, 0, -1, Rotate::Spawn);
-
-        Self { transformers }
+        Self {
+            transformers: [
+                MinoTransform::new(),
+                // I
+                MinoTransform::set_with(&[
+                    (Rotate::Right, 0, -1, Rotate::Left),
+                    (Rotate::Reverse, -1, 0, Rotate::Spawn),
+                ]),
+                MinoTransform::new(),
+                MinoTransform::new(),
+                // S
+                MinoTransform::set_with(&[
+                    (Rotate::Right, 1, 0, Rotate::Left),
+                    (Rotate::Reverse, 0, -1, Rotate::Spawn),
+                ]),
+                // Z
+                MinoTransform::set_with(&[
+                    (Rotate::Left, -1, 0, Rotate::Right),
+                    (Rotate::Reverse, 0, -1, Rotate::Spawn),
+                ]),
+                // O
+                MinoTransform::set_with(&[
+                    (Rotate::Right, 0, -1, Rotate::Spawn),
+                    (Rotate::Reverse, -1, -1, Rotate::Spawn),
+                    (Rotate::Left, -1, 0, Rotate::Spawn),
+                ]),
+            ],
+        }
     }
 
     pub fn create_transformed_rotate(&self, piece: Piece, rotate: Rotate) -> Rotate {
@@ -81,6 +94,11 @@ impl MinoShifter {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // #[test]
+    fn a() {
+        println!("{:#?}", MinoShifter::new());
+    }
 
     fn check_transformed_action(input: Vec<((Piece, Rotate, u8, u8), MinimalAction)>) {
         let shifter = MinoShifter::new();

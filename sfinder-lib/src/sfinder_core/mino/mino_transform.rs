@@ -5,7 +5,7 @@ use crate::{
     sfinder_core::srs::rotate::Rotate,
 };
 
-// #[derive(Debug)]
+#[derive(Debug)]
 pub struct MinoTransform {
     offsets: Vec<Coordinate>,
     rotates: Vec<Rotate>,
@@ -15,46 +15,54 @@ pub struct MinoTransform {
 // Porting note: `mirror` is moved to SimpleMinoOperation
 impl MinoTransform {
     pub fn new() -> Self {
-        let mut this = Self {
+        Self {
             offsets: vec![Coordinate::new(0, 0); Rotate::get_size()],
             rotates: Rotate::value_list().to_vec(),
             reverse_map: vec![Vec::new(); Rotate::get_size()],
-        };
-
-        this.refresh();
-
-        this
-    }
-
-    pub fn set(&mut self, rotate: Rotate, offset_x: i8, offset_y: i8, new_rotate: Rotate) {
-        let index = rotate as usize;
-
-        self.offsets[index] = Coordinate::new(offset_x, offset_y);
-        self.rotates[index] = new_rotate;
-        self.refresh();
-    }
-
-    fn refresh(&mut self) {
-        for reverse in self.reverse_map.iter_mut() {
-            reverse.clear();
         }
+    }
+
+    pub fn set_with(entries: &[(Rotate, i8, i8, Rotate)]) -> Self {
+        let mut offsets = vec![Coordinate::new(0, 0); Rotate::get_size()];
+        let mut rotates = Rotate::value_list().to_vec();
+
+        for &(rotate, offset_x, offset_y, new_rotate) in entries {
+            let index = rotate as usize;
+
+            offsets[index] = Coordinate::new(offset_x, offset_y);
+            rotates[index] = new_rotate;
+        }
+
+        let reverse_map = Self::create_reverse_map(&offsets, &rotates);
+
+        Self {
+            offsets,
+            rotates,
+            reverse_map,
+        }
+    }
+
+    fn create_reverse_map(offsets: &[Coordinate], rotates: &[Rotate]) -> Vec<Vec<Rotate>> {
+        let mut reverse_map = vec![Vec::new(); Rotate::get_size()];
 
         for &rotate in Rotate::value_list() {
             let index = rotate as usize;
-            if let Some(&new_rotate) = self.rotates.get(index) {
+            if let Some(&new_rotate) = rotates.get(index) {
                 if rotate != new_rotate {
                     // 変換後の回転が同じになる、他の回転とも関連づける
-                    for r in self.reverse_map[new_rotate as usize].clone() {
-                        self.reverse_map[r as usize].push(rotate);
-                        self.reverse_map[rotate as usize].push(r);
+                    for r in reverse_map[new_rotate as usize].clone() {
+                        reverse_map[r as usize].push(rotate);
+                        reverse_map[rotate as usize].push(r);
                     }
 
                     // 変換前と変換後を関連づける
-                    self.reverse_map[new_rotate as usize].push(rotate);
-                    self.reverse_map[rotate as usize].push(new_rotate);
+                    reverse_map[new_rotate as usize].push(rotate);
+                    reverse_map[rotate as usize].push(new_rotate);
                 }
             }
         }
+
+        reverse_map
     }
 
     pub fn transform(&self, x: u8, y: u8, rotate: Rotate) -> MinimalAction {
