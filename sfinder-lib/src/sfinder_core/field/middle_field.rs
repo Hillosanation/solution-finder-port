@@ -97,6 +97,12 @@ impl MiddleField {
     }
 }
 
+impl From<MiddleField> for (u64, u64) {
+    fn from(field: MiddleField) -> Self {
+        (field.0, field.1)
+    }
+}
+
 impl Field for MiddleField {
     fn get_max_field_height(&self) -> u8 {
         MAX_FIELD_HEIGHT

@@ -29,6 +29,12 @@ impl From<u64> for SmallField {
     }
 }
 
+impl From<SmallField> for u64 {
+    fn from(value: SmallField) -> Self {
+        value.0
+    }
+}
+
 impl Field for SmallField {
     fn get_max_field_height(&self) -> u8 {
         MAX_FIELD_HEIGHT
