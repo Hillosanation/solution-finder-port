@@ -48,9 +48,7 @@ impl<'m> FullOperationSeparableMino<'m> {
             }
         }
 
-        let mut field = field_factory::create_field(field_height);
-        field.put(mino, x, y);
-        field.insert_blank_row_with_key(delete_key);
+        let field = operation_with_key.create_mino_field(field_height);
 
         Self {
             operation: operation_with_key,

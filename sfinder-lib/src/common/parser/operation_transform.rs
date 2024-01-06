@@ -112,11 +112,10 @@ pub fn parse_to_block_field(
 ) -> BlockField {
     let mut block_field = BlockField::new(height);
     for operation in operation_with_keys {
-        let mut test = field_factory::create_field(height);
-        let mino = mino_factory.get(operation.get_piece(), operation.get_rotate());
-        test.put(mino, operation.get_x(), operation.get_y());
-        test.insert_blank_row_with_key(operation.get_need_deleted_key());
-        block_field.merge(test.as_ref(), mino.get_piece());
+        block_field.merge(
+            operation.create_mino_field(height).as_ref(),
+            operation.get_piece(),
+        );
     }
     block_field
 }
@@ -127,11 +126,7 @@ pub fn parse_to_field(
 ) -> Box<dyn Field> {
     let mut field = field_factory::create_field(height);
     for operation in operation_with_keys {
-        let mut piece_field = field_factory::create_field(height);
-        piece_field.put(operation.get_mino(), operation.get_x(), operation.get_y());
-        piece_field.insert_blank_row_with_key(operation.get_need_deleted_key());
-
-        field.merge(piece_field.as_ref());
+        field.merge(operation.create_mino_field(height).as_ref());
     }
     field
 }
