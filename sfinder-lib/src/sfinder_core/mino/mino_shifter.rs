@@ -70,16 +70,7 @@ impl MinoShifter {
 
     // Porting note: this is usually iterated over immediately anyways, so just return a Vec instead of HashSet.
     pub fn get_unique_rotates(&self, piece: Piece) -> Vec<Rotate> {
-        // surely sorting 4 items is less intensive than keeping a hash table?
-        let mut rotates = Rotate::value_list()
-            .iter()
-            .copied()
-            .map(|rotate| self.transformers[piece as usize].transform_rotate(rotate))
-            .collect::<Vec<_>>();
-        rotates.sort_unstable();
-        rotates.dedup();
-
-        rotates
+        self.transformers[piece as usize].get_unique_rotates()
     }
 }
 

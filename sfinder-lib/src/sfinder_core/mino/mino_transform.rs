@@ -46,19 +46,18 @@ impl MinoTransform {
         let mut reverse_map = vec![Vec::new(); Rotate::get_size()];
 
         for &rotate in Rotate::value_list() {
-            let index = rotate as usize;
-            if let Some(&new_rotate) = rotates.get(index) {
-                if rotate != new_rotate {
-                    // 変換後の回転が同じになる、他の回転とも関連づける
-                    for r in reverse_map[new_rotate as usize].clone() {
-                        reverse_map[r as usize].push(rotate);
-                        reverse_map[rotate as usize].push(r);
-                    }
+            let new_rotate = rotates[rotate as usize];
 
-                    // 変換前と変換後を関連づける
-                    reverse_map[new_rotate as usize].push(rotate);
-                    reverse_map[rotate as usize].push(new_rotate);
+            if rotate != new_rotate {
+                // 変換後の回転が同じになる、他の回転とも関連づける
+                for r in reverse_map[new_rotate as usize].clone() {
+                    reverse_map[r as usize].push(rotate);
+                    reverse_map[rotate as usize].push(r);
                 }
+
+                // 変換前と変換後を関連づける
+                reverse_map[new_rotate as usize].push(rotate);
+                reverse_map[rotate as usize].push(new_rotate);
             }
         }
 
@@ -84,6 +83,7 @@ impl MinoTransform {
             .copied()
             .map(|prev_rotate| {
                 let prev_index = prev_rotate as usize;
+                // Assuming the provided Action is valid, this Action is also valid, and will not panic.
                 MinimalAction::new(
                     u8::try_from(new_x - self.offsets[prev_index].x).unwrap(),
                     u8::try_from(new_y - self.offsets[prev_index].y).unwrap(),
@@ -95,5 +95,14 @@ impl MinoTransform {
 
     pub fn transform_rotate(&self, rotate: Rotate) -> Rotate {
         self.rotates[rotate as usize]
+    }
+
+    pub fn get_unique_rotates(&self) -> Vec<Rotate> {
+        // surely sorting 4 items is less intensive than keeping a hash table?
+        let mut unique = self.rotates.clone();
+        unique.sort_unstable();
+        unique.dedup();
+
+        unique
     }
 }
