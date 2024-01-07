@@ -46,6 +46,7 @@ impl MinoShifter {
     }
 
     // The other version accepting an Action is dropped since it's not used
+    // Used by Candidate
     pub fn create_tranformed_action(
         &self,
         piece: Piece,
@@ -56,6 +57,7 @@ impl MinoShifter {
         self.transformers[piece as usize].transform(x, y, rotate)
     }
 
+    // Used by Reachable
     pub fn enumerate_same_other_actions(
         &self,
         piece: Piece,
@@ -66,6 +68,7 @@ impl MinoShifter {
         self.transformers[piece as usize].enumerate_others(x, y, rotate)
     }
 
+    // Porting note: this is usually iterated over immediately anyways, so just return a Vec instead of HashSet.
     pub fn get_unique_rotates(&self, piece: Piece) -> Vec<Rotate> {
         // surely sorting 4 items is less intensive than keeping a hash table?
         let mut rotates = Rotate::value_list()
@@ -77,17 +80,6 @@ impl MinoShifter {
         rotates.dedup();
 
         rotates
-    }
-
-    fn get_unique_rotates_2(&self, piece: Piece) -> HashSet<Rotate> {
-        let mut set = HashSet::with_capacity(Rotate::get_size());
-        set.extend(
-            Rotate::value_list()
-                .iter()
-                .copied()
-                .map(|rotate| self.transformers[piece as usize].transform_rotate(rotate)),
-        );
-        set
     }
 }
 
@@ -513,31 +505,6 @@ mod tests {
                 ((Piece::J, Rotate::Left, 1, 1), vec![]),
                 ((Piece::J, Rotate::Right, 0, 1), vec![]),
             ]);
-        }
-    }
-}
-
-#[cfg(feature = "test")]
-mod bench {
-    extern crate test;
-    use super::*;
-    use test::Bencher;
-
-    // 94 ns/iter (+/- 49)
-    #[bench]
-    fn bench_get_unique_rotates(b: &mut Bencher) {
-        let shifter = MinoShifter::new();
-        for piece in Piece::value_list().into_iter().copied() {
-            b.iter(|| shifter.get_unique_rotates(piece));
-        }
-    }
-
-    // 136 ns/iter (+/- 22)
-    #[bench]
-    fn bench_get_unique_rotates_2(b: &mut Bencher) {
-        let shifter = MinoShifter::new();
-        for piece in Piece::value_list().into_iter().copied() {
-            b.iter(|| shifter.get_unique_rotates_2(piece));
         }
     }
 }
