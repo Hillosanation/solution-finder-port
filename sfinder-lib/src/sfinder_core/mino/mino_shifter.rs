@@ -1,8 +1,10 @@
+//! Porting note: I introduce congruence here, where two Minos occupy the same cells/coordinates.
+//! We arbitrarily pick one of them as the "canonical" one, and call the others "congruent".
+
 use super::{mino_transform::MinoTransform, piece::Piece};
 use crate::{
     common::datastore::action::minimal_action::MinimalAction, sfinder_core::srs::rotate::Rotate,
 };
-use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct MinoShifter {
@@ -41,13 +43,15 @@ impl MinoShifter {
         }
     }
 
-    pub fn create_transformed_rotate(&self, piece: Piece, rotate: Rotate) -> Rotate {
+    // Porting note: replaces createTransformedRotate
+    pub fn create_canonical_rotate(&self, piece: Piece, rotate: Rotate) -> Rotate {
         self.transformers[piece as usize].transform_rotate(rotate)
     }
 
     // The other version accepting an Action is dropped since it's not used
     // Used by Candidate
-    pub fn create_tranformed_action(
+    // Porting note: replaces createTransformedAction
+    pub fn create_canonical_action(
         &self,
         piece: Piece,
         rotate: Rotate,
@@ -58,7 +62,9 @@ impl MinoShifter {
     }
 
     // Used by Reachable
-    pub fn enumerate_same_other_actions(
+    // TODO: it's more convenient if this also returns the action itself, since we loop over all congruent actions later.
+    // Porting note: replaces enumerateSameOtherActions
+    pub fn enumerate_other_congruent_actions(
         &self,
         piece: Piece,
         rotate: Rotate,
@@ -88,7 +94,7 @@ mod tests {
 
         for ((piece, rotate, x, y), expected) in input {
             assert_eq!(
-                shifter.create_tranformed_action(piece, rotate, x, y),
+                shifter.create_canonical_action(piece, rotate, x, y),
                 expected
             );
         }
@@ -98,7 +104,7 @@ mod tests {
         let shifter = MinoShifter::new();
 
         for ((piece, rotate), expected) in input {
-            assert_eq!(shifter.create_transformed_rotate(piece, rotate), expected);
+            assert_eq!(shifter.create_canonical_rotate(piece, rotate), expected);
         }
     }
 
@@ -106,7 +112,7 @@ mod tests {
         let shifter = MinoShifter::new();
 
         for ((piece, rotate, x, y), expected) in input {
-            let result = shifter.enumerate_same_other_actions(piece, rotate, x, y);
+            let result = shifter.enumerate_other_congruent_actions(piece, rotate, x, y);
             assert!(
                 expected.iter().all(|action| result.contains(action)),
                 "{result:?} does not contain all of {expected:?}",
