@@ -75,6 +75,7 @@ impl MinoShifter {
     }
 
     // Porting note: this is usually iterated over immediately anyways, so just return a Vec instead of HashSet.
+    // Note that this also gives all canonical rotations of the piece.
     pub fn get_unique_rotates(&self, piece: Piece) -> Vec<Rotate> {
         self.transformers[piece as usize].get_unique_rotates()
     }
@@ -84,9 +85,22 @@ impl MinoShifter {
 mod tests {
     use super::*;
 
-    // #[test]
-    fn a() {
-        println!("{:#?}", MinoShifter::new());
+    #[test]
+    fn unique_rotates_are_canonical() {
+        let shifter = MinoShifter::new();
+
+        for &piece in Piece::value_list() {
+            let unique = shifter.get_unique_rotates(piece);
+            let canonical = Rotate::value_list()
+                .iter()
+                .map(|rotate| shifter.create_canonical_rotate(piece, *rotate))
+                .collect::<Vec<_>>();
+
+            assert!(
+                unique.iter().all(|rotate| canonical.contains(rotate)),
+                "{unique:?} does not contain all of {canonical:?}"
+            );
+        }
     }
 
     fn check_transformed_action(input: Vec<((Piece, Rotate, u8, u8), MinimalAction)>) {
