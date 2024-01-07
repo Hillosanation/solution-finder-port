@@ -13,6 +13,7 @@ use crate::{
     },
 };
 
+#[derive(Debug)]
 pub struct FullOperationSeparableMino<'m> {
     operation: FullOperationWithKey<'m>,
     column_field: ColumnSmallField,
