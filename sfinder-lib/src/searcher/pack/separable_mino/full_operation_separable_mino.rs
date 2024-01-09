@@ -14,6 +14,7 @@ use crate::{
 };
 
 #[derive(Debug)]
+#[cfg_attr(test, derive(Clone))]
 pub struct FullOperationSeparableMino<'m> {
     operation: FullOperationWithKey<'m>,
     column_field: ColumnSmallField,
