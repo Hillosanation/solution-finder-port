@@ -20,7 +20,7 @@ impl<'a> SlideXSeparableMino<'a> {
         Self {
             separable_mino,
             operation: SlideXOperationWithKey::new(
-                separable_mino.to_mino_operation_with_key(),
+                separable_mino.get_mino_operation_with_key(),
                 slide_x,
             ),
         }
@@ -32,7 +32,7 @@ impl<'a> SeparableMino for SlideXSeparableMino<'a> {
         self.separable_mino.get_lower_y()
     }
 
-    fn to_mino_operation_with_key(&self) -> &dyn MinoOperationWithKey {
+    fn get_mino_operation_with_key(&self) -> &dyn MinoOperationWithKey {
         &self.operation
     }
 

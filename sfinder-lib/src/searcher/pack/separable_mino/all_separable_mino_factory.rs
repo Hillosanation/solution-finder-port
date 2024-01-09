@@ -138,7 +138,7 @@ mod tests {
             let piece = Piece::new(i as u8);
             pieces
                 .iter()
-                .filter(|p| p.to_mino_operation_with_key().get_piece() == piece)
+                .filter(|p| p.get_mino_operation_with_key().get_piece() == piece)
                 .count()
         });
 

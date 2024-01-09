@@ -58,6 +58,12 @@ impl<'m> FullOperationSeparableMino<'m> {
             field,
         }
     }
+
+    // Porting note: used in SeparableMinos to destructure the MinoOperationWithKey from the SeparableMino.
+    // TODO: Determine if this can replace get_mino_operation_with_key in SeparableMino
+    pub fn to_mino_operation_with_key(self) -> Box<dyn MinoOperationWithKey + 'm> {
+        Box::new(self.operation)
+    }
 }
 
 impl SeparableMino for FullOperationSeparableMino<'_> {
@@ -65,7 +71,7 @@ impl SeparableMino for FullOperationSeparableMino<'_> {
         self.lower_y
     }
 
-    fn to_mino_operation_with_key(&self) -> &dyn MinoOperationWithKey {
+    fn get_mino_operation_with_key(&self) -> &dyn MinoOperationWithKey {
         &self.operation
     }
 
