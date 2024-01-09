@@ -2,6 +2,7 @@
 //! TODO: Since this is only used by SeparableMinos, change the output to FullOperationWithKey.
 //! In SeparableMinos, the FullOperationWithKey is the only part that is used, and the calculations done in FullOperationSeparableMino are not used.
 
+use super::full_operation_separable_mino::FullOperationSeparableMino;
 use crate::{
     common::datastore::full_operation_with_key::FullOperationWithKey,
     sfinder_core::{
@@ -10,46 +11,20 @@ use crate::{
     },
 };
 
-use super::full_operation_separable_mino::FullOperationSeparableMino;
-
-pub struct AllSeparableMinoFactory<'a> {
-    mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+fn insert_pieces_each_mino<'a>(
     field_width: u8,
     field_height: u8,
     delete_key_mask: u64,
-}
-
-impl<'a> AllSeparableMinoFactory<'a> {
-    pub fn new(
-        mino_factory: &'a MinoFactory,
-        mino_shifter: &'a MinoShifter,
-        field_width: u8,
-        field_height: u8,
-        delete_key_mask: u64,
-    ) -> Self {
-        Self {
-            mino_factory,
-            mino_shifter,
-            field_width,
-            field_height,
-            delete_key_mask,
-        }
-    }
-}
-
-fn insert_pieces_each_mino<'a>(
-    factory: &'a AllSeparableMinoFactory<'a>,
     pieces: &mut Vec<FullOperationSeparableMino<'a>>,
     mino: &'a Mino,
     mino_height: i8,
 ) {
     // println!(
     //     "mino_height {mino_height}, field_height {}, width {}",
-    //     factory.field_height, factory.field_width
+    //     field_height, field_width
     // );
     let mut pattern = (1u64 << mino_height) - 1;
-    let end = 1 << factory.field_height;
+    let end = 1 << field_height;
 
     // Porting note: this used to use CombinationIterable, but I use bit twiddling directly
     // Retrived from http://www.graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
@@ -79,15 +54,15 @@ fn insert_pieces_each_mino<'a>(
             upper_y - lower_y + 1
         );
 
-        if factory.delete_key_mask & delete_key == delete_key {
+        if delete_key_mask & delete_key == delete_key {
             for x in u8::try_from(0 - mino.get_min_x()).unwrap()
-                ..u8::try_from(factory.field_width as i8 - mino.get_min_x()).unwrap()
+                ..u8::try_from(field_width as i8 - mino.get_min_x()).unwrap()
             {
                 let y = u8::try_from(lower_y as i8 - mino.get_min_y()).unwrap();
                 pieces.push(FullOperationSeparableMino::new(
                     FullOperationWithKey::new(mino, x, y, delete_key, using_key),
                     upper_y,
-                    factory.field_height,
+                    field_height,
                 ))
             }
         }
@@ -96,25 +71,37 @@ fn insert_pieces_each_mino<'a>(
     }
 }
 
-// TODO: move functions into module level, I don't need to keep the struct around after create is called
-pub fn create<'a>(factory: &'a AllSeparableMinoFactory<'a>) -> Vec<FullOperationSeparableMino<'a>> {
+pub fn create<'a>(
+    mino_factory: &'a MinoFactory,
+    mino_shifter: &'a MinoShifter,
+    field_width: u8,
+    field_height: u8,
+    delete_key_mask: u64,
+) -> Vec<FullOperationSeparableMino<'a>> {
     let mut pieces = Vec::new();
 
     for &piece in Piece::value_list() {
-        for rotate in factory.mino_shifter.get_unique_rotates(piece) {
-            let mino = factory.mino_factory.get(piece, rotate);
+        for rotate in mino_shifter.get_unique_rotates(piece) {
+            let mino = mino_factory.get(piece, rotate);
 
             // ミノの高さを計算
             let mino_height = mino.get_max_y() - mino.get_min_y() + 1;
 
             // フィールドの高さ以上にミノを使う場合はおけない
-            if mino_height > factory.field_height as i8 {
+            if mino_height > field_height as i8 {
                 continue;
             }
 
             // 追加
             // let prev_len = pieces.len();
-            insert_pieces_each_mino(factory, &mut pieces, mino, mino_height);
+            insert_pieces_each_mino(
+                field_width,
+                field_height,
+                delete_key_mask,
+                &mut pieces,
+                mino,
+                mino_height,
+            );
 
             // println!("{piece} {rotate} added: {}", pieces.len() - prev_len);
         }
@@ -132,10 +119,8 @@ mod tests {
         let mino_factory = MinoFactory::new();
         let mino_shifter = MinoShifter::new();
         let mask = key_operators::get_mask_for_key_below_y(height);
-        let factory =
-            AllSeparableMinoFactory::new(&mino_factory, &mino_shifter, width, height, mask);
 
-        let pieces = create(&factory);
+        let pieces = create(&mino_factory, &mino_shifter, width, height, mask);
 
         let actual_counts: [usize; 7] = std::array::from_fn(|i| {
             let piece = Piece::new(i as u8);
