@@ -8,6 +8,8 @@ use crate::{
 };
 
 pub struct SlideXSeparableMino<'sm> {
+    // TODO: I want this to be a FullOperationSeparableMino, so that I can change the API of SeparableMino to make implementing SeparableMinos easier.
+    // Can I guarentee that this will not contain another SlideXSeparableMino?
     separable_mino: &'sm dyn SeparableMino,
     // Porting note: the original recalculates the operation, but this isn't really possible in Rust.
     // The other implementor of SeparableMino provides a borrowed reference to the operation, so we match this

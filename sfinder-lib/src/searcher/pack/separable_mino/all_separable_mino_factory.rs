@@ -71,6 +71,7 @@ fn insert_pieces_each_mino<'a>(
     }
 }
 
+// No need to use a set, since this is wrapped later by SeparableMinos in a BTreeSet anyways
 pub fn create<'a>(
     mino_factory: &'a MinoFactory,
     mino_shifter: &'a MinoShifter,
