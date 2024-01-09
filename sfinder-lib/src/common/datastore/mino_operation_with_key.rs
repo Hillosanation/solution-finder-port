@@ -6,6 +6,7 @@ use crate::{
 };
 
 pub trait MinoOperationWithKey: OperationWithKey + MinoOperation {
+    // TODO: this is probably a u64
     fn default_hash(&self) -> u32 {
         let mut result = u32::from(self.get_y());
         result = FIELD_WIDTH as u32 * result + u32::from(self.get_x());
@@ -25,11 +26,33 @@ pub trait MinoOperationWithKey: OperationWithKey + MinoOperation {
     }
 }
 
-impl<'a> PartialEq for dyn MinoOperationWithKey + 'a {
+// When downcasted to this trait, the only way to differentiate between structs are the functions that are available
+// get_using_key should be determined by the other functions, so no need to check if using_key are equal
+impl PartialEq for dyn MinoOperationWithKey + '_ {
     fn eq(&self, other: &Self) -> bool {
         self.get_x() == other.get_x()
             && self.get_y() == other.get_y()
             && self.get_need_deleted_key() == other.get_need_deleted_key()
             && self.get_mino() == other.get_mino()
+    }
+}
+
+impl Eq for dyn MinoOperationWithKey + '_ {}
+
+impl PartialOrd for dyn MinoOperationWithKey + '_ {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for dyn MinoOperationWithKey + '_ {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        (self.get_x().cmp(&other.get_x()))
+            .then(self.get_y().cmp(&other.get_y()))
+            .then(
+                self.get_need_deleted_key()
+                    .cmp(&other.get_need_deleted_key()),
+            )
+            .then(self.get_mino().cmp(&other.get_mino()))
     }
 }
