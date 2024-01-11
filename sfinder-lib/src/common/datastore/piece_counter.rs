@@ -1,5 +1,6 @@
 use crate::{extras::hash_code::HashCode, sfinder_core::mino::piece::Piece};
 
+// TODO: derive Copy?
 #[derive(Debug, Clone, PartialEq)]
 pub struct PieceCounter(u64);
 
@@ -35,6 +36,11 @@ impl PieceCounter {
         let difference = self.0 as i64 - other.0 as i64;
         // 各ブロックの最上位ビットが1のとき（繰り下がり）が発生していない時true
         difference & 0x80808080808080 == 0
+    }
+
+    // TODO: replace with an interface accepting SeparableMino to refactor the function calls to obtain the piece from SeparableMino
+    pub fn add_piece(&self, piece: Piece) -> Self {
+        Self(self.0 + SLIDE_MASK[piece as usize])
     }
 
     // Porting note: replaces addAndReturnNew
