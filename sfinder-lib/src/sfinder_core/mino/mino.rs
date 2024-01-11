@@ -25,7 +25,6 @@ pub struct Mino {
 const MASK_CENTER_X: i8 = 4;
 const MASK_CENTER_Y: i8 = 2;
 
-// TODO: completely replace MinoFactory with this?
 pub(super) const MINOS: [Mino; 28] = [
     Mino {
         piece: Piece::T,

@@ -4,32 +4,19 @@ use super::{
 };
 use crate::sfinder_core::srs::rotate::Rotate;
 
-pub struct MinoFactory {
-    map: [Mino; Piece::get_size() * Rotate::get_size()],
-}
+pub struct MinoFactory {}
 
 impl MinoFactory {
     const fn into_val(piece: Piece, rotate: Rotate) -> usize {
         piece as usize * Rotate::get_size() + rotate as usize
     }
 
-    pub fn new() -> Self {
-        Self {
-            map: std::array::from_fn(|i| {
-                Mino::new(
-                    Piece::new((i / Rotate::get_size()) as _),
-                    Rotate::new((i % Rotate::get_size()) as _),
-                )
-            }),
-        }
+    pub const fn new() -> Self {
+        Self {}
     }
 
-    pub fn get(&self, piece: Piece, rotate: Rotate) -> &Mino {
-        &self.map[MinoFactory::into_val(piece, rotate)]
-    }
-
-    // Used when const is needed, like in IOnlyMinoField
-    pub const fn get_const(piece: Piece, rotate: Rotate) -> &'static Mino {
+    // TODO: move get to module level and remove MinoFactory struct
+    pub const fn get(&self, piece: Piece, rotate: Rotate) -> &'static Mino {
         &MINOS[MinoFactory::into_val(piece, rotate)]
     }
 }
@@ -38,17 +25,23 @@ impl MinoFactory {
 mod tests {
     use super::*;
 
+    pub fn legacy_new() -> [Mino; Piece::get_size() * Rotate::get_size()] {
+        std::array::from_fn(|i| {
+            Mino::new(
+                Piece::new((i / Rotate::get_size()) as _),
+                Rotate::new((i % Rotate::get_size()) as _),
+            )
+        })
+    }
+
     #[test]
     fn const_eval() {
-        assert_eq!(MinoFactory::new().map, MINOS);
+        assert_eq!(legacy_new(), MINOS);
     }
 
     #[test]
     fn size() {
-        assert_eq!(
-            MinoFactory::new().map.len(),
-            Piece::get_size() * Rotate::get_size()
-        );
+        assert_eq!(legacy_new().len(), Piece::get_size() * Rotate::get_size());
     }
 
     #[test]
