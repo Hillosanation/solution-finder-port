@@ -11,7 +11,7 @@ use crate::extras::hash_code::HashCode;
 pub struct ColumnSmallField(u64);
 
 impl ColumnSmallField {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self(0)
     }
 }

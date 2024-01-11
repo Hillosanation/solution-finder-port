@@ -54,7 +54,7 @@ impl<'a> FullOperationWithKey<'a> {
         }
     }
 
-    pub fn new(mino: &'a Mino, x: u8, y: u8, need_deleted_key: u64, using_key: u64) -> Self {
+    pub const fn new(mino: &'a Mino, x: u8, y: u8, need_deleted_key: u64, using_key: u64) -> Self {
         Self {
             mino,
             x,
