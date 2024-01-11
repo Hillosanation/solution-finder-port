@@ -1,4 +1,5 @@
 pub mod in_out_pair_field;
+pub mod memento;
 pub mod mino_field;
 pub mod mino_fields;
 pub mod separable_mino;
