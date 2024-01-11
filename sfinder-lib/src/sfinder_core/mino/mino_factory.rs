@@ -1,4 +1,7 @@
-use super::{mino::Mino, piece::Piece};
+use super::{
+    mino::{Mino, MINOS},
+    piece::Piece,
+};
 use crate::sfinder_core::srs::rotate::Rotate;
 
 pub struct MinoFactory {
@@ -24,11 +27,21 @@ impl MinoFactory {
     pub fn get(&self, piece: Piece, rotate: Rotate) -> &Mino {
         &self.map[MinoFactory::into_val(piece, rotate)]
     }
+
+    // Used when const is needed, like in IOnlyMinoField
+    pub const fn get_const(piece: Piece, rotate: Rotate) -> &'static Mino {
+        &MINOS[MinoFactory::into_val(piece, rotate)]
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn const_eval() {
+        assert_eq!(MinoFactory::new().map, MINOS);
+    }
 
     #[test]
     fn size() {
