@@ -1,3 +1,4 @@
+use super::solutions_calculator::SolutionsCalculator;
 use crate::{
     extras::callable::Callable,
     searcher::pack::mino_field::recursive_mino_field::RecursiveMinoField,
@@ -8,7 +9,7 @@ pub struct ConnectionsToStreamCallable {}
 
 impl ConnectionsToStreamCallable {
     pub fn new(
-        calculator: SolutionsCalculator,
+        calculator: Box<dyn SolutionsCalculator>,
         init_column_field: ColumnSmallField,
         outer_column_field: ColumnSmallField,
         limit_outer_field: ColumnSmallField,
@@ -24,5 +25,3 @@ impl<'a> Callable<Box<dyn Iterator<Item = RecursiveMinoField<'a>>>>
         todo!()
     }
 }
-
-struct SolutionsCalculator {}
