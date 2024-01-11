@@ -8,26 +8,19 @@ use crate::{
 use std::iter::FusedIterator;
 
 pub trait MinoField: Traversable {
-    fn get_outer_field(&self) -> ColumnSmallField;
+    fn get_outer_field(&self) -> &ColumnSmallField;
 
     fn get_piece_counter(&self) -> PieceCounter;
 
-    fn get_max_index(&self) -> u8;
+    // Porting note: replaces getMaxIndex, use SeparableMinos to compare two SeparableMino structs instead
+    fn get_max_separable_mino(&self) -> &dyn SeparableMino;
 
     // Porting note: extra structs are used to avoid using return position impl Trait in a trait method
-    fn get_separable_mino_stream(&self) -> SeparableMinoTraverser
-    where
-        Self: Sized,
-    {
-        SeparableMinoTraverser {
-            current: Some(self),
-        }
-    }
 
-    fn get_operations_stream(&self) -> MinoOperationWithKeyTraverser
-    where
-        Self: Sized,
-    {
+    // This does not have a default implementation to avoid the cast from Self to &dyn MinoField that requires Self: Sized
+    fn get_separable_mino_stream(&self) -> SeparableMinoTraverser;
+
+    fn get_operations_stream(&self) -> MinoOperationWithKeyTraverser {
         MinoOperationWithKeyTraverser {
             current: self.get_separable_mino_stream(),
         }
@@ -43,6 +36,14 @@ pub trait Traversable {
 
 pub struct SeparableMinoTraverser<'a> {
     current: Option<&'a dyn MinoField>,
+}
+
+impl<'a> SeparableMinoTraverser<'a> {
+    pub fn new(start: &'a dyn MinoField) -> Self {
+        Self {
+            current: Some(start),
+        }
+    }
 }
 
 impl<'a> Iterator for SeparableMinoTraverser<'a> {
@@ -67,5 +68,24 @@ impl<'a> Iterator for MinoOperationWithKeyTraverser<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(self.current.next()?.get_mino_operation_with_key())
+    }
+}
+
+impl PartialEq for dyn MinoField + '_ {
+    fn eq(&self, other: &Self) -> bool {
+        self.get_operations_stream()
+            .eq(other.get_operations_stream())
+    }
+}
+
+impl PartialOrd for dyn MinoField + '_
+where
+    Self: Sized,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(
+            self.get_operations_stream()
+                .cmp(other.get_operations_stream()),
+        )
     }
 }
