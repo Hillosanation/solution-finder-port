@@ -3,7 +3,7 @@ use crate::sfinder_core::column_field::column_field::ColumnField;
 const EMPTY: char = '_';
 const EXISTS: char = 'X';
 
-fn to_string(field: &dyn ColumnField, max_width: u8, max_height: u8) -> String {
+pub fn to_string(field: &dyn ColumnField, max_width: u8, max_height: u8) -> String {
     (0..max_height)
         .rev()
         .map(|y| {
