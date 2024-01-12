@@ -27,6 +27,7 @@ pub fn to_string_with_height(field: &dyn Field, max_field_height: u8) -> String 
     result
 }
 
+// TODO: this can reuse to_string_with_height if get_max_y was implemented, but it's already possible, just gated behined get_upper_y_with_4_blocks
 pub fn to_reduced_string(field: &dyn Field) -> String {
     let max_field_height = field.get_max_field_height();
 
