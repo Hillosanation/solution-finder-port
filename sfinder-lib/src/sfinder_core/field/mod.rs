@@ -3,6 +3,7 @@ pub mod block_field_view;
 pub mod field;
 pub mod field_constants;
 pub mod field_factory;
+pub mod field_view;
 pub mod key_operators;
 pub mod large_field;
 mod long_board_map;
