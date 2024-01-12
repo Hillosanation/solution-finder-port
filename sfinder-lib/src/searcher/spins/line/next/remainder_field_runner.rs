@@ -25,11 +25,11 @@ fn extract_inner(mut remainder_board: u64) -> Vec<RemainderField> {
     assert!(remainder_board != 0);
 
     while remainder_board != 0 {
-        let (remainder_field, ret_remainder_block) = calc_remainder_field_pair(remainder_board);
+        let (remainder_field, next_board) = calc_remainder_field_pair(remainder_board);
 
         pairs.push(remainder_field);
 
-        remainder_board = ret_remainder_block;
+        remainder_board = next_board;
     }
 
     assert!(!pairs.is_empty());
@@ -40,27 +40,25 @@ fn extract_inner(mut remainder_board: u64) -> Vec<RemainderField> {
 fn calc_remainder_field_pair(rest_board: u64) -> (RemainderField, u64) {
     debug_assert!(rest_board != 0);
 
-    let next_board = get_next_board(rest_board).unwrap();
-    to_remainder_field_pair(rest_board, next_board, next_board)
+    let next_board = get_next_board(rest_board);
+
+    (to_remainder_field(rest_board, next_board), next_board)
 }
 
-fn get_next_board(board: u64) -> Option<u64> {
-    (board != 0).then(|| ((board | (board - 1)) + 1) & board)
+fn get_next_board(board: u64) -> u64 {
+    assert!(board != 0);
+    ((board | (board - 1)) + 1) & board
 }
 
-fn to_remainder_field_pair(
-    current_board: u64,
-    next_board: u64,
-    next_rest_block: u64,
-) -> (RemainderField, u64) {
-    // this filters the lowest section of set bits
+fn to_remainder_field(current_board: u64, next_board: u64) -> RemainderField {
+    // this filters the lowest continuous section of set bits
     let target_board = current_board ^ next_board;
-    let min_x = bit_operators::try_get_lowest_x(target_board).unwrap();
 
-    (
-        RemainderField::new(min_x, target_board.count_ones() as _),
-        next_rest_block,
-    )
+    // since only the lowermost row can have filled blocks, trailing_zeros directly corresponds to the x coordinate
+    assert!(target_board != 0);
+    let min_x = target_board.trailing_zeros() as _;
+
+    RemainderField::new(min_x, target_board.count_ones() as _)
 }
 
 #[cfg(test)]
