@@ -165,7 +165,7 @@ mod tests {
         mino_factory: &MinoFactory,
         init_field: &dyn Field,
         operations: &Operations<O>,
-        expected: &Box<dyn Field>,
+        expected: &dyn Field,
         height: u8,
     ) {
         let mut f1 = init_field.prune(height);
@@ -175,7 +175,7 @@ mod tests {
             f1.clear_filled_rows();
         }
 
-        let mut f2 = expected.clone();
+        let mut f2 = dyn_clone::clone_box(expected);
         f2.clear_filled_rows();
         assert_eq!(&f1, &f2);
     }
@@ -184,7 +184,7 @@ mod tests {
         init_field: &dyn Field,
         operations: &[impl MinoOperationWithKey],
         // the type is &Box to get around lifetimes
-        expected: &Box<dyn Field>,
+        expected: &dyn Field,
         height: u8,
     ) {
         let mut f2 = init_field.prune(height);
@@ -192,7 +192,7 @@ mod tests {
             f2.merge(operation.create_mino_field(height).as_ref());
         }
 
-        assert_eq!(&f2, expected);
+        assert_eq!(f2.as_ref(), expected);
     }
 
     fn assert_operations<O: Operation>(
@@ -200,7 +200,7 @@ mod tests {
         init_field: &dyn Field,
         operations: &Operations<O>,
         operations_with_key: &[impl MinoOperationWithKey],
-        expected: &Box<dyn Field>,
+        expected: &dyn Field,
         height: u8,
     ) {
         assert_operations_with_put(mino_factory, init_field, operations, expected, height);
@@ -238,7 +238,7 @@ mod tests {
             field.as_ref(),
             &operations,
             &operations_with_key,
-            &expected,
+            expected.as_ref(),
             height,
         );
     }

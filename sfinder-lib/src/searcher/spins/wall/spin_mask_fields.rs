@@ -57,11 +57,11 @@ impl SpinMaskFields {
         }
 
         [
-            Self::create_mask_field(&field, x - 1, y - 1, field_height),
-            Self::create_mask_field(&field, x + 1, y - 1, field_height),
-            Self::create_mask_field(&field, x - 1, y + 1, field_height),
-            Self::create_mask_field(&field, x + 1, y + 1, field_height),
-            Self::create_mask_field_empty(&field, field_height),
+            Self::create_mask_field(field.clone(), x - 1, y - 1, field_height),
+            Self::create_mask_field(field.clone(), x + 1, y - 1, field_height),
+            Self::create_mask_field(field.clone(), x - 1, y + 1, field_height),
+            Self::create_mask_field(field.clone(), x + 1, y + 1, field_height),
+            Self::create_mask_field_empty(field, field_height),
         ]
         .into_iter()
         .filter_map(|mask_field| mask_field)
@@ -75,14 +75,14 @@ impl SpinMaskFields {
     }
 
     fn create_mask_field(
-        field: &Box<dyn Field>,
+        field: Box<dyn Field>,
         x: i8,
         y: i8,
         field_height: u8,
     ) -> Option<MaskField> {
         let (x, y) = Self::convert_to_field_coord(x, y)?;
 
-        let mut freeze_need = field.clone();
+        let mut freeze_need = field;
         freeze_need.remove_block(x, y);
 
         let mut freeze_not_allowed = field_factory::create_field(field_height);
@@ -91,9 +91,9 @@ impl SpinMaskFields {
         Some(MaskField::new(freeze_need, freeze_not_allowed))
     }
 
-    fn create_mask_field_empty(field: &Box<dyn Field>, field_height: u8) -> Option<MaskField> {
+    fn create_mask_field_empty(field: Box<dyn Field>, field_height: u8) -> Option<MaskField> {
         Some(MaskField::new(
-            field.clone(),
+            field,
             field_factory::create_field(field_height),
         ))
     }

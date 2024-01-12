@@ -32,9 +32,10 @@ impl BlockField {
             .merge(field);
     }
 
-    // TODO: Some weird lifetime thing happens if you use Option<&dyn Field> where it assumes the reference must be 'static
-    pub fn get(&self, piece: Piece) -> Option<&Box<dyn Field>> {
-        self.map[piece as usize].as_ref()
+    pub fn get(&self, piece: Piece) -> Option<&dyn Field> {
+        self.map[piece as usize]
+            .as_ref()
+            .map(|field| field.as_ref())
     }
 
     pub fn contains_all(&self, target: BlockField) -> bool {
@@ -122,7 +123,7 @@ mod tests {
             "XXX_______" +
             "XXXX______"
         );
-        assert_eq!(block_field.get(Piece::T).unwrap(), &merged);
+        assert_eq!(block_field.get(Piece::T).unwrap(), merged.as_ref());
 
         for &piece in Piece::value_list() {
             assert_eq!(block_field.get(piece).is_some(), piece == Piece::T);
