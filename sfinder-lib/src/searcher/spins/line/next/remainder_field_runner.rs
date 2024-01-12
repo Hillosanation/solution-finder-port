@@ -93,7 +93,7 @@ fn calc_remainder_field_pair(
 }
 
 fn get_next_board(board: u64) -> Option<u64> {
-    (board != 0).then_some(((board | (board - 1)) + 1) & board)
+    (board != 0).then(|| ((board | (board - 1)) + 1) & board)
 }
 
 fn to_remainder_field_pair(
