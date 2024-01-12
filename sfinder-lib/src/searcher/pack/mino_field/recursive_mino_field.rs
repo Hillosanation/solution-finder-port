@@ -7,6 +7,8 @@ use crate::{
     sfinder_core::column_field::column_small_field::ColumnSmallField,
 };
 
+// Clone is derived to allow MemorizedRecursiveMinoFields to work, as it needs to give ownership of RecursiveMinoField per the trait definition
+#[derive(Clone)]
 pub struct RecursiveMinoField<'a> {
     separable_mino: &'a dyn SeparableMino,
     mino_field: Option<&'a dyn MinoField>,

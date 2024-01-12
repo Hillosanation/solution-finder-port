@@ -7,7 +7,7 @@ use crate::extras::hash_code::HashCode;
  * 幅は最大6
  */
 // Porting note: to save space, the actual height of the ColumnField is not stored, thus indexing requires you to pass in the height.
-#[cfg_attr(test, derive(Clone))]
+#[derive(Clone)]
 pub struct ColumnSmallField(u64);
 
 impl ColumnSmallField {
