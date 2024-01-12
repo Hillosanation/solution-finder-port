@@ -1,4 +1,5 @@
 use crate::sfinder_core::mino::piece::Piece;
+use std::fmt::Display;
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -78,5 +79,23 @@ impl TryFrom<ColorType> for Piece {
             ColorType::S => Ok(Piece::S),
             _ => Err("Cannot convert this color to Piece".to_owned()),
         }
+    }
+}
+
+// Porting note: moved from ColoredFieldView
+impl Display for ColorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let c = match self {
+            ColorType::Empty => '_',
+            ColorType::I => 'I',
+            ColorType::L => 'L',
+            ColorType::O => 'O',
+            ColorType::Z => 'Z',
+            ColorType::T => 'T',
+            ColorType::J => 'J',
+            ColorType::S => 'S',
+            ColorType::Gray => 'X',
+        };
+        write!(f, "{c}")
     }
 }
