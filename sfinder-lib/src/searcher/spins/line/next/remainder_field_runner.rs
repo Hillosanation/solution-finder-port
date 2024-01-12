@@ -19,14 +19,12 @@ fn extract_inner(mut remainder_board: u64) -> Vec<RemainderField> {
     let mut pairs = Vec::new();
 
     while remainder_board != 0 {
-        fn get_next_board(board: u64) -> u64 {
-            assert!(board != 0); // always satisfied by while loop condition
-            ((board | (board - 1)) + 1) & board
-        }
+        // removes the lowest continuous section of set bits
+        // never overflows since remainder_board != 0
+        let next_board = ((remainder_board | (remainder_board - 1)) + 1) & remainder_board;
 
-        let next_board = get_next_board(remainder_board);
-
-        pairs.push(to_remainder_field(remainder_board, next_board));
+        // parse the lowest continuous section of set bits
+        pairs.push(to_remainder_field(remainder_board ^ next_board));
 
         remainder_board = next_board;
     }
@@ -34,10 +32,7 @@ fn extract_inner(mut remainder_board: u64) -> Vec<RemainderField> {
     pairs
 }
 
-fn to_remainder_field(current_board: u64, next_board: u64) -> RemainderField {
-    // this filters the lowest continuous section of set bits
-    let target_board = current_board ^ next_board;
-
+fn to_remainder_field(target_board: u64) -> RemainderField {
     assert!(target_board != 0);
     // since only the lowermost row can have filled blocks, trailing_zeros directly corresponds to the x coordinate
     let min_x = target_board.trailing_zeros() as _;
