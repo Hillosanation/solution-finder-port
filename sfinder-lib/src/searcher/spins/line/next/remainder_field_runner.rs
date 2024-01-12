@@ -1,9 +1,7 @@
 //! Helper struct used only by LineFillRunner
 
 use super::remainder_field::RemainderField;
-use crate::sfinder_core::field::{
-    bit_operators, field::Field, field_factory, small_field::SmallField,
-};
+use crate::sfinder_core::field::{bit_operators, field::Field, field_factory};
 
 // TODO: there is an easier way of getting the row we want by ANDing the inverted init_field with the field with a filled row
 // or ANDing the non-inverted field, but track the empty blocks instead of the filled blocks
@@ -18,21 +16,20 @@ pub fn extract(init_field: &dyn Field, target_y: u8) -> Vec<RemainderField> {
     // only the lowermost row fill have filled blocks
     let board = remainder_block.get_board(0);
 
-    extract_inner(Box::new(SmallField::from(board)))
+    extract_inner(board)
 }
 
-fn extract_inner(mut remainder_block: Box<dyn Field>) -> Vec<RemainderField> {
+fn extract_inner(mut remainder_board: u64) -> Vec<RemainderField> {
     let mut pairs = Vec::new();
 
-    assert!(!remainder_block.is_empty());
+    assert!(remainder_board != 0);
 
-    while !remainder_block.is_empty() {
-        let (remainder_field, ret_remainder_block) =
-            calc_remainder_field_pair(remainder_block.as_ref());
+    while remainder_board != 0 {
+        let (remainder_field, ret_remainder_block) = calc_remainder_field_pair(remainder_board);
 
         pairs.push(remainder_field);
 
-        remainder_block = ret_remainder_block;
+        remainder_board = ret_remainder_block;
     }
 
     assert!(!pairs.is_empty());
@@ -40,16 +37,11 @@ fn extract_inner(mut remainder_block: Box<dyn Field>) -> Vec<RemainderField> {
     pairs
 }
 
-fn calc_remainder_field_pair(rest_block: &dyn Field) -> (RemainderField, Box<dyn Field>) {
-    debug_assert!(!rest_block.is_empty());
+fn calc_remainder_field_pair(rest_board: u64) -> (RemainderField, u64) {
+    debug_assert!(rest_board != 0);
 
-    let low = rest_block.get_board(0);
-
-    {
-        let next_board = get_next_board(low).unwrap();
-        let next_rest_block = SmallField::from(next_board);
-        to_remainder_field_pair(low, next_board, Box::new(next_rest_block))
-    }
+    let next_board = get_next_board(rest_board).unwrap();
+    to_remainder_field_pair(rest_board, next_board, next_board)
 }
 
 fn get_next_board(board: u64) -> Option<u64> {
@@ -59,8 +51,8 @@ fn get_next_board(board: u64) -> Option<u64> {
 fn to_remainder_field_pair(
     current_board: u64,
     next_board: u64,
-    next_rest_block: Box<dyn Field>,
-) -> (RemainderField, Box<dyn Field>) {
+    next_rest_block: u64,
+) -> (RemainderField, u64) {
     // this filters the lowest section of set bits
     let target_board = current_board ^ next_board;
     let min_x = bit_operators::try_get_lowest_x(target_board).unwrap();
