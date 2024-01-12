@@ -104,7 +104,7 @@ impl OperationWithKey for FullOperationWithKey<'_> {
 impl MinoOperationWithKey for FullOperationWithKey<'_> {}
 
 impl HashCode for FullOperationWithKey<'_> {
-    type Output = u32;
+    type Output = u64;
 
     fn hash_code(&self) -> Self::Output {
         MinoOperationWithKey::default_hash(self)

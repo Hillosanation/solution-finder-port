@@ -6,14 +6,13 @@ use crate::{
 };
 
 pub trait MinoOperationWithKey: OperationWithKey + MinoOperation {
-    // TODO: this is probably a u64
-    fn default_hash(&self) -> u32 {
-        let mut result = u32::from(self.get_y());
-        result = FIELD_WIDTH as u32 * result + u32::from(self.get_x());
-        result = 31 * result + self.get_mino().hash_code() as u32;
+    fn default_hash(&self) -> u64 {
+        let mut result = u64::from(self.get_y());
+        result = FIELD_WIDTH as u64 * result + u64::from(self.get_x());
+        result = 31 * result + self.get_mino().hash_code() as u64;
 
         let need_deleted_key = self.get_need_deleted_key();
-        result = 31 * result + (need_deleted_key ^ need_deleted_key >> 32) as u32;
+        result = 31 * result + need_deleted_key ^ need_deleted_key >> 32;
 
         result
     }

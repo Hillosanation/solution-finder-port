@@ -70,7 +70,7 @@ impl PartialEq for SlideXOperationWithKey<'_> {
 }
 
 impl HashCode for SlideXOperationWithKey<'_> {
-    type Output = u32;
+    type Output = u64;
 
     fn hash_code(&self) -> Self::Output {
         <dyn MinoOperationWithKey>::default_hash(self)
