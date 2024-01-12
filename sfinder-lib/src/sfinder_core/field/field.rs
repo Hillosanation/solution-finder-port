@@ -66,7 +66,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
     // 一番上からharddropで指定した位置を通過するとき true を返却
     fn can_reach_on_harddrop(&self, mino: &Mino, x: u8, start_y: u8) -> bool;
     /// Internal function for implementing can_reach_on_harddrop
-    /// TODO: find a way to make this private
+    /// TODO(#11): find a way to make this private
     fn _can_reach_on_harddrop(
         &self,
         mino: &Mino,
@@ -225,7 +225,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
 
 // Porting note: This collection of helper functions is distinct from the FieldHelper class, which is dropped.
 pub trait FieldHelper {
-    /// TODO: is_in should be the only function that should be exposed
+    /// TODO(#11): is_in should be the only function that should be exposed
     fn is_in(mino: &Mino, x: i8, y: i8) -> bool {
         let min_x = x + mino.get_min_x();
         let max_x = x + mino.get_max_x();

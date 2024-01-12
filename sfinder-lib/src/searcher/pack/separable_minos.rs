@@ -56,7 +56,7 @@ impl<'a> SeparableMinos<'a> {
     }
 
     // Porting note: partially replaces getIndex, used when comparing two SeparableMinos.
-    // TODO: phase out this and compare the MinoOperationWithKey directly through the Ord trait
+    // TODO(#14): phase out this and compare the MinoOperationWithKey directly through the Ord trait
     pub fn compare_index(a: &dyn SeparableMino, b: &dyn SeparableMino) -> std::cmp::Ordering {
         let a_op = a.get_mino_operation_with_key();
         let b_op = b.get_mino_operation_with_key();

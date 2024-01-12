@@ -8,7 +8,7 @@ pub fn create_small_field() -> ColumnSmallField {
 }
 
 // Porting note: merged the two constructors that took in boards
-// TODO: change API to only accept one board? create_small_field already provides a way to a new ColumnSmallField
+// TODO(#10): change API to only accept one board? create_small_field already provides a way to a new ColumnSmallField
 pub fn create_small_field_from_inner(boards: &[u64]) -> ColumnSmallField {
     match boards {
         [] => ColumnSmallField::new(),

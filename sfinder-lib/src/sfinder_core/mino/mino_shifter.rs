@@ -62,7 +62,7 @@ impl MinoShifter {
     }
 
     // Used by Reachable
-    // TODO: it's more convenient if this also returns the action itself, since we loop over all congruent actions later.
+    // TODO(#17): it's more convenient if this also returns the action itself, since we loop over all congruent actions later.
     // Porting note: replaces enumerateSameOtherActions
     pub fn enumerate_other_congruent_actions(
         &self,

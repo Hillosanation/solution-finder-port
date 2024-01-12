@@ -1,5 +1,5 @@
 //! Helper struct used only by SeparableMinos.
-//! TODO: Since this is only used by SeparableMinos, change the output to FullOperationWithKey.
+//! TODO(#15): Since this is only used by SeparableMinos, change the output to FullOperationWithKey.
 //! In SeparableMinos, the FullOperationWithKey is the only part that is used, and the calculations done in FullOperationSeparableMino are not used.
 
 use super::full_operation_separable_mino::FullOperationSeparableMino;
