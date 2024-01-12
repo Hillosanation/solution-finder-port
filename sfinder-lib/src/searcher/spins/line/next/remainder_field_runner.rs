@@ -6,6 +6,8 @@ use crate::sfinder_core::field::{
     large_field::LargeField, middle_field::MiddleField, small_field::SmallField,
 };
 
+// TODO: there is an easier way of getting the row we want by ANDing the inverted init_field with the field with a filled row
+// or ANDing the non-inverted field, but track the empty blocks instead of the filled blocks
 pub fn extract(init_field: &dyn Field, target_y: u8) -> Vec<RemainderField> {
     let max_field_height = init_field.get_max_field_height();
 
@@ -112,6 +114,8 @@ fn to_remainder_field_pair(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{sfinder_core::field::field_constants::FIELD_WIDTH, sfinder_lib::randoms};
+    use rand::{thread_rng, Rng};
 
     #[test]
     fn case_1() {
@@ -152,5 +156,60 @@ mod tests {
 
         assert_eq!(remainder_fields[2].min_x, 8);
         assert_eq!(remainder_fields[2].target_block_count, 2);
+    }
+
+    #[test]
+    fn random() {
+        // this test doesn't balance the other branches, since it's likely that the lower boards are not completely empty
+        let mut rngs = thread_rng();
+
+        for _ in 0..10000 {
+            let height = rngs.gen_range(1..24);
+            let num_of_empty_minos = rngs.gen_range(0..(height * FIELD_WIDTH) / 4);
+            let field = randoms::gen_field(&mut rngs, height, num_of_empty_minos);
+
+            for y in 0..height {
+                let mut row = field_factory::create_field(height);
+                row.fill_row(y);
+
+                // println!("{height} {y}");
+                // println!("{row:?}");
+                // println!("{field:?}");
+
+                row.reduce(field.as_ref());
+
+                if row.is_empty() {
+                    continue;
+                }
+
+                let remainder_fields = extract(field.as_ref(), y);
+                // println!("{remainder_fields:?}");
+
+                let mut expected_runs = Vec::new();
+                {
+                    // manually find run length of row
+                    let mut current_start = 0;
+                    let mut current_run = 0;
+                    for x in 0..FIELD_WIDTH {
+                        if field.is_empty_block(x, y) {
+                            if current_run == 0 {
+                                current_start = x;
+                            }
+                            current_run += 1;
+                        } else {
+                            if current_run > 0 {
+                                expected_runs.push(RemainderField::new(current_start, current_run));
+                                current_run = 0;
+                            }
+                        }
+                    }
+                    if current_run > 0 {
+                        expected_runs.push(RemainderField::new(current_start, current_run));
+                    }
+                }
+
+                assert_eq!(remainder_fields, expected_runs);
+            }
+        }
     }
 }

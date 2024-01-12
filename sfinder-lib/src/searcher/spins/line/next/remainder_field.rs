@@ -1,5 +1,6 @@
 //! Helper function used only by RemainderFieldRunner
 
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub struct RemainderField {
     pub min_x: u8,
     pub target_block_count: u8,
