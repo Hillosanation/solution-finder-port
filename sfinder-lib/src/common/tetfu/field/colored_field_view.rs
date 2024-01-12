@@ -6,15 +6,15 @@ pub fn to_string(field: &dyn ColoredField) -> String {
 }
 
 pub fn to_string_with_height(field: &dyn ColoredField, get_max_height: usize) -> String {
-    let mut result = String::new();
-    for y in (0..get_max_height as u8).rev() {
-        for x in 0..FIELD_WIDTH {
-            let color = field.get_color(x, y);
-            result += &(color as usize).to_string();
-        }
-        result.push('\n');
-    }
-    result
+    (0..get_max_height as u8)
+        .rev()
+        .map(|y| {
+            (0..FIELD_WIDTH)
+                .map(|x| (field.get_color(x, y) as usize).to_string())
+                .collect()
+        })
+        .collect::<Vec<String>>()
+        .join("\n")
 }
 
 pub fn to_string_with_type(field: &dyn ColoredField) -> String {
@@ -22,13 +22,13 @@ pub fn to_string_with_type(field: &dyn ColoredField) -> String {
 }
 
 pub fn to_string_with_type_with_height(field: &dyn ColoredField, get_max_height: usize) -> String {
-    let mut result = String::new();
-    for y in (0..get_max_height as u8).rev() {
-        for x in 0..FIELD_WIDTH {
-            let color = field.get_color(x, y);
-            result += &color.to_string();
-        }
-        result.push('\n');
-    }
-    result
+    (0..get_max_height as u8)
+        .rev()
+        .map(|y| {
+            (0..FIELD_WIDTH)
+                .map(|x| field.get_color(x, y).to_string())
+                .collect()
+        })
+        .collect::<Vec<String>>()
+        .join("\n")
 }

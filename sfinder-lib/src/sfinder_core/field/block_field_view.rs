@@ -8,16 +8,19 @@ pub fn to_string(block_field: &BlockField) -> String {
 }
 
 pub fn to_string_with_height(block_field: &BlockField, max_height: u8) -> String {
-    let mut result = String::new();
-    for y in (0..max_height).rev() {
-        for x in 0..FIELD_WIDTH {
-            if let Some(piece) = block_field.get_piece_of_block(x, y) {
-                result += &piece.to_string();
-            } else {
-                result.push(EMPTY_CHAR);
-            }
-        }
-        result.push('\n');
-    }
-    result
+    (0..max_height)
+        .rev()
+        .map(|y| {
+            (0..FIELD_WIDTH)
+                .map(|x| {
+                    if let Some(piece) = block_field.get_piece_of_block(x, y) {
+                        piece.to_string()
+                    } else {
+                        EMPTY_CHAR.to_string()
+                    }
+                })
+                .collect()
+        })
+        .collect::<Vec<String>>()
+        .join("\n")
 }

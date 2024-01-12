@@ -12,19 +12,21 @@ pub fn to_string(field: &dyn Field) -> String {
 pub fn to_string_with_height(field: &dyn Field, max_field_height: u8) -> String {
     assert!(max_field_height <= field.get_board_count() as u8 * BOARD_HEIGHT);
 
-    let mut result = String::new();
-    for y in (0..max_field_height).rev() {
-        for x in 0..FIELD_WIDTH {
-            result.push(if field.is_empty_block(x, y) {
-                EMPTY
-            } else {
-                EXISTS
-            });
-        }
-        result.push('\n');
-    }
-
-    result
+    (0..max_field_height)
+        .rev()
+        .map(|y| {
+            (0..FIELD_WIDTH)
+                .map(|x| {
+                    if field.is_empty_block(x, y) {
+                        EMPTY
+                    } else {
+                        EXISTS
+                    }
+                })
+                .collect()
+        })
+        .collect::<Vec<String>>()
+        .join("\n")
 }
 
 // TODO: this can reuse to_string_with_height if get_max_y was implemented, but it's already possible, just gated behined get_upper_y_with_4_blocks
