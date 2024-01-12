@@ -17,7 +17,7 @@ use crate::{
 };
 
 const LAST_OPERATION: FullOperationWithKey = FullOperationWithKey::new(
-    &MinoFactory::new().get(Piece::I, Rotate::Spawn),
+    MinoFactory::new().get(Piece::I, Rotate::Spawn),
     0,
     0,
     0b1000000000100000000010000000001,

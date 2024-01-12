@@ -30,8 +30,8 @@ impl RecursiveMinoFields for MemorizedRecursiveMinoFields<'_> {
         Box::new(
             self.result
                 .get_or_init(|| self.callable.call())
-                .to_owned()
-                .into_iter(),
+                .iter()
+                .cloned(),
         )
     }
 }
