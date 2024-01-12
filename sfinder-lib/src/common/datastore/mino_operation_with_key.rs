@@ -12,7 +12,7 @@ pub trait MinoOperationWithKey: OperationWithKey + MinoOperation {
         result = 31 * result + self.get_mino().hash_code() as u64;
 
         let need_deleted_key = self.get_need_deleted_key();
-        result = 31 * result + need_deleted_key ^ need_deleted_key >> 32;
+        result = 31 * result + (need_deleted_key ^ need_deleted_key >> 32);
 
         result
     }
