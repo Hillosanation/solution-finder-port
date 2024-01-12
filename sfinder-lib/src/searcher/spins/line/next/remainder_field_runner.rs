@@ -13,7 +13,7 @@ pub fn extract(init_field: &dyn Field, target_y: u8) -> Vec<RemainderField> {
     remainder_block.reduce(init_field);
     remainder_block.slide_down(target_y);
 
-    // only the lowermost row fill have filled blocks
+    // only the lowermost row will have filled blocks
     let board = remainder_block.get_board(0);
 
     extract_inner(board)
@@ -25,37 +25,27 @@ fn extract_inner(mut remainder_board: u64) -> Vec<RemainderField> {
     assert!(remainder_board != 0);
 
     while remainder_board != 0 {
-        let (remainder_field, next_board) = calc_remainder_field_pair(remainder_board);
+        fn get_next_board(board: u64) -> u64 {
+            assert!(board != 0); // always satisfied by while loop condition
+            ((board | (board - 1)) + 1) & board
+        }
 
-        pairs.push(remainder_field);
+        let next_board = get_next_board(remainder_board);
+
+        pairs.push(to_remainder_field(remainder_board, next_board));
 
         remainder_board = next_board;
     }
 
-    assert!(!pairs.is_empty());
-
     pairs
-}
-
-fn calc_remainder_field_pair(rest_board: u64) -> (RemainderField, u64) {
-    debug_assert!(rest_board != 0);
-
-    let next_board = get_next_board(rest_board);
-
-    (to_remainder_field(rest_board, next_board), next_board)
-}
-
-fn get_next_board(board: u64) -> u64 {
-    assert!(board != 0);
-    ((board | (board - 1)) + 1) & board
 }
 
 fn to_remainder_field(current_board: u64, next_board: u64) -> RemainderField {
     // this filters the lowest continuous section of set bits
     let target_board = current_board ^ next_board;
 
-    // since only the lowermost row can have filled blocks, trailing_zeros directly corresponds to the x coordinate
     assert!(target_board != 0);
+    // since only the lowermost row can have filled blocks, trailing_zeros directly corresponds to the x coordinate
     let min_x = target_board.trailing_zeros() as _;
 
     RemainderField::new(min_x, target_board.count_ones() as _)
