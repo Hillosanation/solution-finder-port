@@ -1,4 +1,5 @@
 pub mod bit_operators;
+pub mod block_field_view;
 pub mod field;
 pub mod field_constants;
 pub mod field_factory;

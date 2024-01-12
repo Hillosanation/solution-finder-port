@@ -91,9 +91,8 @@ impl PartialOrd for BlockField {
 
 #[cfg(test)]
 mod tests {
-    use crate::extras::test_functions::assert_partialord_symmetric;
-
     use super::*;
+    use crate::extras::test_functions::assert_partialord_symmetric;
 
     // tests retrieved from PieceFieldTest.java
 
