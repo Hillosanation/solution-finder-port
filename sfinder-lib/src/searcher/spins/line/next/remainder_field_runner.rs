@@ -114,3 +114,49 @@ fn to_remainder_field_pair(
         next_rest_block,
     ))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn case_1() {
+        #[rustfmt::skip]
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "__________"
+                + "__________"
+                + "__________"
+                + "__________"
+        );
+
+        let remainder_fields = extract(field.as_ref(), 2);
+
+        assert_eq!(remainder_fields.len(), 1);
+
+        assert_eq!(remainder_fields[0].min_x, 0);
+        assert_eq!(remainder_fields[0].target_block_count, 10);
+    }
+
+    #[test]
+    fn case_2() {
+        #[rustfmt::skip]
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "__XX__XX__"
+        );
+
+        let remainder_fields = extract(field.as_ref(), 0);
+
+        assert_eq!(remainder_fields.len(), 3);
+
+        assert_eq!(remainder_fields[0].min_x, 0);
+        assert_eq!(remainder_fields[0].target_block_count, 2);
+
+        assert_eq!(remainder_fields[1].min_x, 4);
+        assert_eq!(remainder_fields[1].target_block_count, 2);
+
+        assert_eq!(remainder_fields[2].min_x, 8);
+        assert_eq!(remainder_fields[2].target_block_count, 2);
+    }
+}
