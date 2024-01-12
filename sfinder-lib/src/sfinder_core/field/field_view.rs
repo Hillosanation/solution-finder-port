@@ -111,9 +111,8 @@ mod tests {
                 })
                 .collect::<Vec<String>>();
 
-            let field = field_factory::create_field_with_marks(marks.concat());
-
             let empty_line = (12 - height) % 6;
+
             let expected = (0..empty_line)
                 .map(|_| "__________")
                 .chain(marks.iter().map(|string| string.as_str()))
@@ -121,7 +120,8 @@ mod tests {
                 .collect::<Vec<String>>()
                 .join("\n");
 
-            assert_eq!(to_string_with_height(field.as_ref(), height), expected);
+            let field = field_factory::create_field_with_marks(marks.concat());
+            assert_eq!(to_string(field.as_ref()), expected);
         }
     }
 }
