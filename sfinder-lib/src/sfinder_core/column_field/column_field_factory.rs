@@ -64,11 +64,11 @@ mod tests {
     fn create_field1() {
         let field = column_field_factory::create_small_field_from_inner(&[0b1110]);
         assert_eq!(field.get_num_of_all_blocks(), 3);
-        assert!(field.is_empty(0, 0, 4));
-        assert!(!field.is_empty(0, 1, 4));
-        assert!(!field.is_empty(0, 2, 4));
-        assert!(!field.is_empty(0, 3, 4));
-        assert!(field.is_empty(1, 0, 4));
+        assert!(field.is_empty_block(0, 0, 4));
+        assert!(!field.is_empty_block(0, 1, 4));
+        assert!(!field.is_empty_block(0, 2, 4));
+        assert!(!field.is_empty_block(0, 3, 4));
+        assert!(field.is_empty_block(1, 0, 4));
     }
 
     #[test]
@@ -83,11 +83,11 @@ mod tests {
     fn create_field_3() {
         let field = column_field_factory::create_small_field_from_inner(&[0b1010101]);
         assert_eq!(field.get_num_of_all_blocks(), 4);
-        assert!(!field.is_empty(0, 0, 4));
-        assert!(field.is_empty(0, 1, 4));
-        assert!(!field.is_empty(0, 2, 4));
-        assert!(field.is_empty(0, 3, 4));
-        assert!(!field.is_empty(1, 0, 4));
+        assert!(!field.is_empty_block(0, 0, 4));
+        assert!(field.is_empty_block(0, 1, 4));
+        assert!(!field.is_empty_block(0, 2, 4));
+        assert!(field.is_empty_block(0, 3, 4));
+        assert!(!field.is_empty_block(1, 0, 4));
     }
 
     #[test]
@@ -103,9 +103,9 @@ mod tests {
         );
 
         assert_eq!(field.get_num_of_all_blocks(), 4);
-        assert!(!field.is_empty(0, 0, 4));
-        assert!(field.is_empty(0, 1, 4));
-        assert!(field.is_empty(0, 2, 4));
-        assert!(field.is_empty(0, 3, 4));
+        assert!(!field.is_empty_block(0, 0, 4));
+        assert!(field.is_empty_block(0, 1, 4));
+        assert!(field.is_empty_block(0, 2, 4));
+        assert!(field.is_empty_block(0, 3, 4));
     }
 }

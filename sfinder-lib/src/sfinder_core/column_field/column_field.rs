@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 
 pub trait ColumnField: Debug {
     // 指定した位置にブロックをおく
@@ -8,7 +8,7 @@ pub trait ColumnField: Debug {
     fn remove_block(&mut self, x: u8, y: u8, height: u8);
 
     // 指定した位置にブロックがないとき true を返却
-    fn is_empty(&self, x: u8, y: u8, height: u8) -> bool;
+    fn is_empty_block(&self, x: u8, y: u8, height: u8) -> bool;
 
     // 指定した番号の6列分のフィールドを表現するボードを返却（0が最下層）
     fn get_board(&self, index: u8) -> u64;
@@ -94,7 +94,7 @@ mod tests {
             // 1block different field
             let x = rngs.gen_range(0..FIELD_WIDTH);
             let y = rngs.gen_range(0..height);
-            if field1.is_empty(x, y, height) {
+            if field1.is_empty_block(x, y, height) {
                 field1.set_block(x, y, height);
             } else {
                 field1.remove_block(x, y, height);

@@ -36,7 +36,7 @@ impl ColumnField for ColumnSmallField {
         self.0 &= !get_y_mask(x, y, height);
     }
 
-    fn is_empty(&self, x: u8, y: u8, height: u8) -> bool {
+    fn is_empty_block(&self, x: u8, y: u8, height: u8) -> bool {
         self.0 & get_y_mask(x, y, height) == 0
     }
 
@@ -114,11 +114,11 @@ mod tests {
         let mut field = ColumnSmallField::new();
         let height = 4;
 
-        assert!(field.is_empty(0, 0, height));
+        assert!(field.is_empty_block(0, 0, height));
         field.set_block(0, 0, height);
-        assert!(!field.is_empty(0, 0, height));
+        assert!(!field.is_empty_block(0, 0, height));
         field.remove_block(0, 0, height);
-        assert!(field.is_empty(0, 0, height));
+        assert!(field.is_empty_block(0, 0, height));
     }
 
     #[test]
