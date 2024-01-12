@@ -1,28 +1,22 @@
 //! Helper struct used only by LineFillRunner
 
 use super::remainder_field::RemainderField;
-use crate::sfinder_core::field::{bit_operators, field::Field, field_factory};
+use crate::sfinder_core::field::{bit_operators, field::Field};
 
-// TODO: there is an easier way of getting the row we want by ANDing the inverted init_field with the field with a filled row
-// or ANDing the non-inverted field, but track the empty blocks instead of the filled blocks
 pub fn extract(init_field: &dyn Field, target_y: u8) -> Vec<RemainderField> {
-    let max_field_height = init_field.get_max_field_height();
+    let mut field = dyn_clone::clone_box(init_field);
+    field.slide_down(target_y);
 
-    let mut remainder_block = field_factory::create_field(max_field_height);
-    remainder_block.fill_row(target_y);
-    remainder_block.reduce(init_field);
-    remainder_block.slide_down(target_y);
+    let board = field.get_board(0);
+    const BOTTOMMOST_ROW: u64 = bit_operators::get_row_mask(0);
 
     // only the lowermost row will have filled blocks
-    let board = remainder_block.get_board(0);
-
-    extract_inner(board)
+    extract_inner(!board & BOTTOMMOST_ROW)
 }
 
 fn extract_inner(mut remainder_board: u64) -> Vec<RemainderField> {
-    let mut pairs = Vec::new();
-
     assert!(remainder_board != 0);
+    let mut pairs = Vec::new();
 
     while remainder_board != 0 {
         fn get_next_board(board: u64) -> u64 {
@@ -54,7 +48,10 @@ fn to_remainder_field(current_board: u64, next_board: u64) -> RemainderField {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{sfinder_core::field::field_constants::FIELD_WIDTH, sfinder_lib::randoms};
+    use crate::{
+        sfinder_core::field::{field_constants::FIELD_WIDTH, field_factory},
+        sfinder_lib::randoms,
+    };
     use rand::{thread_rng, Rng};
 
     #[test]
