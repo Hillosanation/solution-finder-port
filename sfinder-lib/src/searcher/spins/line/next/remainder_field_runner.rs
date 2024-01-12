@@ -2,7 +2,7 @@
 
 use super::remainder_field::RemainderField;
 use crate::sfinder_core::field::{
-    bit_operators, field::Field, field_constants::BoardCount, field_factory, key_operators,
+    bit_operators, field::Field, field_constants::BoardCount, field_factory,
     large_field::LargeField, middle_field::MiddleField, small_field::SmallField,
 };
 
@@ -10,9 +10,7 @@ pub fn extract(init_field: &dyn Field, target_y: u8) -> Vec<RemainderField> {
     let max_field_height = init_field.get_max_field_height();
 
     let mut remainder_block = field_factory::create_field(max_field_height);
-    let bit_key = key_operators::get_bit_key(target_y);
-
-    remainder_block.insert_filled_row_with_key(bit_key);
+    remainder_block.fill_row(target_y);
     remainder_block.reduce(init_field);
 
     extract_inner(remainder_block)
