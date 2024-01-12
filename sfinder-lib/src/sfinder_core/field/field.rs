@@ -280,14 +280,14 @@ pub trait FieldHelper {
 
 impl FieldHelper for dyn Field {}
 
-impl std::cmp::PartialEq for dyn Field {
+impl std::cmp::PartialEq for dyn Field + '_ {
     fn eq(&self, other: &Self) -> bool {
         let largest_board_count = self.get_board_count().max(other.get_board_count());
         (0..largest_board_count as u8).all(|index| self.get_board(index) == other.get_board(index))
     }
 }
 
-impl HashCode for dyn Field {
+impl HashCode for dyn Field + '_ {
     type Output = u32;
 
     fn hash_code(&self) -> Self::Output {
@@ -300,7 +300,7 @@ impl HashCode for dyn Field {
     }
 }
 
-impl std::cmp::PartialOrd for dyn Field {
+impl std::cmp::PartialOrd for dyn Field + '_ {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         let largest_board_count = self.get_board_count().max(other.get_board_count());
 
