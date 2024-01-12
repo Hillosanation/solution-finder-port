@@ -50,23 +50,22 @@ fn calc_remainder_field_pair(
             let low = rest_block.get_board(0);
 
             {
-                let next_board = get_next_board(low);
+                let next_board = get_next_board(low).unwrap();
                 let next_rest_block = SmallField::from(next_board);
-                to_remainder_field_pair(low, next_board, Box::new(next_rest_block)).unwrap()
+                to_remainder_field_pair(low, next_board, Box::new(next_rest_block))
             }
         }
         BoardCount::Middle => {
             let low = rest_block.get_board(0);
             let high = rest_block.get_board(1);
 
-            if low != 0 {
-                let next_board = get_next_board(low);
+            if let Some(next_board) = get_next_board(low) {
                 let next_rest_block = MiddleField::from_parts(next_board, high);
-                to_remainder_field_pair(low, next_board, Box::new(next_rest_block)).unwrap()
+                to_remainder_field_pair(low, next_board, Box::new(next_rest_block))
             } else {
-                let next_board = get_next_board(high);
-                let next_rest_block = MiddleField::from_parts(low, next_board);
-                to_remainder_field_pair(high, next_board, Box::new(next_rest_block)).unwrap()
+                let next_board = get_next_board(high).unwrap();
+                let next_rest_block = MiddleField::from_parts(0, next_board);
+                to_remainder_field_pair(high, next_board, Box::new(next_rest_block))
             }
         }
         BoardCount::Large => {
@@ -75,44 +74,41 @@ fn calc_remainder_field_pair(
             let mid_high = rest_block.get_board(2);
             let high = rest_block.get_board(3);
 
-            if low != 0 {
-                let next_board = get_next_board(low);
+            if let Some(next_board) = get_next_board(low) {
                 let next_rest_block = LargeField::from_parts(next_board, mid_low, mid_high, high);
-                to_remainder_field_pair(low, next_board, Box::new(next_rest_block)).unwrap()
-            } else if mid_low != 0 {
-                let next_board = get_next_board(mid_low);
+                to_remainder_field_pair(low, next_board, Box::new(next_rest_block))
+            } else if let Some(next_board) = get_next_board(mid_low) {
                 let next_rest_block = LargeField::from_parts(0, next_board, mid_high, high);
-                to_remainder_field_pair(mid_low, next_board, Box::new(next_rest_block)).unwrap()
-            } else if mid_high != 0 {
-                let next_board = get_next_board(mid_high);
+                to_remainder_field_pair(mid_low, next_board, Box::new(next_rest_block))
+            } else if let Some(next_board) = get_next_board(mid_high) {
                 let next_rest_block = LargeField::from_parts(0, 0, next_board, high);
-                to_remainder_field_pair(mid_high, next_board, Box::new(next_rest_block)).unwrap()
+                to_remainder_field_pair(mid_high, next_board, Box::new(next_rest_block))
             } else {
-                let next_board = get_next_board(high);
+                let next_board = get_next_board(high).unwrap();
                 let next_rest_block = LargeField::from_parts(0, 0, 0, next_board);
-                to_remainder_field_pair(high, next_board, Box::new(next_rest_block)).unwrap()
+                to_remainder_field_pair(high, next_board, Box::new(next_rest_block))
             }
         }
     }
 }
 
-fn get_next_board(board: u64) -> u64 {
-    ((board | (board - 1)) + 1) & board
+fn get_next_board(board: u64) -> Option<u64> {
+    (board != 0).then_some(((board | (board - 1)) + 1) & board)
 }
 
 fn to_remainder_field_pair(
     current_board: u64,
     next_board: u64,
     next_rest_block: Box<dyn Field>,
-) -> Option<(RemainderField, Box<dyn Field>)> {
+) -> (RemainderField, Box<dyn Field>) {
     // this filters the lowest section of set bits
     let target_board = current_board ^ next_board;
-    let min_x = bit_operators::try_get_lowest_x(target_board)?;
+    let min_x = bit_operators::try_get_lowest_x(target_board).unwrap();
 
-    Some((
+    (
         RemainderField::new(min_x, target_board.count_ones() as _),
         next_rest_block,
-    ))
+    )
 }
 
 #[cfg(test)]
