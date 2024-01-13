@@ -67,14 +67,14 @@ impl InOutPairField {
 
         pairs.extend((0..max - 1).map(|i| {
             Self::new(
-                Self::read_to_inner_field(init_field, &sized_bit, i * width),
-                Self::read_to_outer_field(init_field, &sized_bit, width, (i + 1) * width),
+                Self::read_to_inner_field(init_field, sized_bit, i * width),
+                Self::read_to_outer_field(init_field, sized_bit, width, (i + 1) * width),
             )
         }));
 
         pairs.push(Self::new(
-            Self::read_to_inner_field(init_field, &sized_bit, (max - 1) * width),
-            Self::read_to_outer_field(init_field, &sized_bit, 3, max * width), // the last OuterField is always 3 wide, for some reason
+            Self::read_to_inner_field(init_field, sized_bit, (max - 1) * width),
+            Self::read_to_outer_field(init_field, sized_bit, 3, max * width), // the last OuterField is always 3 wide, for some reason
         ));
 
         pairs
@@ -87,7 +87,7 @@ impl InOutPairField {
         let width = sized_bit.width;
 
         (0..(9 / width + 1))
-            .map(|i| Self::read_to_inner_field(init_field, &sized_bit, i * width))
+            .map(|i| Self::read_to_inner_field(init_field, sized_bit, i * width))
             .collect()
     }
 

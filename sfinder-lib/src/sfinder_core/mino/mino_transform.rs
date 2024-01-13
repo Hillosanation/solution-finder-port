@@ -33,7 +33,7 @@ impl MinoTransform {
             rotates[index] = new_rotate;
         }
 
-        let reverse_map = Self::create_reverse_map(&offsets, &rotates);
+        let reverse_map = Self::create_reverse_map(&rotates);
 
         Self {
             offsets,
@@ -42,7 +42,7 @@ impl MinoTransform {
         }
     }
 
-    fn create_reverse_map(offsets: &[Coordinate], rotates: &[Rotate]) -> Vec<Vec<Rotate>> {
+    fn create_reverse_map(rotates: &[Rotate]) -> Vec<Vec<Rotate>> {
         let mut reverse_map = vec![Vec::new(); Rotate::get_size()];
 
         for &rotate in Rotate::value_list() {

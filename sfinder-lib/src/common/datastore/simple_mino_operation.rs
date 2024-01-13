@@ -38,7 +38,7 @@ impl<'a> SimpleMinoOperation<'a> {
         let lx = (FIELD_WIDTH - 1) - rx;
 
         Self::new(
-            &mirror_mino,
+            mirror_mino,
             u8::try_from(lx as i8 - mirror_mino.get_min_x()).unwrap(),
             u8::try_from(by as i8 - mirror_mino.get_min_y()).unwrap(),
         )

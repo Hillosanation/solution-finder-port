@@ -107,7 +107,6 @@ pub fn parse_to_operations(
 
 pub fn parse_to_block_field(
     operation_with_keys: &[impl MinoOperationWithKey],
-    mino_factory: &MinoFactory,
     height: u8,
 ) -> BlockField {
     let mut block_field = BlockField::new(height);

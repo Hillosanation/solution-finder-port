@@ -52,6 +52,6 @@ impl Ord for dyn MinoOperationWithKey + '_ {
                 self.get_need_deleted_key()
                     .cmp(&other.get_need_deleted_key()),
             )
-            .then(self.get_mino().cmp(&other.get_mino()))
+            .then(self.get_mino().cmp(other.get_mino()))
     }
 }

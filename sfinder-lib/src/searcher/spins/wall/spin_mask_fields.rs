@@ -24,7 +24,8 @@ impl SpinMaskFields {
     ) -> IntMap<u8, Vec<MaskField>> {
         let max_height = allow_fill_max_height + 1;
         assert!(max_height <= field_height);
-        assert!(max_height * FIELD_WIDTH <= u8::MAX);
+        // avoid to_key overflowing
+        assert!(max_height <= u8::MAX / FIELD_WIDTH);
 
         (0..max_height)
             .flat_map(|y| {
@@ -64,7 +65,7 @@ impl SpinMaskFields {
             Self::create_mask_field_empty(field, field_height),
         ]
         .into_iter()
-        .filter_map(|mask_field| mask_field)
+        .flatten()
         .collect()
     }
 
@@ -110,7 +111,7 @@ impl SpinMaskFields {
         deleted_key: u64,
     ) -> impl Iterator<Item = MaskField> + '_ {
         // slide_y <= y
-        let slide_y = (deleted_key & key_operators::get_mask_for_key_below_y(y as u8)).count_ones();
+        let slide_y = (deleted_key & key_operators::get_mask_for_key_below_y(y)).count_ones();
         let new_y = y - slide_y as u8;
         let key = Self::to_key(x, new_y);
 

@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 
 pub trait ColumnField: Debug {
     // 指定した位置にブロックをおく
@@ -37,7 +37,7 @@ pub trait ColumnField: Debug {
 impl PartialEq for dyn ColumnField + '_ {
     fn eq(&self, other: &Self) -> bool {
         let largest_board_count = self.get_board_count().max(other.get_board_count());
-        (0..largest_board_count as u8).all(|index| self.get_board(index) == other.get_board(index))
+        (0..largest_board_count).all(|index| self.get_board(index) == other.get_board(index))
     }
 }
 
@@ -46,7 +46,7 @@ impl PartialOrd for dyn ColumnField + '_ {
         let largest_board_count = self.get_board_count().max(other.get_board_count());
 
         // there isn't a way to chain a variable number of then_with together
-        for index in 0..largest_board_count as u8 {
+        for index in 0..largest_board_count {
             // takes advantage of the fact that indexing out of bounds of the boards for a Field returns 0
             let cmp = self.get_board(index).cmp(&other.get_board(index));
             if cmp != std::cmp::Ordering::Equal {

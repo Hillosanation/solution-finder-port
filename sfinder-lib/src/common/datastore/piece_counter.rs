@@ -5,8 +5,8 @@ use crate::{extras::hash_code::HashCode, sfinder_core::mino::piece::Piece};
 pub struct PieceCounter(u64);
 
 const SLIDE_MASK: [u64; Piece::get_size()] = [
-    1 >> (8 * 0),
-    1 << (8 * 1),
+    1 << 0,
+    1 << 8,
     1 << (8 * 2),
     1 << (8 * 3),
     1 << (8 * 4),
@@ -29,7 +29,7 @@ impl PieceCounter {
     }
 
     fn get_count(&self, piece: Piece) -> u64 {
-        self.0 >> 8 * (piece as usize) & 0xff
+        self.0 >> (8 * (piece as usize)) & 0xff
     }
 
     pub const fn contains_all(&self, other: &Self) -> bool {

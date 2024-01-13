@@ -46,7 +46,7 @@ fn get(s: u8) -> ColorType {
         b'J' => ColorType::J,
         b'S' => ColorType::S,
         b' ' | b'_' => ColorType::Empty,
-        b'x' | b'*' | b'.' | _ => ColorType::Gray,
+        /*b'x' | b'*' | b'.' |*/ _ => ColorType::Gray,
     }
 }
 

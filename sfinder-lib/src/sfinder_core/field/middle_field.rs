@@ -376,6 +376,7 @@ impl Field for MiddleField {
     }
 
     fn get_min_y(&self) -> Option<u8> {
+        #[allow(clippy::manual_map)]
         if let Some(min_y) = bit_operators::try_get_lowest_y(self.0) {
             Some(min_y)
         } else if let Some(min_y) = bit_operators::try_get_lowest_y(self.1) {

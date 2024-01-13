@@ -1,4 +1,6 @@
 // #![feature(test)]
+#![deny(clippy::unnecessary_cast)]
+// #![allow(dead_code)]
 
 mod common;
 pub mod extras;

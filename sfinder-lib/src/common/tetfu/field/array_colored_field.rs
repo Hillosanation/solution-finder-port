@@ -23,9 +23,7 @@ impl ColoredField for ArrayColoredField {
             self.field[..max_height as usize].to_vec()
         } else {
             let mut new_field = vec![[ColorType::Empty; FIELD_WIDTH as usize]; max_height as usize];
-            for i in 0..max_height as usize {
-                new_field[i] = self.field[i];
-            }
+            new_field.copy_from_slice(&self.field[..max_height as usize]);
             new_field
         };
         Box::new(Self { field })
