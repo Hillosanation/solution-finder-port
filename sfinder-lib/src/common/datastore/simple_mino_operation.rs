@@ -27,8 +27,9 @@ impl SimpleMinoOperation {
         let x = mino_operation.get_x();
         let y = mino_operation.get_y();
 
-        // TODO: technically you don't need to query mino_factory here to get this information, since you can recover them from the mirrored mino
-        let mino = mino_factory.get(piece, rotate);
+        // technically you don't need to use the original mino here to get this information,
+        // since you can recover them from the mirrored mino
+        let mino = mino_operation.get_mino();
         let rx = u8::try_from(x as i8 + mino.get_max_x()).unwrap();
         let by = u8::try_from(y as i8 + mino.get_min_y()).unwrap();
 
