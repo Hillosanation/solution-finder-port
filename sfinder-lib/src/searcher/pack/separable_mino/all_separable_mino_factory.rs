@@ -1,10 +1,10 @@
 //! Helper struct used only by SeparableMinos.
-//! TODO(#15): Since this is only used by SeparableMinos, change the output to FullOperationWithKey.
-//! In SeparableMinos, the FullOperationWithKey is the only part that is used, and the calculations done in FullOperationSeparableMino are not used.
 
-use super::full_operation_separable_mino::FullOperationSeparableMino;
 use crate::{
-    common::datastore::full_operation_with_key::FullOperationWithKey,
+    common::datastore::{
+        full_operation_with_key::FullOperationWithKey,
+        mino_operation_with_key::MinoOperationWithKey,
+    },
     sfinder_core::{
         field::key_operators,
         mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
@@ -15,7 +15,7 @@ fn insert_pieces_each_mino(
     field_width: u8,
     field_height: u8,
     delete_key_mask: u64,
-    pieces: &mut Vec<FullOperationSeparableMino>,
+    pieces: &mut Vec<Box<dyn MinoOperationWithKey>>,
     mino: &'static Mino,
     mino_height: i8,
 ) {
@@ -59,11 +59,9 @@ fn insert_pieces_each_mino(
                 ..u8::try_from(field_width as i8 - mino.get_min_x()).unwrap()
             {
                 let y = u8::try_from(lower_y as i8 - mino.get_min_y()).unwrap();
-                pieces.push(FullOperationSeparableMino::new(
-                    FullOperationWithKey::new(mino, x, y, delete_key, using_key),
-                    upper_y,
-                    field_height,
-                ))
+                pieces.push(Box::new(FullOperationWithKey::new(
+                    mino, x, y, delete_key, using_key,
+                )));
             }
         }
 
@@ -78,7 +76,7 @@ pub fn create<'a>(
     field_width: u8,
     field_height: u8,
     delete_key_mask: u64,
-) -> Vec<FullOperationSeparableMino> {
+) -> Vec<Box<dyn MinoOperationWithKey>> {
     let mut pieces = Vec::new();
 
     for &piece in Piece::value_list() {
@@ -114,7 +112,6 @@ pub fn create<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::searcher::pack::separable_mino::separable_mino::SeparableMino;
 
     fn test_counts(width: u8, height: u8, counts: [usize; Piece::get_size()]) {
         let mino_factory = MinoFactory::new();
@@ -125,10 +122,7 @@ mod tests {
 
         let actual_counts: [usize; 7] = std::array::from_fn(|i| {
             let piece = Piece::new(i as u8);
-            pieces
-                .iter()
-                .filter(|p| p.get_mino_operation_with_key().get_piece() == piece)
-                .count()
+            pieces.iter().filter(|p| p.get_piece() == piece).count()
         });
 
         assert_eq!(actual_counts, counts);

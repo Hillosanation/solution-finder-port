@@ -1,9 +1,4 @@
-use super::{
-    separable_mino::{
-        full_operation_separable_mino::FullOperationSeparableMino, separable_mino::SeparableMino,
-    },
-    sized_bit::SizedBit,
-};
+use super::{separable_mino::separable_mino::SeparableMino, sized_bit::SizedBit};
 use crate::{
     common::datastore::mino_operation_with_key::MinoOperationWithKey,
     searcher::pack::separable_mino::all_separable_mino_factory,
@@ -83,13 +78,10 @@ impl<'a> SeparableMinos<'a> {
     }
 }
 
-impl<'a> From<Vec<FullOperationSeparableMino>> for SeparableMinos<'a> {
-    fn from(minos: Vec<FullOperationSeparableMino>) -> Self {
+impl<'a> From<Vec<Box<dyn MinoOperationWithKey + 'a>>> for SeparableMinos<'a> {
+    fn from(indexes: Vec<Box<dyn MinoOperationWithKey + 'a>>) -> Self {
         Self {
-            indexes: minos
-                .into_iter()
-                .map(|mino| mino.to_mino_operation_with_key())
-                .collect(),
+            indexes: BTreeSet::from_iter(indexes),
         }
     }
 }
@@ -98,10 +90,7 @@ impl<'a> From<Vec<FullOperationSeparableMino>> for SeparableMinos<'a> {
 mod tests {
     use super::*;
     use crate::{
-        searcher::pack::{
-            separable_mino::full_operation_separable_mino::FullOperationSeparableMino,
-            sized_bit::SizedBit,
-        },
+        searcher::pack::sized_bit::SizedBit,
         sfinder_core::{
             field::field_constants::FIELD_WIDTH,
             mino::{mino_factory::MinoFactory, mino_shifter::MinoShifter},
@@ -109,13 +98,15 @@ mod tests {
     };
     use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng};
 
+    fn gen_sized_bit(rngs: &mut ThreadRng) -> SizedBit {
+        SizedBit::new(rngs.gen_range(1..=FIELD_WIDTH), rngs.gen_range(1..=4))
+    }
+
     fn create_separable_mino_set<'a>(
-        rngs: &mut ThreadRng,
         mino_factory: &'a MinoFactory,
         mino_shifter: &'a MinoShifter,
-    ) -> Vec<FullOperationSeparableMino> {
-        let sized_bit = SizedBit::new(rngs.gen_range(1..=FIELD_WIDTH), rngs.gen_range(1..=4));
-
+        sized_bit: &SizedBit,
+    ) -> Vec<Box<dyn MinoOperationWithKey>> {
         all_separable_mino_factory::create(
             mino_factory,
             mino_shifter,
@@ -128,11 +119,11 @@ mod tests {
     #[test]
     fn create() {
         let mut rngs = thread_rng();
-        let mino_factory = MinoFactory::new();
-        let mino_shifter = MinoShifter::new();
 
-        let minos = create_separable_mino_set(&mut rngs, &mino_factory, &mino_shifter);
-        let minos1 = minos.clone();
+        let sized_bit = gen_sized_bit(&mut rngs);
+        let minos = create_separable_mino_set(&MinoFactory::new(), &MinoShifter::new(), &sized_bit);
+        let minos1 =
+            create_separable_mino_set(&MinoFactory::new(), &MinoShifter::new(), &sized_bit);
         let mut minos2 = minos;
         minos2.shuffle(&mut rngs);
 
@@ -152,19 +143,15 @@ mod tests {
         let mino_factory = MinoFactory::new();
         let mino_shifter = MinoShifter::new();
 
-        let minos = create_separable_mino_set(&mut rngs, &mino_factory, &mino_shifter);
+        let minos =
+            create_separable_mino_set(&mino_factory, &mino_shifter, &gen_sized_bit(&mut rngs));
 
         for _ in 0..10000 {
             let mino1 = minos.choose(&mut rngs).unwrap();
             let mino2 = minos.choose(&mut rngs).unwrap();
 
-            let cmp = SeparableMinos::compare_index(mino1, mino2);
-            assert_eq!(
-                cmp,
-                mino1
-                    .get_mino_operation_with_key()
-                    .cmp(mino2.get_mino_operation_with_key())
-            );
+            let cmp = SeparableMinos::compare_index_operations(mino1.as_ref(), mino2.as_ref());
+            assert_eq!(cmp, mino1.cmp(mino2));
         }
     }
 
