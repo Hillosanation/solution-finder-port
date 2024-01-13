@@ -21,11 +21,8 @@ impl<'a> ColumnFieldConnection<'a> {
         let fill_board = sized_bit.fill_board;
 
         let board = freeze.get_board(0);
-        // TODO(#10): remove indirection, see TODO on create_small_field_from_inner
-        let inner_field =
-            column_field_factory::create_small_field_from_inner(&[board & fill_board]);
-        let outer_field =
-            column_field_factory::create_small_field_from_inner(&[board & !fill_board]);
+        let inner_field = column_field_factory::create_small_field_from_inner(board & fill_board);
+        let outer_field = column_field_factory::create_small_field_from_inner(board & !fill_board);
 
         Self {
             mino,

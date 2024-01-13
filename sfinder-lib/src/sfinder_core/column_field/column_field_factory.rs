@@ -8,13 +8,9 @@ pub fn create_small_field() -> ColumnSmallField {
 }
 
 // Porting note: merged the two constructors that took in boards
-// TODO(#10): change API to only accept one board? create_small_field already provides a way to a new ColumnSmallField
-pub fn create_small_field_from_inner(boards: &[u64]) -> ColumnSmallField {
-    match boards {
-        [] => ColumnSmallField::new(),
-        [board] => ColumnSmallField::from(*board),
-        _ => panic!("Too many boards"),
-    }
+// Since only ColumnSmallField is used, we take in just a single board
+pub fn create_small_field_from_inner(board: u64) -> ColumnSmallField {
+    ColumnSmallField::from(board)
 }
 
 pub fn create_small_field_with_marks(marks: String, height: u8) -> ColumnSmallField {
@@ -62,7 +58,7 @@ mod tests {
 
     #[test]
     fn create_field1() {
-        let field = column_field_factory::create_small_field_from_inner(&[0b1110]);
+        let field = column_field_factory::create_small_field_from_inner(0b1110);
         assert_eq!(field.get_num_of_all_blocks(), 3);
         assert!(field.is_empty_block(0, 0, 4));
         assert!(!field.is_empty_block(0, 1, 4));
@@ -72,16 +68,8 @@ mod tests {
     }
 
     #[test]
-    fn create_field_2() {
-        assert_eq!(
-            column_field_factory::create_small_field_from_inner(&[]).get_num_of_all_blocks(),
-            0
-        );
-    }
-
-    #[test]
     fn create_field_3() {
-        let field = column_field_factory::create_small_field_from_inner(&[0b1010101]);
+        let field = column_field_factory::create_small_field_from_inner(0b1010101);
         assert_eq!(field.get_num_of_all_blocks(), 4);
         assert!(!field.is_empty_block(0, 0, 4));
         assert!(field.is_empty_block(0, 1, 4));

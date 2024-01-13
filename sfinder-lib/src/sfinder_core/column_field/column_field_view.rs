@@ -76,7 +76,7 @@ mod tests {
                     };
                 }
             }
-            let field = column_field_factory::create_small_field_from_inner(&[board]);
+            let field = column_field_factory::create_small_field_from_inner(board);
 
             // parse to strings
             let expect = fields
