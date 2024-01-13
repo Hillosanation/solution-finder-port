@@ -15,19 +15,15 @@ use crate::{
 
 #[derive(Debug)]
 #[cfg_attr(test, derive(Clone))]
-pub struct FullOperationSeparableMino<'m> {
-    operation: FullOperationWithKey<'m>,
+pub struct FullOperationSeparableMino {
+    operation: FullOperationWithKey,
     column_field: ColumnSmallField,
     lower_y: u8,
     field: Box<dyn Field>,
 }
 
-impl<'m> FullOperationSeparableMino<'m> {
-    pub fn new(
-        operation_with_key: FullOperationWithKey<'m>,
-        upper_y: u8,
-        field_height: u8,
-    ) -> Self {
+impl<'a> FullOperationSeparableMino {
+    pub fn new(operation_with_key: FullOperationWithKey, upper_y: u8, field_height: u8) -> Self {
         assert!(upper_y <= 10);
 
         let x = operation_with_key.get_x();
@@ -62,12 +58,12 @@ impl<'m> FullOperationSeparableMino<'m> {
 
     // Porting note: used in SeparableMinos to destructure the MinoOperationWithKey from the SeparableMino.
     // TODO(#15): Determine if this can replace get_mino_operation_with_key in SeparableMino
-    pub fn to_mino_operation_with_key(self) -> Box<dyn MinoOperationWithKey + 'm> {
+    pub fn to_mino_operation_with_key(self) -> Box<dyn MinoOperationWithKey + 'a> {
         Box::new(self.operation)
     }
 }
 
-impl SeparableMino for FullOperationSeparableMino<'_> {
+impl SeparableMino for FullOperationSeparableMino {
     fn get_lower_y(&self) -> u8 {
         self.lower_y
     }
@@ -85,13 +81,13 @@ impl SeparableMino for FullOperationSeparableMino<'_> {
     }
 }
 
-impl PartialEq for FullOperationSeparableMino<'_> {
+impl PartialEq for FullOperationSeparableMino {
     fn eq(&self, other: &Self) -> bool {
         <dyn OperationWithKey>::eq(&self.operation, &other.operation)
     }
 }
 
-impl PartialOrd for FullOperationSeparableMino<'_> {
+impl PartialOrd for FullOperationSeparableMino {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         <dyn OperationWithKey>::partial_cmp(&self.operation, &other.operation)
     }

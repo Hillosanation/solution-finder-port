@@ -20,7 +20,7 @@ pub fn parse_to_operations_with_key<'a, O: Operation>(
     operations: &'a Operations<O>,
     mino_factory: &'a MinoFactory,
     height: u8,
-) -> Vec<FullOperationWithKey<'a>> {
+) -> Vec<FullOperationWithKey> {
     let mut keys = Vec::with_capacity(operations.get_operations().len());
 
     let mut field = field_origin.prune(height);
@@ -40,7 +40,7 @@ pub fn parse_to_operations_with_key<'a, O: Operation>(
 }
 
 pub fn to_full_operation_with_key(
-    mino: &Mino,
+    mino: &'static Mino,
     x: u8,
     y: u8,
     delete_key: u64,

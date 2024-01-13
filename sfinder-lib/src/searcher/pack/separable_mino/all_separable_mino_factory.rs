@@ -11,12 +11,12 @@ use crate::{
     },
 };
 
-fn insert_pieces_each_mino<'a>(
+fn insert_pieces_each_mino(
     field_width: u8,
     field_height: u8,
     delete_key_mask: u64,
-    pieces: &mut Vec<FullOperationSeparableMino<'a>>,
-    mino: &'a Mino,
+    pieces: &mut Vec<FullOperationSeparableMino>,
+    mino: &'static Mino,
     mino_height: i8,
 ) {
     // println!(
@@ -73,12 +73,12 @@ fn insert_pieces_each_mino<'a>(
 
 // No need to use a set, since this is wrapped later by SeparableMinos in a BTreeSet anyways
 pub fn create<'a>(
-    mino_factory: &'a MinoFactory,
+    mino_factory: &MinoFactory,
     mino_shifter: &'a MinoShifter,
     field_width: u8,
     field_height: u8,
     delete_key_mask: u64,
-) -> Vec<FullOperationSeparableMino<'a>> {
+) -> Vec<FullOperationSeparableMino> {
     let mut pieces = Vec::new();
 
     for &piece in Piece::value_list() {

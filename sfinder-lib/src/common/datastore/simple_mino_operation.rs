@@ -9,19 +9,19 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub struct SimpleMinoOperation<'m> {
-    mino: &'m Mino,
+pub struct SimpleMinoOperation {
+    mino: &'static Mino,
     x: u8,
     y: u8,
 }
 
-impl<'a> SimpleMinoOperation<'a> {
-    pub fn new(mino: &'a Mino, x: u8, y: u8) -> Self {
+impl SimpleMinoOperation {
+    pub fn new(mino: &'static Mino, x: u8, y: u8) -> Self {
         Self { mino, x, y }
     }
 
     // Porting note: moved from MinoTransform
-    pub fn as_mirror(mino_factory: &'a MinoFactory, mino_operation: &dyn MinoOperation) -> Self {
+    pub fn as_mirror(mino_factory: &MinoFactory, mino_operation: &dyn MinoOperation) -> Self {
         let piece = mino_operation.get_piece();
         let rotate = mino_operation.get_rotate();
         let x = mino_operation.get_x();
@@ -45,7 +45,7 @@ impl<'a> SimpleMinoOperation<'a> {
     }
 }
 
-impl Action for SimpleMinoOperation<'_> {
+impl Action for SimpleMinoOperation {
     fn get_x(&self) -> u8 {
         self.x
     }
@@ -59,25 +59,25 @@ impl Action for SimpleMinoOperation<'_> {
     }
 }
 
-impl Operation for SimpleMinoOperation<'_> {
+impl Operation for SimpleMinoOperation {
     fn get_piece(&self) -> crate::sfinder_core::mino::piece::Piece {
         self.mino.get_piece()
     }
 }
 
-impl MinoOperation for SimpleMinoOperation<'_> {
+impl MinoOperation for SimpleMinoOperation {
     fn get_mino(&self) -> &Mino {
         self.mino
     }
 }
 
-impl PartialEq for SimpleMinoOperation<'_> {
+impl PartialEq for SimpleMinoOperation {
     fn eq(&self, other: &Self) -> bool {
         self.mino == other.mino && self.x == other.x && self.y == other.y
     }
 }
 
-impl HashCode for SimpleMinoOperation<'_> {
+impl HashCode for SimpleMinoOperation {
     type Output = u32;
 
     fn hash_code(&self) -> Self::Output {

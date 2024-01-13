@@ -83,7 +83,8 @@ mod tests {
 
     use crate::{
         common::datastore::full_operation_with_key::FullOperationWithKey,
-        sfinder_core::field::field_constants::FIELD_WIDTH, sfinder_lib::randoms,
+        sfinder_core::{field::field_constants::FIELD_WIDTH, mino::mino_factory::MinoFactory},
+        sfinder_lib::randoms,
     };
 
     use super::*;
@@ -95,7 +96,7 @@ mod tests {
         for _ in 0..10000 {
             let piece = randoms::gen_piece(&mut rngs);
             let rotate = randoms::gen_rotate(&mut rngs);
-            let mino = Mino::new(piece, rotate);
+            let mino = MinoFactory::new().get(piece, rotate);
 
             let operation_with_key = FullOperationWithKey::new(
                 &mino,

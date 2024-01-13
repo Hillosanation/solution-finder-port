@@ -83,8 +83,8 @@ impl<'a> SeparableMinos<'a> {
     }
 }
 
-impl<'a> From<Vec<FullOperationSeparableMino<'a>>> for SeparableMinos<'a> {
-    fn from(minos: Vec<FullOperationSeparableMino<'a>>) -> Self {
+impl<'a> From<Vec<FullOperationSeparableMino>> for SeparableMinos<'a> {
+    fn from(minos: Vec<FullOperationSeparableMino>) -> Self {
         Self {
             indexes: minos
                 .into_iter()
@@ -113,7 +113,7 @@ mod tests {
         rngs: &mut ThreadRng,
         mino_factory: &'a MinoFactory,
         mino_shifter: &'a MinoShifter,
-    ) -> Vec<FullOperationSeparableMino<'a>> {
+    ) -> Vec<FullOperationSeparableMino> {
         let sized_bit = SizedBit::new(rngs.gen_range(1..=FIELD_WIDTH), rngs.gen_range(1..=4));
 
         all_separable_mino_factory::create(

@@ -14,16 +14,22 @@ use crate::{
 use std::fmt::{Debug, Display};
 
 #[derive(Debug, Clone)]
-pub struct FullOperationWithKey<'m> {
-    mino: &'m Mino,
+pub struct FullOperationWithKey {
+    mino: &'static Mino,
     x: u8,
     y: u8,
     need_deleted_key: u64,
     using_key: u64,
 }
 
-impl<'a> FullOperationWithKey<'a> {
-    pub fn create(mino: &'a Mino, x: u8, y: u8, need_deleted_key: u64, field_height: u8) -> Self {
+impl FullOperationWithKey {
+    pub fn create(
+        mino: &'static Mino,
+        x: u8,
+        y: u8,
+        need_deleted_key: u64,
+        field_height: u8,
+    ) -> Self {
         let mut field = field_factory::create_field(field_height);
         field.put(mino, x, y);
         field.insert_blank_row_with_key(need_deleted_key);
@@ -39,7 +45,7 @@ impl<'a> FullOperationWithKey<'a> {
 
     // lowerY: 最も下にあるブロックのy座標
     pub fn new_with_lower_y(
-        mino: &'a Mino,
+        mino: &'static Mino,
         x: u8,
         need_deleted_key: u64,
         using_key: u64,
@@ -54,7 +60,13 @@ impl<'a> FullOperationWithKey<'a> {
         }
     }
 
-    pub const fn new(mino: &'a Mino, x: u8, y: u8, need_deleted_key: u64, using_key: u64) -> Self {
+    pub const fn new(
+        mino: &'static Mino,
+        x: u8,
+        y: u8,
+        need_deleted_key: u64,
+        using_key: u64,
+    ) -> Self {
         Self {
             mino,
             x,
@@ -65,7 +77,7 @@ impl<'a> FullOperationWithKey<'a> {
     }
 }
 
-impl Action for FullOperationWithKey<'_> {
+impl Action for FullOperationWithKey {
     fn get_x(&self) -> u8 {
         self.x
     }
@@ -79,19 +91,19 @@ impl Action for FullOperationWithKey<'_> {
     }
 }
 
-impl Operation for FullOperationWithKey<'_> {
+impl Operation for FullOperationWithKey {
     fn get_piece(&self) -> Piece {
         self.mino.get_piece()
     }
 }
 
-impl MinoOperation for FullOperationWithKey<'_> {
+impl MinoOperation for FullOperationWithKey {
     fn get_mino(&self) -> &Mino {
         self.mino
     }
 }
 
-impl OperationWithKey for FullOperationWithKey<'_> {
+impl OperationWithKey for FullOperationWithKey {
     fn get_need_deleted_key(&self) -> u64 {
         self.need_deleted_key
     }
@@ -101,9 +113,9 @@ impl OperationWithKey for FullOperationWithKey<'_> {
     }
 }
 
-impl MinoOperationWithKey for FullOperationWithKey<'_> {}
+impl MinoOperationWithKey for FullOperationWithKey {}
 
-impl HashCode for FullOperationWithKey<'_> {
+impl HashCode for FullOperationWithKey {
     type Output = u64;
 
     fn hash_code(&self) -> Self::Output {
@@ -111,13 +123,13 @@ impl HashCode for FullOperationWithKey<'_> {
     }
 }
 
-impl PartialEq for FullOperationWithKey<'_> {
+impl PartialEq for FullOperationWithKey {
     fn eq(&self, other: &Self) -> bool {
         self as &dyn MinoOperationWithKey == other as &_
     }
 }
 
-impl Display for FullOperationWithKey<'_> {
+impl Display for FullOperationWithKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self as &dyn OperationWithKey)
     }

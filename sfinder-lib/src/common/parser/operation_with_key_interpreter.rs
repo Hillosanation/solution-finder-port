@@ -12,7 +12,7 @@ use crate::{
 pub fn parse_to_vec<'m>(
     operations: &'m str,
     mino_factory: &'m MinoFactory,
-) -> Vec<FullOperationWithKey<'m>> {
+) -> Vec<FullOperationWithKey> {
     parse_to_stream(operations, mino_factory).collect()
 }
 
@@ -20,7 +20,7 @@ pub fn parse_to_vec<'m>(
 pub fn parse_to_stream<'m>(
     operations: &'m str,
     mino_factory: &'m MinoFactory,
-) -> impl Iterator<Item = FullOperationWithKey<'m>> {
+) -> impl Iterator<Item = FullOperationWithKey> + 'm {
     operations.split(';').map(|s| {
         let operation_str = s.split(',').collect::<Vec<_>>();
         assert_eq!(operation_str.len(), 6);
