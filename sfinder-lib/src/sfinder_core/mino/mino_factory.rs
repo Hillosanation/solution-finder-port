@@ -15,7 +15,7 @@ impl MinoFactory {
         Self {}
     }
 
-    // TODO: move get to module level and remove MinoFactory struct
+    // TODO(#19): move get to module level and remove MinoFactory struct
     pub const fn get(&self, piece: Piece, rotate: Rotate) -> &'static Mino {
         &MINOS[MinoFactory::into_val(piece, rotate)]
     }
