@@ -39,7 +39,7 @@ pub trait MinoRotation {
         &self,
         current: &'static Mino,
         direction: RotateDirection,
-    ) -> &[Coordinate; 5] {
+    ) -> &[Coordinate] {
         self.get_patterns_from(current, direction).get_offsets()
     }
 

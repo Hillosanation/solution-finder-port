@@ -1,39 +1,35 @@
 use crate::{common::datastore::coordinate::Coordinate, extras::hash_code::HashCode};
 
-const PATTERN_SIZE: usize = 5;
-
 #[derive(PartialEq)]
 pub struct Pattern {
     // テストパターンごとに、ミノの移動量を表す配列（[x, y]）
-    offsets: [Coordinate; PATTERN_SIZE],
+    offsets: Vec<Coordinate>,
     // テストパターンごとで、スピンをMiniからRegularに昇格するパターンを`true`で表す配列
-    privilege_spins: [bool; PATTERN_SIZE],
+    privilege_spins: Vec<bool>,
 }
 
 impl Pattern {
     // Porting note: replaces noPrivilegeSpins
-    pub const fn with_no_privilege_spins(offsets: [Coordinate; PATTERN_SIZE]) -> Self {
+    pub fn with_no_privilege_spins(offsets: Vec<Coordinate>) -> Self {
+        let len = offsets.len();
         Self {
             offsets,
-            privilege_spins: [false; PATTERN_SIZE],
+            privilege_spins: vec![false; len],
         }
     }
 
-    pub const fn new(
-        offsets: [Coordinate; PATTERN_SIZE],
-        privilege_spins: [bool; PATTERN_SIZE],
-    ) -> Self {
+    pub const fn new(offsets: Vec<Coordinate>, privilege_spins: Vec<bool>) -> Self {
         Self {
             offsets,
             privilege_spins,
         }
     }
 
-    pub const fn get_offsets(&self) -> &[Coordinate; 5] {
+    pub fn get_offsets(&self) -> &[Coordinate] {
         &self.offsets
     }
 
-    pub const fn is_privilege_spins_at(&self, index: u8) -> bool {
+    pub fn is_privilege_spins_at(&self, index: u8) -> bool {
         self.privilege_spins[index as usize]
     }
 }
