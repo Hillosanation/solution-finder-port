@@ -6,3 +6,4 @@ pub mod offset_define;
 pub mod pattern;
 pub mod rotate;
 pub mod rotate_direction;
+pub mod spin_result;
