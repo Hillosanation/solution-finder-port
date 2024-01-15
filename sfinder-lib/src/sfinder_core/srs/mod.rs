@@ -1,4 +1,5 @@
 pub mod mino_rotation;
+pub mod mino_rotation_detail;
 pub mod mino_rotation_impl;
 pub mod mino_rotation_no_180_impl;
 pub mod offset;
