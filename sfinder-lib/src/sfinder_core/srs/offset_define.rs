@@ -1,6 +1,6 @@
 //! Kick table defined for SRS.
 
-use crate::common::datastore::coordinate::Coordinate;
+use crate::{common::datastore::coordinate::Coordinate, sfinder_core::mino::piece::Piece};
 
 use super::{offset::Offset, pattern::Pattern, rotate::Rotate};
 
@@ -11,6 +11,17 @@ pub enum OffsetType {
     O,
     T,
     Other,
+}
+
+impl From<Piece> for OffsetType {
+    fn from(piece: Piece) -> Self {
+        match piece {
+            Piece::I => Self::I,
+            Piece::O => Self::O,
+            Piece::T => Self::T,
+            _ => Self::Other,
+        }
+    }
 }
 
 #[rustfmt::skip]
