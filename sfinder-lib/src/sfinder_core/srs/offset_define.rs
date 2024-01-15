@@ -20,36 +20,13 @@ pub struct OffsetDefine {
 
 impl OffsetDefine {
     pub fn new(offset_type: OffsetType) -> Self {
+        #[rustfmt::skip]
         let rotate_map = match offset_type {
             OffsetType::I => [
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(-1, 0),
-                    Coordinate::new(2, 0),
-                    Coordinate::new(-1, 0),
-                    Coordinate::new(2, 0),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(-1, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 1),
-                    Coordinate::new(0, -2),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(-1, 1),
-                    Coordinate::new(1, 1),
-                    Coordinate::new(-2, 1),
-                    Coordinate::new(1, 0),
-                    Coordinate::new(-2, 0),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(0, 1),
-                    Coordinate::new(0, 1),
-                    Coordinate::new(0, 1),
-                    Coordinate::new(0, -1),
-                    Coordinate::new(0, 2),
-                ]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(-1, 0), Coordinate::new(2, 0), Coordinate::new(-1, 0), Coordinate::new(2, 0)]),
+                Offset::new(vec![Coordinate::new(-1, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 1), Coordinate::new(0, -2)]),
+                Offset::new(vec![Coordinate::new(-1, 1), Coordinate::new(1, 1), Coordinate::new(-2, 1), Coordinate::new(1, 0), Coordinate::new(-2, 0)]),
+                Offset::new(vec![Coordinate::new(0, 1), Coordinate::new(0, 1), Coordinate::new(0, 1), Coordinate::new(0, -1), Coordinate::new(0, 2)]),
             ],
             OffsetType::O => [
                 Offset::new(vec![Coordinate::new(0, 0)]),
@@ -58,64 +35,16 @@ impl OffsetDefine {
                 Offset::new(vec![Coordinate::new(-1, 0)]),
             ],
             OffsetType::T => [
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(1, 0),
-                    Coordinate::new(1, -1),
-                    Coordinate::new(0, 2),
-                    Coordinate::new(1, 2),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(-1, 0),
-                    Coordinate::new(-1, -1),
-                    Coordinate::new(0, 2),
-                    Coordinate::new(-1, 2),
-                ]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(1, 0), Coordinate::new(1, -1), Coordinate::new(0, 2), Coordinate::new(1, 2)]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(-1, 0), Coordinate::new(-1, -1), Coordinate::new(0, 2), Coordinate::new(-1, 2)]),
             ],
             OffsetType::Other => [
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(1, 0),
-                    Coordinate::new(1, -1),
-                    Coordinate::new(0, 2),
-                    Coordinate::new(1, 2),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                    Coordinate::new(0, 0),
-                ]),
-                Offset::new(vec![
-                    Coordinate::new(0, 0),
-                    Coordinate::new(-1, 0),
-                    Coordinate::new(-1, -1),
-                    Coordinate::new(0, 2),
-                    Coordinate::new(-1, 2),
-                ]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(1, 0), Coordinate::new(1, -1), Coordinate::new(0, 2), Coordinate::new(1, 2)]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
+                Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(-1, 0), Coordinate::new(-1, -1), Coordinate::new(0, 2), Coordinate::new(-1, 2)]),
             ],
         };
 
