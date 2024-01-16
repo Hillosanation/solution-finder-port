@@ -2,7 +2,7 @@ use std::cell::OnceCell;
 
 use crate::{
     common::datastore::coordinate::Coordinate, entry::common::kicks::kick_pattern::KickPatternType,
-    sfinder_core::srs::pattern::Pattern,
+    sfinder_core::srs::pattern::_Pattern,
 };
 
 use super::{kick_pattern::KickPattern, kick_type::KickType};
@@ -54,7 +54,7 @@ fn parse_to_kick_type(str: &str) -> Result<KickType, String> {
     })
 }
 
-fn parse_to_pattern(str: String) -> Result<Pattern, String> {
+fn parse_to_pattern(str: String) -> Result<_Pattern, String> {
     validate(&str)?;
 
     let brackets = detect_brackets(&str)?;
@@ -129,17 +129,13 @@ fn detect_xys(brackets: Vec<&str>) -> Result<Vec<XYMark>, String> {
         .collect()
 }
 
-fn create_pattern(xy_marks: Vec<XYMark>) -> Pattern {
-    let len = xy_marks.len();
-    let mut offsets = Vec::with_capacity(len);
-    let mut privilege_spins = Vec::with_capacity(len);
-
-    for xy_mark in xy_marks {
-        offsets.push(Coordinate::new(xy_mark.x, xy_mark.y));
-        privilege_spins.push(xy_mark.mark);
-    }
-
-    Pattern::new(offsets, privilege_spins)
+fn create_pattern(xy_marks: Vec<XYMark>) -> _Pattern {
+    _Pattern::new(
+        xy_marks
+            .into_iter()
+            .map(|xy_mark| (Coordinate::new(xy_mark.x, xy_mark.y), xy_mark.mark))
+            .collect(),
+    )
 }
 
 #[cfg(test)]
@@ -159,7 +155,7 @@ mod tests {
             key: &str,
             value: &str,
             (piece, from, to): (Piece, Rotate, Rotate),
-            pattern: Pattern,
+            pattern: _Pattern,
         ) {
             assert_eq!(
                 create_wrapper(key, value).unwrap(),
@@ -177,7 +173,7 @@ mod tests {
                 "T.NE",
                 "(0,0)",
                 (Piece::T, Rotate::Spawn, Rotate::Right),
-                Pattern::with_no_privilege_spins(vec![Coordinate::new(0, 0)]),
+                _Pattern::with_no_privilege_spins(vec![Coordinate::new(0, 0)]),
             );
         }
 
@@ -187,7 +183,7 @@ mod tests {
                 "S.ES",
                 "(1, 1), (2, 2)",
                 (Piece::S, Rotate::Right, Rotate::Reverse),
-                Pattern::with_no_privilege_spins(vec![
+                _Pattern::with_no_privilege_spins(vec![
                     Coordinate::new(1, 1),
                     Coordinate::new(2, 2),
                 ]),
@@ -200,7 +196,7 @@ mod tests {
                 "O.SW",
                 "( +0 , -0 )( +2 , -2 ) (+3,-3) ",
                 (Piece::O, Rotate::Reverse, Rotate::Left),
-                Pattern::with_no_privilege_spins(vec![
+                _Pattern::with_no_privilege_spins(vec![
                     Coordinate::new(0, 0),
                     Coordinate::new(2, -2),
                     Coordinate::new(3, -3),
@@ -214,14 +210,11 @@ mod tests {
                 "O.SW",
                 " (@ -0 , 0 )( -2 , -2 ) (@-3,-3) ",
                 (Piece::O, Rotate::Reverse, Rotate::Left),
-                Pattern::new(
-                    vec![
-                        Coordinate::new(0, 0),
-                        Coordinate::new(-2, -2),
-                        Coordinate::new(-3, -3),
-                    ],
-                    vec![true, false, true],
-                ),
+                _Pattern::new(vec![
+                    (Coordinate::new(0, 0), true),
+                    (Coordinate::new(-2, -2), false),
+                    (Coordinate::new(-3, -3), true),
+                ]),
             );
         }
 
@@ -241,7 +234,7 @@ mod tests {
             assert_eq!(reference.get_pattern(&BTreeMap::new()), None);
             assert_eq!(
                 reference.get_pattern(&fallback),
-                Some(&Pattern::with_no_privilege_spins(vec![Coordinate::new(
+                Some(&_Pattern::with_no_privilege_spins(vec![Coordinate::new(
                     0, 0
                 )]))
             );
@@ -253,7 +246,7 @@ mod tests {
                 "T.0R",
                 "(1,2)",
                 (Piece::T, Rotate::Spawn, Rotate::Right),
-                Pattern::with_no_privilege_spins(vec![Coordinate::new(1, 2)]),
+                _Pattern::with_no_privilege_spins(vec![Coordinate::new(1, 2)]),
             );
         }
     }

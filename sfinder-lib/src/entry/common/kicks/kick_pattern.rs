@@ -1,10 +1,10 @@
 use super::kick_type::KickType;
-use crate::sfinder_core::srs::pattern::Pattern;
+use crate::sfinder_core::srs::pattern::_Pattern;
 use std::collections::BTreeMap;
 
 #[cfg_attr(test, derive(Debug, PartialEq))]
 pub enum KickPatternType {
-    Fixed { pattern: Pattern },
+    Fixed { pattern: _Pattern },
     Referenced { reference_kick_type: KickType },
 }
 
@@ -44,7 +44,7 @@ impl KickPattern {
         &'a self,
         // TODO: can we just use FixedKickPattern? I don't think you need multiple layers of indirection
         fallback: &'a BTreeMap<KickType, KickPattern>,
-    ) -> Option<&Pattern> {
+    ) -> Option<&_Pattern> {
         match &self.kick_pattern_type {
             KickPatternType::Fixed { pattern } => Some(pattern),
             KickPatternType::Referenced {

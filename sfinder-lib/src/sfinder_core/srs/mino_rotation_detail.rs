@@ -1,5 +1,5 @@
 use super::{
-    mino_rotation::MinoRotation, pattern::Pattern, rotate_direction::RotateDirection,
+    mino_rotation::MinoRotation, pattern::_Pattern, rotate_direction::RotateDirection,
     spin_result::SpinResult,
 };
 use crate::sfinder_core::{
@@ -32,6 +32,7 @@ impl<'a> MinoRotationDetail<'a> {
         let after_rotate = before.get_rotate().apply(direction);
         let after = self.mino_factory.get(before.get_piece(), after_rotate);
 
+        // TODO: inline to reduce arguments
         self.get_kicks_inner(field, direction, before, after, before_x, before_y, offsets)
     }
 
@@ -43,18 +44,17 @@ impl<'a> MinoRotationDetail<'a> {
         after: &'static Mino,
         before_x: u8,
         before_y: u8,
-        offsets: &Pattern,
+        offsets: &_Pattern,
     ) -> Option<SpinResult> {
         let min_x = -after.get_min_x();
         let max_x = FIELD_WIDTH as i8 - after.get_max_x();
         let min_y = -after.get_min_y();
 
-        // TODO: we could just check for priviledge spins here
         offsets
-            .get_offsets()
+            .get_checks()
             .iter()
             .enumerate()
-            .find_map(|(index, offset)| {
+            .find_map(|(index, (offset, is_privilege_spins))| {
                 let to_x = u8::try_from(before_x as i8 + offset.x).unwrap();
                 let to_y = u8::try_from(before_y as i8 + offset.y).unwrap();
 
@@ -62,19 +62,16 @@ impl<'a> MinoRotationDetail<'a> {
                     && (to_x as i8) < max_x
                     && min_y <= (to_y as i8)
                     && field.can_put(after, to_x, to_y))
-                .then(|| (to_x, to_y, index))
-            })
-            .map(|(to_x, to_y, index)| {
-                SpinResult::new(
-                    after,
-                    to_x,
-                    to_y,
-                    index as u8,
-                    direction,
-                    // instead of here
-                    self.mino_rotation
-                        .is_privilege_spins(before, direction, index as u8),
-                )
+                .then(|| {
+                    SpinResult::new(
+                        after,
+                        to_x,
+                        to_y,
+                        index as u8,
+                        direction,
+                        *is_privilege_spins,
+                    )
+                })
             })
     }
 }

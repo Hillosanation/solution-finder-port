@@ -1,4 +1,4 @@
-use super::{pattern::Pattern, rotate::Rotate, rotate_direction::RotateDirection};
+use super::{pattern::_Pattern, rotate::Rotate, rotate_direction::RotateDirection};
 use crate::{
     common::datastore::coordinate::Coordinate,
     sfinder_core::{
@@ -9,7 +9,7 @@ use crate::{
 
 pub trait MinoRotation {
     // Porting note: refactors retrieval of map
-    fn get_map(&self, direction: RotateDirection) -> &[Pattern];
+    fn get_map(&self, direction: RotateDirection) -> &[_Pattern];
 
     fn get_kicks(
         &self,
@@ -34,18 +34,21 @@ pub trait MinoRotation {
         )
     }
 
-    // You way want to use get_offsets_from instead, if you don't need information about the privilege spins
-    fn get_patterns_from(&self, current: &'static Mino, direction: RotateDirection) -> &Pattern {
+    fn get_patterns_from(&self, current: &'static Mino, direction: RotateDirection) -> &_Pattern {
         &self.get_map(direction)[into_val(current)]
     }
 
-    // Porting note: replaces getPatternsFrom
+    // You way want to use get_patterns_from instead, and ignore the information about privilege spins
+    #[deprecated]
     fn get_offsets_from(
         &self,
         current: &'static Mino,
         direction: RotateDirection,
-    ) -> &[Coordinate] {
-        self.get_patterns_from(current, direction).get_offsets()
+    ) -> Vec<Coordinate> {
+        self.get_patterns_from(current, direction)
+            .get_offsets()
+            .copied()
+            .collect()
     }
 
     fn is_privilege_spins(
@@ -54,8 +57,7 @@ pub trait MinoRotation {
         direction: RotateDirection,
         test_pattern_index: u8,
     ) -> bool {
-        self.get_patterns_from(before, direction)
-            .is_privilege_spins_at(test_pattern_index)
+        self.get_patterns_from(before, direction).get_checks()[test_pattern_index as usize].1
     }
 
     fn supports_180(&self) -> bool;
@@ -75,23 +77,23 @@ fn _get_kicks(
     x: u8,
     y: u8,
     after: &'static Mino,
-    pattern: &Pattern,
+    pattern: &_Pattern,
 ) -> Option<Coordinate> {
-    let offsets = pattern.get_offsets();
     let min_x = -after.get_min_x();
     let max_x = FIELD_WIDTH as i8 - after.get_max_x();
     let min_y = -after.get_min_y();
 
-    offsets
-        .iter()
-        .find(|offset| {
+    pattern
+        .get_offsets()
+        .find_map(|offset| {
             let to_x = x as i8 + offset.x;
             let to_y = y as i8 + offset.y;
 
-            min_x <= to_x
+            (min_x <= to_x
                 && to_x < max_x
                 && min_y <= to_y
-                && field.can_put(after, to_x as u8, to_y as u8)
+                && field.can_put(after, to_x as u8, to_y as u8))
+            .then_some(offset)
         })
         .copied()
 }
