@@ -832,7 +832,7 @@ impl Debug for LargeField {
 
 impl PartialEq for LargeField {
     fn eq(&self, other: &Self) -> bool {
-        self as &dyn Field == other as &_
+        <dyn Field>::eq(self, other)
     }
 }
 

@@ -19,9 +19,9 @@ pub fn create(key: String, value: String) -> Result<KickPattern, String> {
     let trimmed_value = value.replace(" ", "");
 
     let kick_type = parse_to_kick_type(trimmed_key)?;
-    let kick_pattern_type = if trimmed_value.starts_with('&') {
+    let kick_pattern_type = if let Some(stripped_value) = trimmed_value.strip_prefix('&') {
         KickPatternType::Referenced {
-            reference_kick_type: parse_to_kick_type(trimmed_value.trim_start_matches('&'))?,
+            reference_kick_type: parse_to_kick_type(stripped_value)?,
         }
     } else {
         KickPatternType::Fixed {

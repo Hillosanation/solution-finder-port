@@ -106,7 +106,7 @@ impl OperationWithKey for OriginalPiece {
 
 impl MinoOperationWithKey for OriginalPiece {}
 
-impl<'a> PartialEq for OriginalPiece {
+impl PartialEq for OriginalPiece {
     fn eq(&self, other: &Self) -> bool {
         self.operation_with_key == other.operation_with_key
     }

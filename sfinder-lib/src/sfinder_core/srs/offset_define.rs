@@ -39,13 +39,7 @@ fn get_rotate_map(offset_type: OffsetType) -> [Offset; Rotate::get_size()] {
             Offset::new(vec![Coordinate::new(-1, -1)]),
             Offset::new(vec![Coordinate::new(-1, 0)]),
         ],
-        OffsetType::T => [
-            Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
-            Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(1, 0), Coordinate::new(1, -1), Coordinate::new(0, 2), Coordinate::new(1, 2)]),
-            Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
-            Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(-1, 0), Coordinate::new(-1, -1), Coordinate::new(0, 2), Coordinate::new(-1, 2)]),
-        ],
-        OffsetType::Other => [
+        OffsetType::T | OffsetType::Other => [
             Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
             Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(1, 0), Coordinate::new(1, -1), Coordinate::new(0, 2), Coordinate::new(1, 2)]),
             Offset::new(vec![Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0), Coordinate::new(0, 0)]),
