@@ -17,19 +17,19 @@ impl LargeMemory {
 impl Memory for LargeMemory {
     fn get(&self, x: u8, y: u8) -> bool {
         match y {
-            ..BORDER_LOWER => self.0 & bit_operators::get_x_mask(x, y) != 0,
-            ..BORDER_MID => self.1 & bit_operators::get_x_mask(x, y - BORDER_LOWER) != 0,
-            ..BORDER_HIGH => self.2 & bit_operators::get_x_mask(x, y - BORDER_MID) != 0,
-            _ => self.3 & bit_operators::get_x_mask(x, y - BORDER_HIGH) != 0,
+            BORDER_HIGH.. => self.3 & bit_operators::get_x_mask(x, y - BORDER_HIGH) != 0,
+            BORDER_MID.. => self.2 & bit_operators::get_x_mask(x, y - BORDER_MID) != 0,
+            BORDER_LOWER.. => self.1 & bit_operators::get_x_mask(x, y - BORDER_LOWER) != 0,
+            _ => self.0 & bit_operators::get_x_mask(x, y) != 0,
         }
     }
 
     fn set(&mut self, x: u8, y: u8) {
         match y {
-            ..BORDER_LOWER => self.0 |= bit_operators::get_x_mask(x, y),
-            ..BORDER_MID => self.1 |= bit_operators::get_x_mask(x, y - BORDER_LOWER),
-            ..BORDER_HIGH => self.2 |= bit_operators::get_x_mask(x, y - BORDER_MID),
-            _ => self.3 |= bit_operators::get_x_mask(x, y - BORDER_HIGH),
+            BORDER_HIGH.. => self.3 |= bit_operators::get_x_mask(x, y - BORDER_HIGH),
+            BORDER_MID.. => self.2 |= bit_operators::get_x_mask(x, y - BORDER_MID),
+            BORDER_LOWER.. => self.1 |= bit_operators::get_x_mask(x, y - BORDER_LOWER),
+            _ => self.0 |= bit_operators::get_x_mask(x, y),
         }
     }
 

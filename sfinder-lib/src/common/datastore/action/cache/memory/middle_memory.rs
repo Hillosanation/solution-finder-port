@@ -13,15 +13,15 @@ impl MiddleMemory {
 impl Memory for MiddleMemory {
     fn get(&self, x: u8, y: u8) -> bool {
         match y {
-            ..BOARD_HEIGHT => self.0 & bit_operators::get_x_mask(x, y) != 0,
-            _ => self.1 & bit_operators::get_x_mask(x, y - BOARD_HEIGHT) != 0,
+            BOARD_HEIGHT.. => self.1 & bit_operators::get_x_mask(x, y - BOARD_HEIGHT) != 0,
+            _ => self.0 & bit_operators::get_x_mask(x, y) != 0,
         }
     }
 
     fn set(&mut self, x: u8, y: u8) {
         match y {
-            ..BOARD_HEIGHT => self.0 |= bit_operators::get_x_mask(x, y),
-            _ => self.1 |= bit_operators::get_x_mask(x, y - BOARD_HEIGHT),
+            BOARD_HEIGHT.. => self.1 |= bit_operators::get_x_mask(x, y - BOARD_HEIGHT),
+            _ => self.0 |= bit_operators::get_x_mask(x, y),
         }
     }
 
