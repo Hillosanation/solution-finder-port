@@ -20,6 +20,11 @@ pub trait MinoRotation {
         y: u8,
         direction: RotateDirection,
     ) -> Option<Coordinate> {
+        // guard for 180 rotation
+        // TODO: so do we need to check for supported rotation directions before calling this function?
+        if direction == RotateDirection::Rotate180 && self.no_supports_180() {
+            return None;
+        }
         _get_kicks(
             field,
             x,
