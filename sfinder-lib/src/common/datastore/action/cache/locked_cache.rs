@@ -62,3 +62,57 @@ impl LockedCache {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::sfinder_core::field::field_constants::FIELD_WIDTH;
+
+    fn assert_cache(height: u8) {
+        let mut cache = LockedCache::new(height);
+
+        for y in 0..height {
+            for x in 0..FIELD_WIDTH {
+                for &rotate in Rotate::value_list() {
+                    assert!(!cache.is_visited(x, y, rotate));
+                    cache.visit(x, y, rotate);
+                    assert!(cache.is_visited(x, y, rotate));
+                    assert!(!cache.is_found(x, y, rotate));
+                    cache.found(x, y, rotate);
+                    assert!(cache.is_found(x, y, rotate));
+                }
+            }
+        }
+
+        cache.clear();
+
+        for y in 0..height {
+            for x in 0..FIELD_WIDTH {
+                for &rotate in Rotate::value_list() {
+                    assert!(!cache.is_visited(x, y, rotate));
+                    assert!(!cache.is_found(x, y, rotate));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_locked_cache_6() {
+        assert_cache(6);
+    }
+
+    #[test]
+    fn test_locked_cache_12() {
+        assert_cache(12);
+    }
+
+    #[test]
+    fn test_locked_cache_24() {
+        assert_cache(24);
+    }
+
+    #[test]
+    fn test_locked_cache_48() {
+        assert_cache(48);
+    }
+}
