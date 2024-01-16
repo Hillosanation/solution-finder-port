@@ -63,14 +63,16 @@ impl _Pattern {
         Self { checks }
     }
 
+    pub fn get_checks(&self) -> &[(Coordinate, bool)] {
+        &self.checks
+    }
+
     pub fn get_offsets(&self) -> impl Iterator<Item = &Coordinate> {
         self.checks.iter().map(|(offset, _)| offset)
     }
 
-    // Porting note: replaces getPrivilegeSpinsAt
-    // TODO: move MinoRotation functions down to Pattern
-    pub fn get_checks(&self) -> &[(Coordinate, bool)] {
-        &self.checks
+    pub fn is_privilege_spins_at(&self, index: u8) -> bool {
+        self.checks[index as usize].1
     }
 }
 

@@ -34,30 +34,9 @@ pub trait MinoRotation {
         )
     }
 
+    // Porting note: replaces getOffsetsFrom and isPrivilegeSpins, call the methods directly in Pattern instead
     fn get_patterns_from(&self, current: &'static Mino, direction: RotateDirection) -> &_Pattern {
         &self.get_map(direction)[into_val(current)]
-    }
-
-    // You way want to use get_patterns_from instead, and ignore the information about privilege spins
-    #[deprecated]
-    fn get_offsets_from(
-        &self,
-        current: &'static Mino,
-        direction: RotateDirection,
-    ) -> Vec<Coordinate> {
-        self.get_patterns_from(current, direction)
-            .get_offsets()
-            .copied()
-            .collect()
-    }
-
-    fn is_privilege_spins(
-        &self,
-        before: &'static Mino,
-        direction: RotateDirection,
-        test_pattern_index: u8,
-    ) -> bool {
-        self.get_patterns_from(before, direction).get_checks()[test_pattern_index as usize].1
     }
 
     fn supports_180(&self) -> bool;
@@ -1939,7 +1918,11 @@ mod tests {
                 .copied()
                 .map(|rotate| {
                     let mino = MinoFactory::new().get(piece, rotate);
-                    rotation.get_offsets_from(mino, direction)
+                    rotation
+                        .get_patterns_from(mino, direction)
+                        .get_offsets()
+                        .copied()
+                        .collect::<Vec<_>>()
                 })
                 .collect::<Vec<_>>();
             assert_eq!(actual, expected);
