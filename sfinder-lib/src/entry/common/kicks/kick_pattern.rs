@@ -2,28 +2,36 @@ use super::kick_type::KickType;
 use crate::sfinder_core::srs::pattern::Pattern;
 use std::collections::BTreeMap;
 
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub enum KickPatternType {
     Fixed { pattern: Pattern },
     Referenced { reference_kick_type: KickType },
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub struct KickPattern {
     kick_type: KickType,
     kick_pattern_type: KickPatternType,
 }
 
 impl KickPattern {
-    pub fn new(kick_type: KickType, kick_pattern_type: KickPatternType) -> Self {
+    // Porting note: replaces new
+    pub fn try_new(
+        kick_type: KickType,
+        kick_pattern_type: KickPatternType,
+    ) -> Result<Self, String> {
         if let KickPatternType::Referenced {
             ref reference_kick_type,
         } = kick_pattern_type
         {
-            assert_ne!(kick_type, *reference_kick_type, "Cannot refer to itself");
+            if kick_type == *reference_kick_type {
+                return Err("Cannot refer to itself".to_string());
+            }
         }
-        Self {
+        Ok(Self {
             kick_type,
             kick_pattern_type,
-        }
+        })
     }
 }
 

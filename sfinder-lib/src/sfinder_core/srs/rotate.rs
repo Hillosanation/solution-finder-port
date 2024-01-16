@@ -111,10 +111,10 @@ impl FromStr for Rotate {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "0" => Ok(Rotate::Spawn),
-            "R" => Ok(Rotate::Right),
-            "2" => Ok(Rotate::Reverse),
-            "L" => Ok(Rotate::Left),
+            "N" | "0" => Ok(Rotate::Spawn),
+            "E" | "R" => Ok(Rotate::Right),
+            "S" | "2" => Ok(Rotate::Reverse),
+            "W" | "L" => Ok(Rotate::Left),
             _ => Err(format!("Invalid rotate: {s}")),
         }
     }
