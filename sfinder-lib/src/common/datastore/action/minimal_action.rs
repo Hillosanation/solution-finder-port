@@ -1,10 +1,11 @@
 use super::action::Action;
 use crate::{extras::hash_code::HashCode, sfinder_core::srs::rotate::Rotate};
+use std::hash::Hash;
 
 /*
  * y < 24であること
  */
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct MinimalAction {
     x: u8,
     y: u8,
@@ -28,12 +29,6 @@ impl Action for MinimalAction {
 
     fn get_rotate(&self) -> Rotate {
         self.rotate
-    }
-}
-
-impl PartialEq for MinimalAction {
-    fn eq(&self, other: &Self) -> bool {
-        self.x == other.x && self.y == other.y && self.rotate == other.rotate
     }
 }
 
@@ -63,6 +58,14 @@ impl PartialOrd for MinimalAction {
         Some(self.y.cmp(&other.y))
     }
 }
+
+impl Hash for MinimalAction {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u32(self.hash_code());
+    }
+}
+
+impl nohash::IsEnabled for MinimalAction {}
 
 #[cfg(test)]
 mod tests {
