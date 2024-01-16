@@ -18,7 +18,8 @@ impl Pattern {
         }
     }
 
-    pub const fn new(offsets: Vec<Coordinate>, privilege_spins: Vec<bool>) -> Self {
+    pub fn new(offsets: Vec<Coordinate>, privilege_spins: Vec<bool>) -> Self {
+        assert_eq!(offsets.len(), privilege_spins.len());
         Self {
             offsets,
             privilege_spins,
