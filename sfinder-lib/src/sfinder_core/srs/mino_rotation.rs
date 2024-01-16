@@ -1536,9 +1536,15 @@ mod tests {
 
         mod rotate_180 {
             use super::*;
+            use crate::entry::common::kicks::factory::file_mino_rotation_factory;
+            use std::path::PathBuf;
 
             fn create_nullpomino180() -> Box<dyn MinoRotation> {
-                todo!()
+                file_mino_rotation_factory::create(PathBuf::from(
+                    std::env::var("CARGO_MANIFEST_DIR").unwrap()
+                        + "/kicks/nullpomino180.properties",
+                ))
+                .unwrap()
             }
 
             fn assert_wrapper_180(
@@ -1562,9 +1568,363 @@ mod tests {
 
             mod with_i {
                 use super::*;
+
+                #[test]
+                fn case1() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "XXXXXXXX__"
+                            + "XXXXXXX___"
+                            + "XXXXXXX___"
+                            + "XXXXXXX___"
+                            + "XXXXXXX_X_"
+                            + "XXXXXXXXX_"
+                            + "XXXXXXXXX_",
+                        &[(Piece::I, Rotate::Right, 8, 5, Some(Coordinate::new(-1, -2)))],
+                    );
+                }
+
+                #[test]
+                fn case2() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__XX______"
+                            + "___XXXXXXX"
+                            + "___XXXXXXX"
+                            + "_X_XXXXXXX"
+                            + "_X_XXXXXXX"
+                            + "_XXXXXXXXX",
+                        &[(Piece::I, Rotate::Left, 1, 4, Some(Coordinate::new(1, -1)))],
+                    );
+                }
+
+                #[test]
+                fn case3() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "_XXXXXXXXX"
+                            + "_X_XXXXXXX"
+                            + "_X_XXXXXXX"
+                            + "_X_XXXXXXX"
+                            + "_X_XXXXXXX",
+                        &[(Piece::I, Rotate::Left, 0, 1, Some(Coordinate::new(2, 1)))],
+                    );
+                }
+
+                #[test]
+                fn case4() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "__________"
+                            + "XXX____X__"
+                            + "_XXXXXXXXX"
+                            + "XXX____XXX",
+                        &[(Piece::I, Rotate::Spawn, 4, 2, Some(Coordinate::new(1, -2)))],
+                    );
+                }
+            }
+
+            mod with_o {
+                use super::*;
+
+                #[test]
+                fn case1() {
+                    assert_wrapper_180(
+                        String::new() + "__________" + "__________" + "__________" + "__________",
+                        &[
+                            (Piece::O, Rotate::Spawn, 4, 1, Some(Coordinate::new(1, 1))),
+                            (
+                                Piece::O,
+                                Rotate::Reverse,
+                                5,
+                                2,
+                                Some(Coordinate::new(-1, -1)),
+                            ),
+                            (Piece::O, Rotate::Right, 5, 2, Some(Coordinate::new(1, -1))),
+                            (Piece::O, Rotate::Left, 6, 1, Some(Coordinate::new(-1, 1))),
+                        ],
+                    );
+                }
+            }
+
+            mod with_l {
+                use super::*;
+
+                #[test]
+                fn case1() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "XX________"
+                            + "XXX___XXXX"
+                            + "XXX___XXXX"
+                            + "XX____XXXX"
+                            + "XX_XXXXXXX",
+                        &[(Piece::L, Rotate::Spawn, 3, 1, Some(Coordinate::new(0, 0)))],
+                    );
+                }
+
+                #[test]
+                fn case2() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "XX________"
+                            + "XX__XXXXXX"
+                            + "XXX_XXXXXX"
+                            + "XXX_XXXXXX"
+                            + "XXX__XXXXX",
+                        &[(Piece::L, Rotate::Left, 3, 2, Some(Coordinate::new(0, -1)))],
+                    );
+                }
+            }
+
+            mod with_j {
+                use super::*;
+
+                #[test]
+                fn case1() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "XXXXX__XXX"
+                            + "XXXXX__XXX"
+                            + "XXXXX_XXXX"
+                            + "XXXX__XXXX",
+                        &[(Piece::J, Rotate::Right, 5, 1, Some(Coordinate::new(0, 0)))],
+                    );
+                }
+            }
+
+            mod with_s {
+                use super::*;
+
+                #[test]
+                fn case1() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "XXXXXX____"
+                            + "XXXXXX____"
+                            + "XXXXXX__X_"
+                            + "XXXXX__XXX",
+                        &[(Piece::S, Rotate::Spawn, 7, 1, Some(Coordinate::new(-1, 0)))],
+                    );
+                }
+
+                #[test]
+                fn case2() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "_X____X___"
+                            + "XX__XXX___"
+                            + "XXX__XXXXX"
+                            + "XXXX_XXXXX",
+                        &[(Piece::S, Rotate::Left, 3, 2, Some(Coordinate::new(0, -1)))],
+                    );
+                }
+
+                #[test]
+                fn case3() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "____XXXXXX"
+                            + "X__XXXXXXX"
+                            + "XXXX__XXXX"
+                            + "XXX__XXXXX",
+                        &[(Piece::S, Rotate::Spawn, 2, 2, Some(Coordinate::new(2, -1)))],
+                    );
+                }
+
+                #[test]
+                fn case4() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "____XXX___"
+                            + "XXXXX_X___"
+                            + "XXXXX__X__"
+                            + "XXXXXX_XXX",
+                        &[(Piece::S, Rotate::Right, 7, 2, Some(Coordinate::new(-1, -1)))],
+                    );
+                }
+
+                #[test]
+                fn case5() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "XXXXXXX___"
+                            + "XXXXX_XX__"
+                            + "XXXXX__XX_"
+                            + "XXXXXX_XXX",
+                        &[(Piece::S, Rotate::Right, 7, 3, Some(Coordinate::new(-1, -2)))],
+                    );
+                }
+            }
+
+            mod with_z {
+                use super::*;
+
+                #[test]
+                fn case1() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "__________"
+                            + "X____XXXXX"
+                            + "X____XXXXX"
+                            + "XXXX__XXXX",
+                        &[(Piece::Z, Rotate::Spawn, 3, 1, Some(Coordinate::new(1, 0)))],
+                    );
+                }
+
+                #[test]
+                fn case2() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "__________"
+                            + "XXXXXX_XXX"
+                            + "XXXXX__XXX"
+                            + "XXXXX_XXXX",
+                        &[(Piece::Z, Rotate::Right, 6, 3, Some(Coordinate::new(0, -2)))],
+                    );
+                }
+
+                #[test]
+                fn case3() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "X_________"
+                            + "X__XXXXXXX"
+                            + "X__X_XXXXX"
+                            + "X_X__XXXXX"
+                            + "XXX_XXXXXX",
+                        &[(Piece::Z, Rotate::Left, 2, 2, Some(Coordinate::new(1, -1)))],
+                    );
+                }
+
+                #[test]
+                fn case4() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "___XXXXXXX"
+                            + "__XX_XXXXX"
+                            + "_XX__XXXXX"
+                            + "XXX_XXXXXX",
+                        &[(Piece::Z, Rotate::Left, 2, 3, Some(Coordinate::new(1, -2)))],
+                    );
+                }
+            }
+
+            mod with_t {
+                use super::*;
+
+                #[test]
+                fn case1() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "__________"
+                            + "XX___XXXXX"
+                            + "XXXX__XXXX"
+                            + "XXXX_XXXXX",
+                        &[(Piece::T, Rotate::Left, 4, 2, Some(Coordinate::new(0, -1)))],
+                    );
+                }
+
+                #[test]
+                fn case2() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "_____XXXXX"
+                            + "_____XXXXX"
+                            + "XXXX_XXXXX"
+                            + "XXXX__XXXX"
+                            + "XXXX_XXXXX",
+                        &[(Piece::T, Rotate::Left, 4, 3, Some(Coordinate::new(0, -2)))],
+                    );
+                }
+
+                #[test]
+                fn case3() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "XX___XX___"
+                            + "XXX__XX___"
+                            + "X_____XXXX"
+                            + "XX_XXXXXXX",
+                        &[(Piece::T, Rotate::Spawn, 4, 1, Some(Coordinate::new(-2, 0)))],
+                    );
+                }
+
+                #[test]
+                fn case4() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "___X______"
+                            + "XXXX___XX_"
+                            + "XXXX__XXXX"
+                            + "X______XXX"
+                            + "XX_XXXXXXX",
+                        &[(Piece::T, Rotate::Spawn, 5, 1, Some(Coordinate::new(-3, 0)))],
+                    );
+                }
+
+                #[test]
+                fn case5() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "XX___XXXXX"
+                            + "XXX___XXXX"
+                            + "X___XXXXXX"
+                            + "XX_XXXXXXX",
+                        &[(Piece::T, Rotate::Spawn, 4, 2, Some(Coordinate::new(-2, -1)))],
+                    );
+                }
+
+                #[test]
+                fn case6() {
+                    assert_wrapper_180(
+                        String::new()
+                            + "__________"
+                            + "__________"
+                            + "XX________"
+                            + "XXX___XXXX"
+                            + "X___XXXXXX"
+                            + "XX_XXXXXXX",
+                        &[(Piece::T, Rotate::Spawn, 4, 2, Some(Coordinate::new(-2, -1)))],
+                    );
+                }
             }
         }
     }
+
     mod offset {
         use super::*;
 
@@ -1673,11 +2033,11 @@ mod tests {
             #[test]
             fn cw() {
                 #[rustfmt::skip]
-            test_wrapper(
-                Piece::O,
-                RotateDirection::Clockwise,
-                vec![&[Coordinate::new(0, 1)], &[Coordinate::new(1, 0)], &[Coordinate::new(0, -1)], &[Coordinate::new(-1, 0)]],
-            );
+                test_wrapper(
+                    Piece::O,
+                    RotateDirection::Clockwise,
+                    vec![&[Coordinate::new(0, 1)], &[Coordinate::new(1, 0)], &[Coordinate::new(0, -1)], &[Coordinate::new(-1, 0)]],
+                );
             }
         }
     }
