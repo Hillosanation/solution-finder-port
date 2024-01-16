@@ -1,6 +1,5 @@
 use super::{
-    mino_rotation::MinoRotation, pattern::_Pattern, rotate_direction::RotateDirection,
-    spin_result::SpinResult,
+    mino_rotation::MinoRotation, rotate_direction::RotateDirection, spin_result::SpinResult,
 };
 use crate::sfinder_core::{
     field::{field::Field, field_constants::FIELD_WIDTH},
@@ -32,47 +31,33 @@ impl<'a> MinoRotationDetail<'a> {
         let after_rotate = before.get_rotate().apply(direction);
         let after = self.mino_factory.get(before.get_piece(), after_rotate);
 
-        // TODO: inline to reduce arguments
-        self.get_kicks_inner(field, direction, before, after, before_x, before_y, offsets)
-    }
+        {
+            let min_x = -after.get_min_x();
+            let max_x = FIELD_WIDTH as i8 - after.get_max_x();
+            let min_y = -after.get_min_y();
 
-    fn get_kicks_inner(
-        &self,
-        field: &dyn Field,
-        direction: RotateDirection,
-        before: &'static Mino,
-        after: &'static Mino,
-        before_x: u8,
-        before_y: u8,
-        offsets: &_Pattern,
-    ) -> Option<SpinResult> {
-        let min_x = -after.get_min_x();
-        let max_x = FIELD_WIDTH as i8 - after.get_max_x();
-        let min_y = -after.get_min_y();
+            offsets.get_checks().iter().enumerate().find_map(
+                |(index, (offset, is_privilege_spins))| {
+                    let to_x = u8::try_from(before_x as i8 + offset.x).unwrap();
+                    let to_y = u8::try_from(before_y as i8 + offset.y).unwrap();
 
-        offsets
-            .get_checks()
-            .iter()
-            .enumerate()
-            .find_map(|(index, (offset, is_privilege_spins))| {
-                let to_x = u8::try_from(before_x as i8 + offset.x).unwrap();
-                let to_y = u8::try_from(before_y as i8 + offset.y).unwrap();
-
-                (min_x <= (to_x as i8)
-                    && (to_x as i8) < max_x
-                    && min_y <= (to_y as i8)
-                    && field.can_put(after, to_x, to_y))
-                .then(|| {
-                    SpinResult::new(
-                        after,
-                        to_x,
-                        to_y,
-                        index as u8,
-                        direction,
-                        *is_privilege_spins,
-                    )
-                })
-            })
+                    (min_x <= (to_x as i8)
+                        && (to_x as i8) < max_x
+                        && min_y <= (to_y as i8)
+                        && field.can_put(after, to_x, to_y))
+                    .then(|| {
+                        SpinResult::new(
+                            after,
+                            to_x,
+                            to_y,
+                            index as u8,
+                            direction,
+                            *is_privilege_spins,
+                        )
+                    })
+                },
+            )
+        }
     }
 }
 
