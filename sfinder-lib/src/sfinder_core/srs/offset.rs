@@ -1,4 +1,4 @@
-use super::pattern::_Pattern;
+use super::pattern::Pattern;
 use crate::common::datastore::coordinate::Coordinate;
 
 pub struct Offset {
@@ -10,16 +10,16 @@ impl Offset {
         Self { offsets }
     }
 
-    pub fn to_pattern(&self, other: &Self) -> _Pattern {
-        _Pattern::with_no_privilege_spins(self.create_pattern_array(other))
+    pub fn to_pattern(&self, other: &Self) -> Pattern {
+        Pattern::with_no_privilege_spins(self.create_pattern_array(other))
     }
 
     pub fn to_pattern_with_privilege_spin(
         &self,
         other: &Self,
         privilege_spin_index: u8,
-    ) -> _Pattern {
-        _Pattern::new(
+    ) -> Pattern {
+        Pattern::new(
             self.create_pattern_array(other)
                 .into_iter()
                 .enumerate()

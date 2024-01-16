@@ -1,4 +1,4 @@
-use super::{pattern::_Pattern, rotate::Rotate, rotate_direction::RotateDirection};
+use super::{pattern::Pattern, rotate::Rotate, rotate_direction::RotateDirection};
 use crate::{
     common::datastore::coordinate::Coordinate,
     sfinder_core::{
@@ -9,7 +9,7 @@ use crate::{
 
 pub trait MinoRotation {
     // Porting note: refactors retrieval of map
-    fn get_map(&self, direction: RotateDirection) -> &[_Pattern];
+    fn get_map(&self, direction: RotateDirection) -> &[Pattern];
 
     fn get_kicks(
         &self,
@@ -35,7 +35,7 @@ pub trait MinoRotation {
     }
 
     // Porting note: replaces getOffsetsFrom and isPrivilegeSpins, call the methods directly in Pattern instead
-    fn get_patterns_from(&self, current: &'static Mino, direction: RotateDirection) -> &_Pattern {
+    fn get_patterns_from(&self, current: &'static Mino, direction: RotateDirection) -> &Pattern {
         &self.get_map(direction)[into_val(current)]
     }
 
@@ -56,7 +56,7 @@ fn _get_kicks(
     x: u8,
     y: u8,
     after: &'static Mino,
-    pattern: &_Pattern,
+    pattern: &Pattern,
 ) -> Option<Coordinate> {
     let min_x = -after.get_min_x();
     let max_x = FIELD_WIDTH as i8 - after.get_max_x();

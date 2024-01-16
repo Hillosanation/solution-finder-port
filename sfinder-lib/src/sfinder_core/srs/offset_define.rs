@@ -2,7 +2,7 @@
 
 use crate::{common::datastore::coordinate::Coordinate, sfinder_core::mino::piece::Piece};
 
-use super::{offset::Offset, pattern::_Pattern, rotate::Rotate};
+use super::{offset::Offset, pattern::Pattern, rotate::Rotate};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
@@ -49,7 +49,7 @@ fn get_rotate_map(offset_type: OffsetType) -> [Offset; Rotate::get_size()] {
 }
 
 // Porting note: replaces getPattern
-pub fn create_pattern(offset_type: OffsetType, current: Rotate, next: Rotate) -> _Pattern {
+pub fn create_pattern(offset_type: OffsetType, current: Rotate, next: Rotate) -> Pattern {
     let rotate_map = get_rotate_map(offset_type);
 
     // SRSでは、TSTフォームはRegular判定にする

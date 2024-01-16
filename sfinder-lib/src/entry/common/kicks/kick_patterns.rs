@@ -1,7 +1,7 @@
 use super::{kick_pattern::KickPattern, kick_type::KickType};
 use crate::sfinder_core::{
     mino::piece::Piece,
-    srs::{pattern::_Pattern, rotate::Rotate},
+    srs::{pattern::Pattern, rotate::Rotate},
 };
 use std::collections::BTreeMap;
 
@@ -19,7 +19,7 @@ impl KickPatterns {
         }
     }
 
-    pub fn get_pattern(&self, piece: Piece, from: Rotate, to: Rotate) -> Option<&_Pattern> {
+    pub fn get_pattern(&self, piece: Piece, from: Rotate, to: Rotate) -> Option<&Pattern> {
         self.kick_patterns
             .get(&KickType { piece, from, to })?
             .get_pattern(&self.kick_patterns)

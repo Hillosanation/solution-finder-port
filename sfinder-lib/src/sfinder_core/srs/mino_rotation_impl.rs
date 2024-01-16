@@ -1,20 +1,20 @@
 use super::{
-    mino_rotation::MinoRotation, pattern::_Pattern, rotate::Rotate,
+    mino_rotation::MinoRotation, pattern::Pattern, rotate::Rotate,
     rotate_direction::RotateDirection,
 };
 use crate::sfinder_core::mino::piece::Piece;
 
 pub struct MinoRotationImpl {
-    cw_map: [_Pattern; Piece::get_size() * Rotate::get_size()],
-    ccw_map: [_Pattern; Piece::get_size() * Rotate::get_size()],
-    rotate_180_map: [_Pattern; Piece::get_size() * Rotate::get_size()],
+    cw_map: [Pattern; Piece::get_size() * Rotate::get_size()],
+    ccw_map: [Pattern; Piece::get_size() * Rotate::get_size()],
+    rotate_180_map: [Pattern; Piece::get_size() * Rotate::get_size()],
 }
 
 impl MinoRotationImpl {
     pub fn new(
-        cw_map: [_Pattern; Piece::get_size() * Rotate::get_size()],
-        ccw_map: [_Pattern; Piece::get_size() * Rotate::get_size()],
-        rotate_180_map: [_Pattern; Piece::get_size() * Rotate::get_size()],
+        cw_map: [Pattern; Piece::get_size() * Rotate::get_size()],
+        ccw_map: [Pattern; Piece::get_size() * Rotate::get_size()],
+        rotate_180_map: [Pattern; Piece::get_size() * Rotate::get_size()],
     ) -> Self {
         Self {
             cw_map,
@@ -25,7 +25,7 @@ impl MinoRotationImpl {
 }
 
 impl MinoRotation for MinoRotationImpl {
-    fn get_map(&self, direction: RotateDirection) -> &[_Pattern] {
+    fn get_map(&self, direction: RotateDirection) -> &[Pattern] {
         match direction {
             RotateDirection::Clockwise => &self.cw_map,
             RotateDirection::CounterClockwise => &self.ccw_map,

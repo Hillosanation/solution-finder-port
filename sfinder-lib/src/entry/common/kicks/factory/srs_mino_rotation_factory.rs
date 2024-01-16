@@ -4,7 +4,7 @@ use crate::sfinder_core::{
         mino_rotation::MinoRotation,
         mino_rotation_no_180_impl::MinoRotationNo180Impl,
         offset_define::{self, OffsetType},
-        pattern::_Pattern,
+        pattern::Pattern,
         rotate::Rotate,
         rotate_direction::RotateDirection,
     },
@@ -12,7 +12,7 @@ use crate::sfinder_core::{
 
 // Porting note: moved functions to module level, since MinoRotation is only generated once at the start, I am changing this to generate lazily
 
-fn create_map(direction: RotateDirection) -> [_Pattern; Piece::get_size() * Rotate::get_size()] {
+fn create_map(direction: RotateDirection) -> [Pattern; Piece::get_size() * Rotate::get_size()] {
     std::array::from_fn(|i| {
         let piece = Piece::new((i / Rotate::get_size()) as _);
         let rotate = Rotate::new((i % Rotate::get_size()) as _);
@@ -21,7 +21,7 @@ fn create_map(direction: RotateDirection) -> [_Pattern; Piece::get_size() * Rota
     })
 }
 
-fn get_pattern(piece: Piece, current: Rotate, next: Rotate) -> _Pattern {
+fn get_pattern(piece: Piece, current: Rotate, next: Rotate) -> Pattern {
     offset_define::create_pattern(OffsetType::from(piece), current, next)
 }
 

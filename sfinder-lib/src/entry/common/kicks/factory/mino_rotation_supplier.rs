@@ -4,13 +4,13 @@ use crate::{
         mino::piece::Piece,
         srs::{
             mino_rotation::MinoRotation, mino_rotation_impl::MinoRotationImpl,
-            mino_rotation_no_180_impl::MinoRotationNo180Impl, pattern::_Pattern, rotate::Rotate,
+            mino_rotation_no_180_impl::MinoRotationNo180Impl, pattern::Pattern, rotate::Rotate,
             rotate_direction::RotateDirection,
         },
     },
 };
 
-type MapResult = Result<[_Pattern; Piece::get_size() * Rotate::get_size()], KickType>;
+type MapResult = Result<[Pattern; Piece::get_size() * Rotate::get_size()], KickType>;
 
 const SIZE_90_ONLY: usize = Piece::get_size() * Rotate::get_size() * 2;
 const SIZE_WITH_180: usize = Piece::get_size() * Rotate::get_size() * 3;
