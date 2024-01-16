@@ -2,6 +2,7 @@ use super::{rotate::Rotate, rotate_direction::RotateDirection};
 use crate::sfinder_core::mino::mino::Mino;
 
 // Porting note: replaces SuccessSpinResult, Option<T> is used instead of NoneSpinResult
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub struct SpinResult {
     after: &'static Mino, // only Rotate is used
     pub x: u8,
