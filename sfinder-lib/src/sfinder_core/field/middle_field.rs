@@ -20,10 +20,6 @@ enum Position {
 pub struct MiddleField(u64, u64);
 
 impl MiddleField {
-    pub fn new() -> Self {
-        Self(0, 0)
-    }
-
     pub fn from_parts(low: u64, high: u64) -> Self {
         Self(low, high)
     }
@@ -57,11 +53,6 @@ impl MiddleField {
             | bit_operators::board_shl(new_x_board_high, BOARD_HEIGHT - delete_row_low))
             & VALID_BOARD_RANGE;
         self.1 = bit_operators::board_shr(new_x_board_high, delete_row_low);
-    }
-
-    fn clear_all(&mut self) {
-        self.0 = 0;
-        self.1 = 0;
     }
 
     fn fill_all(&mut self) {
@@ -104,6 +95,10 @@ impl From<MiddleField> for (u64, u64) {
 }
 
 impl Field for MiddleField {
+    fn new() -> Self {
+        Self(0, 0)
+    }
+
     fn get_max_field_height(&self) -> u8 {
         MAX_FIELD_HEIGHT
     }
@@ -124,6 +119,11 @@ impl Field for MiddleField {
             Position::Low(y_off) => self.0 &= !bit_operators::get_x_mask(x, y_off),
             Position::High(y_off) => self.1 &= !bit_operators::get_x_mask(x, y_off),
         }
+    }
+
+    fn clear_all(&mut self) {
+        self.0 = 0;
+        self.1 = 0;
     }
 
     fn put(&mut self, mino: &Mino, x: u8, y: u8) {

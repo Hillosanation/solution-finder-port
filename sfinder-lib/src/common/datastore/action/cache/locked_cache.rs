@@ -1,9 +1,13 @@
-use super::memory::{memory::Memory, small_memory::SmallMemory};
+use super::memory::{array_memory::ArrayMemory, memory::Memory};
 use crate::{
-    common::datastore::action::cache::memory::{
-        array_memory::ArrayMemory, large_memory::LargeMemory, middle_memory::MiddleMemory,
+    common::datastore::action::cache::memory::field_memory::FieldMemory,
+    sfinder_core::{
+        field::{
+            field_constants::BOARD_HEIGHT, large_field::LargeField, middle_field::MiddleField,
+            small_field::SmallField,
+        },
+        srs::rotate::Rotate,
     },
-    sfinder_core::{field::field_constants::BOARD_HEIGHT, srs::rotate::Rotate},
 };
 
 pub struct LockedCache {
@@ -19,14 +23,15 @@ impl LockedCache {
         }
     }
 
+    // TODO: I think this is the only place FieldMemory is created, so the Field implementations have to be imported here
     fn create_memory(height: u8) -> Box<dyn Memory> {
         const MIDDLE_HEIGHT: u8 = BOARD_HEIGHT * 2;
-        const LARGE_HEIGHT: u8 = BOARD_HEIGHT * 3;
+        const LARGE_HEIGHT: u8 = BOARD_HEIGHT * 4;
 
         match height {
-            ..=BOARD_HEIGHT => Box::new(SmallMemory::new()),
-            ..=MIDDLE_HEIGHT => Box::new(MiddleMemory::new()),
-            ..=LARGE_HEIGHT => Box::new(LargeMemory::new()),
+            ..=BOARD_HEIGHT => Box::new(FieldMemory::<SmallField>::new()),
+            ..=MIDDLE_HEIGHT => Box::new(FieldMemory::<MiddleField>::new()),
+            ..=LARGE_HEIGHT => Box::new(FieldMemory::<LargeField>::new()),
             _ => Box::new(ArrayMemory::new(height)),
         }
     }

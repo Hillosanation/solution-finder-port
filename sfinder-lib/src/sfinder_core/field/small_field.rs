@@ -14,10 +14,6 @@ pub const MAX_FIELD_HEIGHT: u8 = BOARD_HEIGHT;
 pub struct SmallField(u64);
 
 impl SmallField {
-    pub fn new() -> Self {
-        Self(0)
-    }
-
     pub fn get_x_board(&self) -> u64 {
         self.0
     }
@@ -36,6 +32,10 @@ impl From<SmallField> for u64 {
 }
 
 impl Field for SmallField {
+    fn new() -> Self {
+        Self(0)
+    }
+
     fn get_max_field_height(&self) -> u8 {
         MAX_FIELD_HEIGHT
     }
@@ -50,6 +50,10 @@ impl Field for SmallField {
 
     fn remove_block(&mut self, x: u8, y: u8) {
         self.0 &= !bit_operators::get_x_mask(x, y);
+    }
+
+    fn clear_all(&mut self) {
+        self.0 = 0;
     }
 
     fn put(&mut self, mino: &Mino, x: u8, y: u8) {

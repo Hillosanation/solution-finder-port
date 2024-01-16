@@ -26,10 +26,6 @@ enum Position {
 pub struct LargeField(u64, u64, u64, u64);
 
 impl LargeField {
-    pub fn new() -> Self {
-        Self(0, 0, 0, 0)
-    }
-
     pub fn from_parts(low: u64, mid_low: u64, mid_high: u64, high: u64) -> Self {
         Self(low, mid_low, mid_high, high)
     }
@@ -113,13 +109,6 @@ impl LargeField {
         }
     }
 
-    fn clear_all(&mut self) {
-        self.0 = 0;
-        self.1 = 0;
-        self.2 = 0;
-        self.3 = 0;
-    }
-
     fn fill_all(&mut self) {
         self.0 = VALID_BOARD_RANGE;
         self.1 = VALID_BOARD_RANGE;
@@ -193,6 +182,10 @@ impl LargeField {
 }
 
 impl Field for LargeField {
+    fn new() -> Self {
+        Self(0, 0, 0, 0)
+    }
+
     fn get_max_field_height(&self) -> u8 {
         MAX_FIELD_HEIGHT
     }
@@ -219,6 +212,12 @@ impl Field for LargeField {
         }
     }
 
+    fn clear_all(&mut self) {
+        self.0 = 0;
+        self.1 = 0;
+        self.2 = 0;
+        self.3 = 0;
+    }
     fn put(&mut self, mino: &Mino, x: u8, y: u8) {
         match Self::select(y) {
             Position::Low(y_off) => {
