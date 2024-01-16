@@ -19,14 +19,14 @@ impl KickPatterns {
         }
     }
 
-    fn get_pattern(&self, piece: Piece, from: Rotate, to: Rotate) -> Option<&Pattern> {
+    pub fn get_pattern(&self, piece: Piece, from: Rotate, to: Rotate) -> Option<&Pattern> {
         self.kick_patterns
             .get(&KickType { piece, from, to })?
             .get_pattern(&self.kick_patterns)
     }
 
     // Porting note: replaces size
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.kick_patterns.len()
     }
 }

@@ -1,6 +1,6 @@
 use crate::{common::datastore::coordinate::Coordinate, extras::hash_code::HashCode};
 
-#[derive(PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Pattern {
     // テストパターンごとに、ミノの移動量を表す配列（[x, y]）
     offsets: Vec<Coordinate>,

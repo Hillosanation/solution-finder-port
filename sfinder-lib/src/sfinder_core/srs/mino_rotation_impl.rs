@@ -11,7 +11,7 @@ pub struct MinoRotationImpl {
 }
 
 impl MinoRotationImpl {
-    fn new(
+    pub fn new(
         cw_map: [Pattern; Piece::get_size() * Rotate::get_size()],
         ccw_map: [Pattern; Piece::get_size() * Rotate::get_size()],
         rotate_180_map: [Pattern; Piece::get_size() * Rotate::get_size()],
