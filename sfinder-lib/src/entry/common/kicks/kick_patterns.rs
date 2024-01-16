@@ -1,4 +1,8 @@
 use super::{kick_pattern::KickPattern, kick_type::KickType};
+use crate::sfinder_core::{
+    mino::piece::Piece,
+    srs::{pattern::Pattern, rotate::Rotate},
+};
 use std::collections::BTreeMap;
 
 pub struct KickPatterns {
@@ -10,9 +14,19 @@ impl KickPatterns {
         Self {
             kick_patterns: kick_patterns
                 .into_iter()
-                // TODO: just sort by overriding Ord of KickPattern and collect into BTreeSet
                 .map(|kick_pattern| (kick_pattern.get_kick_type().clone(), kick_pattern))
                 .collect(),
         }
+    }
+
+    fn get_pattern(&self, piece: Piece, from: Rotate, to: Rotate) -> Option<&Pattern> {
+        self.kick_patterns
+            .get(&KickType { piece, from, to })?
+            .get_pattern(&self.kick_patterns)
+    }
+
+    // Porting note: replaces size
+    fn len(&self) -> usize {
+        self.kick_patterns.len()
     }
 }
