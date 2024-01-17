@@ -62,16 +62,16 @@ impl MinoShifter {
     }
 
     // Used by Reachable
-    // TODO(#17): it's more convenient if this also returns the action itself, since we loop over all congruent actions later.
     // Porting note: replaces enumerateSameOtherActions
-    pub fn enumerate_other_congruent_actions(
+    /// Porting note: Note that this also adds the current action into the result, see #17.
+    pub fn congruent_actions(
         &self,
         piece: Piece,
         rotate: Rotate,
         x: u8,
         y: u8,
     ) -> Vec<MinimalAction> {
-        self.transformers[piece as usize].enumerate_others(x, y, rotate)
+        self.transformers[piece as usize].congruent_actions(x, y, rotate)
     }
 
     // Porting note: this is usually iterated over immediately anyways, so just return a Vec instead of HashSet.
@@ -125,12 +125,15 @@ mod tests {
     fn check_same_other_actions(input: Vec<((Piece, Rotate, u8, u8), Vec<MinimalAction>)>) {
         let shifter = MinoShifter::new();
 
-        for ((piece, rotate, x, y), expected) in input {
-            let result = shifter.enumerate_other_congruent_actions(piece, rotate, x, y);
+        for ((piece, rotate, x, y), expected_others) in input {
+            let result = shifter.congruent_actions(piece, rotate, x, y);
+
+            assert_eq!(expected_others.len() + 1, result.len());
             assert!(
-                expected.iter().all(|action| result.contains(action)),
-                "{result:?} does not contain all of {expected:?}",
+                expected_others.iter().all(|action| result.contains(action)),
+                "{result:?} does not contain all of {expected_others:?}",
             );
+            assert!(result.contains(&MinimalAction::new(x, y, rotate)));
         }
     }
 

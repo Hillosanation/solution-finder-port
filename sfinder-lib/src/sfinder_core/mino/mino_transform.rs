@@ -73,7 +73,8 @@ impl MinoTransform {
         )
     }
 
-    pub fn enumerate_others(&self, x: u8, y: u8, rotate: Rotate) -> Vec<MinimalAction> {
+    #[deprecated]
+    fn enumerate_others(&self, x: u8, y: u8, rotate: Rotate) -> Vec<MinimalAction> {
         let index = rotate as usize;
         let new_x = x as i8 + self.offsets[index].x;
         let new_y = y as i8 + self.offsets[index].y;
@@ -90,6 +91,28 @@ impl MinoTransform {
                     prev_rotate,
                 )
             })
+            .collect()
+    }
+
+    pub fn congruent_actions(&self, x: u8, y: u8, rotate: Rotate) -> Vec<MinimalAction> {
+        let index = rotate as usize;
+        let new_x = x as i8 + self.offsets[index].x;
+        let new_y = y as i8 + self.offsets[index].y;
+
+        self.reverse_map[index]
+            .iter()
+            .copied()
+            .map(|prev_rotate| {
+                let prev_index = prev_rotate as usize;
+                // Assuming the provided Action is valid, this Action is also valid, and will not panic.
+                MinimalAction::new(
+                    u8::try_from(new_x - self.offsets[prev_index].x).unwrap(),
+                    u8::try_from(new_y - self.offsets[prev_index].y).unwrap(),
+                    prev_rotate,
+                )
+            })
+            // this adds the original action to the list, without changing reverse_map
+            .chain(std::iter::once(MinimalAction::new(x, y, rotate)))
             .collect()
     }
 
