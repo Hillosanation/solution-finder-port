@@ -181,9 +181,10 @@ impl Candidate for LockedCandidate<'_> {
                     ..u8::try_from(valid_height as i8 - mino.get_max_y()).unwrap())
                     .rev()
                 {
-                    // dbg!(x, y, piece, rotate, field);
                     if field.can_put(mino, x, y) && field.is_on_ground(mino, x, y) {
                         if self.check(field, mino, x, y, FromDirection::None) {
+                            // println!("passed, {:?}", (piece, rotate, x, y));
+
                             let action = self
                                 .mino_shifter
                                 .create_canonical_action(piece, rotate, x, y);
@@ -206,8 +207,11 @@ mod tests {
     use crate::{
         common::datastore::action::action::Action,
         entry::common::kicks::factory::srs_mino_rotation_factory,
-        sfinder_core::{action::candidate::candidate_facade, field::field_factory},
-        sfinder_lib::randoms,
+        sfinder_core::{
+            action::{candidate::candidate_facade, reachable::reachable_facade},
+            field::{field_factory, field_view},
+        },
+        sfinder_lib::{coordinate_walker, randoms},
     };
     use rand::{thread_rng, Rng};
     use std::collections::HashSet;
@@ -363,7 +367,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "Reachable"]
     fn test_random() {
         let mut rngs = thread_rng();
 
@@ -386,7 +389,51 @@ mod tests {
             );
             let actions = candidates.search(field.as_ref(), piece, height);
 
-            todo!("Reachable")
+            // println!("{actions:?}");
+
+            let mut reachable = reachable_facade::create_90_locked(
+                &mino_factory,
+                &mino_shifter,
+                mino_rotation.as_ref(),
+                height,
+            );
+
+            for &rotate in Rotate::value_list() {
+                // dbg!((rotate, height));
+                let mino = mino_factory.get(piece, rotate);
+                for (x, y) in coordinate_walker::walk(mino, height) {
+                    // {
+                    //     println!("{:?}", (piece, rotate, x, y));
+                    //     println!("{}", field_view::to_string(field.as_ref()));
+                    //     println!("%%%%%%%%%%");
+                    //     let mut mino_field = field_factory::create_field(height);
+                    //     mino_field.put(mino, x, y);
+                    //     println!("{field:?}");
+                    //     println!("{}", field_view::to_reduced_string(mino_field.as_ref()));
+                    // }
+
+                    let can_put = field.can_put(mino, x, y);
+                    let on_ground = field.is_on_ground(mino, x, y);
+                    let reachable = can_put && reachable.checks(field.as_ref(), mino, x, y, height);
+
+                    let canonical_action =
+                        mino_shifter.create_canonical_action(piece, rotate, x, y);
+                    let is_candidate = actions.contains(&canonical_action);
+                    let expected = can_put && on_ground && reachable;
+
+                    assert_eq!(
+                        is_candidate,
+                        expected,
+                        "{actions:?}\n{can_put} {on_ground} {reachable}\n{}\n%%%%%%%%%%\n{}",
+                        field_view::to_string(field.as_ref()),
+                        {
+                            let mut mino_field = field_factory::create_field(height);
+                            mino_field.put(mino, x, y);
+                            field_view::to_reduced_string(mino_field.as_ref())
+                        }
+                    );
+                }
+            }
         }
     }
 }
