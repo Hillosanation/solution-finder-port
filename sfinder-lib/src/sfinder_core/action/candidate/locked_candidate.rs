@@ -8,7 +8,7 @@ use crate::{
         srs::{mino_rotation::MinoRotation, rotate::Rotate, rotate_direction::RotateDirection},
     },
 };
-use nohash::{BuildNoHashHasher, IntSet, NoHashHasher};
+use nohash::{BuildNoHashHasher, IntSet};
 
 pub struct LockedCandidate<'a> {
     mino_factory: &'a MinoFactory,

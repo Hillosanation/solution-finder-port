@@ -25,6 +25,6 @@ impl Memory for ArrayMemory {
     }
 
     fn clear(&mut self) {
-        self.data = vec![0; self.data.len()];
+        self.data.fill(0);
     }
 }
