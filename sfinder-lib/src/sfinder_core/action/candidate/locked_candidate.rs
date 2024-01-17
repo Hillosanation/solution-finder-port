@@ -218,16 +218,14 @@ impl ILockedCandidate for LockedCandidate<'_> {}
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
-    use rand::{thread_rng, Rng};
-
     use crate::{
-        common::datastore::action::{action::Action, candidate::candidate_facade},
+        common::datastore::action::action::Action,
         entry::common::kicks::factory::srs_mino_rotation_factory,
-        sfinder_core::field::field_factory,
+        sfinder_core::{action::candidate::candidate_facade, field::field_factory},
         sfinder_lib::randoms,
     };
+    use rand::{thread_rng, Rng};
+    use std::collections::HashSet;
 
     use super::*;
 
