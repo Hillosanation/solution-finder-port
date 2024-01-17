@@ -2,19 +2,13 @@ use super::candidate::{Candidate, ILockedCandidate};
 use crate::{
     common::datastore::action::{cache::locked_cache::LockedCache, minimal_action::MinimalAction},
     sfinder_core::{
+        action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
         mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
         srs::{mino_rotation::MinoRotation, rotate::Rotate, rotate_direction::RotateDirection},
     },
 };
-use nohash::IntSet;
-
-#[derive(PartialEq)]
-enum FromDirection {
-    None,
-    Left,
-    Right,
-}
+use nohash::{BuildNoHashHasher, IntSet, NoHashHasher};
 
 pub struct LockedCandidate<'a> {
     mino_factory: &'a MinoFactory,
@@ -146,7 +140,7 @@ impl<'a> LockedCandidate<'a> {
                 }
             })
             .any(|(pattern, from_x, from_y)| {
-                Self::can_put_mino_in_field(field, mino, from_x, from_y)
+                can_put_mino_in_field(field, mino, from_x, from_y)
                     && self.mino_rotation.get_kicks(
                         field,
                         mino_before,
@@ -164,14 +158,6 @@ impl<'a> LockedCandidate<'a> {
 
         result
     }
-
-    fn can_put_mino_in_field(field: &dyn Field, mino: &Mino, x: u8, y: u8) -> bool {
-        -mino.get_min_x() as u8 <= x
-            && x < FIELD_WIDTH  - mino.get_max_x() as u8
-            && -mino.get_min_y() as u8 <= y
-            // casts guarded by previous checks
-            && field.can_put(mino, x, y)
-    }
 }
 
 impl Candidate for LockedCandidate<'_> {
@@ -184,8 +170,7 @@ impl Candidate for LockedCandidate<'_> {
         self.appear_y = valid_height;
         self.locked_cache.clear();
 
-        let mut actions: IntSet<MinimalAction> =
-            IntSet::with_capacity_and_hasher(2, Default::default());
+        let mut actions = IntSet::with_hasher(BuildNoHashHasher::default());
 
         for &rotate in Rotate::value_list() {
             let mino = self.mino_factory.get(piece, rotate);
