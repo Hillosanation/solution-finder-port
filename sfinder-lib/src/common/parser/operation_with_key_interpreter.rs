@@ -1,5 +1,4 @@
 //! These functions are almost always used in tests, to make creating operations easier.
-#[cfg(test)]
 use crate::{
     common::datastore::full_operation_with_key::FullOperationWithKey,
     sfinder_core::{field::key_operators, mino::mino_factory::MinoFactory},
@@ -8,7 +7,6 @@ use crate::{
 // Porting note: parseToString and parseToStringSimple are moved to the OperationWithKey trait.
 
 // Porting note: Replaces parseToList
-#[cfg(test)]
 pub fn parse_to_vec<'m>(
     operations: &'m str,
     mino_factory: &'m MinoFactory,
@@ -16,7 +14,6 @@ pub fn parse_to_vec<'m>(
     parse_to_stream(operations, mino_factory).collect()
 }
 
-#[cfg(test)]
 pub fn parse_to_stream<'m>(
     operations: &'m str,
     mino_factory: &'m MinoFactory,
@@ -38,7 +35,6 @@ pub fn parse_to_stream<'m>(
     })
 }
 
-#[cfg(test)]
 pub fn full_operation_with_key_to_string(operations: &[FullOperationWithKey]) -> String {
     operations
         .iter()
