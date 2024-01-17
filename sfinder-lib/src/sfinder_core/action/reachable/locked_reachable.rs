@@ -1,3 +1,4 @@
+use super::reachable::{ILockedReachable, Reachable};
 use crate::{
     common::datastore::action::{action::Action, cache::locked_cache::LockedCache},
     sfinder_core::{
@@ -31,36 +32,6 @@ impl<'a> LockedReachable<'a> {
             locked_cache: LockedCache::new(max_y),
             appear_y: 0,
         }
-    }
-
-    pub fn checks(
-        &mut self,
-        field: &dyn Field,
-        mino: &'static Mino,
-        x: u8,
-        y: u8,
-        valid_height: u8,
-    ) -> bool {
-        assert!(field.can_put(mino, x, y));
-
-        self.appear_y = valid_height;
-        self.locked_cache.clear();
-
-        let piece = mino.get_piece();
-        let rotate = mino.get_rotate();
-
-        self.mino_shifter
-            .congruent_actions(piece, rotate, x, y)
-            .iter()
-            .any(|action| {
-                self.check(
-                    field,
-                    piece,
-                    action.get_x(),
-                    action.get_y(),
-                    action.get_rotate(),
-                )
-            })
     }
 
     fn check(&mut self, field: &dyn Field, piece: Piece, x: u8, y: u8, rotate: Rotate) -> bool {
@@ -184,3 +155,37 @@ impl<'a> LockedReachable<'a> {
             })
     }
 }
+
+impl Reachable for LockedReachable<'_> {
+    fn checks(
+        &mut self,
+        field: &dyn Field,
+        mino: &'static Mino,
+        x: u8,
+        y: u8,
+        valid_height: u8,
+    ) -> bool {
+        assert!(field.can_put(mino, x, y));
+
+        self.appear_y = valid_height;
+        self.locked_cache.clear();
+
+        let piece = mino.get_piece();
+        let rotate = mino.get_rotate();
+
+        self.mino_shifter
+            .congruent_actions(piece, rotate, x, y)
+            .iter()
+            .any(|action| {
+                self.check(
+                    field,
+                    piece,
+                    action.get_x(),
+                    action.get_y(),
+                    action.get_rotate(),
+                )
+            })
+    }
+}
+
+impl ILockedReachable for LockedReachable<'_> {}
