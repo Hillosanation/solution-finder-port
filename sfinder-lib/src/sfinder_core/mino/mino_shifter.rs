@@ -128,7 +128,12 @@ mod tests {
         for ((piece, rotate, x, y), expected_others) in input {
             let result = shifter.congruent_actions(piece, rotate, x, y);
 
-            assert_eq!(expected_others.len() + 1, result.len());
+            // dbg!(piece, rotate, x, y, &result, &expected_others);
+            assert_eq!(
+                expected_others.len() + 1,
+                result.len(),
+                "expected: {expected_others:?}, result: {result:?}",
+            );
             assert!(
                 expected_others.iter().all(|action| result.contains(action)),
                 "{result:?} does not contain all of {expected_others:?}",
