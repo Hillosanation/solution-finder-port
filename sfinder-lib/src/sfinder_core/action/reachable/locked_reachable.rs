@@ -4,8 +4,8 @@ use crate::{
     sfinder_core::{
         action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
-        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
-        srs::{mino_rotation::MinoRotation, rotate::Rotate, rotate_direction::RotateDirection},
+        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter},
+        srs::{mino_rotation::MinoRotation, rotate_direction::RotateDirection},
     },
 };
 
@@ -197,11 +197,18 @@ mod tests {
         entry::common::kicks::factory::srs_mino_rotation_factory,
         sfinder_core::{
             action::reachable::reachable_facade,
-            field::field_factory,
-            mino::piece::Piece::{I, J, L, O, S, T, Z},
-            srs::rotate::Rotate::{Left, Reverse, Right, Spawn},
+            field::{field_factory, field_view},
+            mino::piece::Piece::{self, I, J, L, O, S, T, Z},
+            srs::rotate::Rotate::{self, Left, Reverse, Right, Spawn},
         },
     };
+
+    #[test]
+    fn debug() {
+        let mut field = field_factory::create_field(4);
+        field.put(MinoFactory::new().get(I, Right), 1, 2);
+        println!("{}", field_view::to_string(field.as_ref()));
+    }
 
     // Porting note: the test cases seem to actually check for the specific kick, not just if any congruent action are possible.
     // But the implementation of LockedReachable seems to also check if any congruent action is reachable.
