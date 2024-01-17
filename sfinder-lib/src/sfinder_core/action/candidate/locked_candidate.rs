@@ -123,7 +123,7 @@ impl<'a> LockedCandidate<'a> {
         let current_rotate = mino.get_rotate();
         let mino_before = self
             .mino_factory
-            .get(mino.get_piece(), current_rotate.apply(direction));
+            .get(mino.get_piece(), current_rotate.apply(direction.reverse()));
 
         let result = self
             .mino_rotation
@@ -140,7 +140,7 @@ impl<'a> LockedCandidate<'a> {
                 }
             })
             .any(|(pattern, from_x, from_y)| {
-                can_put_mino_in_field(field, mino, from_x, from_y)
+                can_put_mino_in_field(field, mino_before, from_x, from_y)
                     && self.mino_rotation.get_kicks(
                         field,
                         mino_before,
@@ -418,6 +418,7 @@ mod tests {
 
                     let canonical_action =
                         mino_shifter.create_canonical_action(piece, rotate, x, y);
+                    // Porting note: because actions only contains canonical actions, we need to normalize our action before checking
                     let is_candidate = actions.contains(&canonical_action);
                     let expected = can_put && on_ground && reachable;
 

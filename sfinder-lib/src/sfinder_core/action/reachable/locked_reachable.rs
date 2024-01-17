@@ -116,7 +116,7 @@ impl<'a> LockedReachable<'a> {
         let current_rotate = mino.get_rotate();
         let mino_before = self
             .mino_factory
-            .get(mino.get_piece(), current_rotate.apply(direction));
+            .get(mino.get_piece(), current_rotate.apply(direction.reverse()));
 
         self.mino_rotation
             .get_patterns_from(mino_before, direction)
@@ -132,7 +132,7 @@ impl<'a> LockedReachable<'a> {
                 }
             })
             .any(|(pattern, from_x, from_y)| {
-                can_put_mino_in_field(field, mino, from_x, from_y)
+                can_put_mino_in_field(field, mino_before, from_x, from_y)
                     && self.mino_rotation.get_kicks(
                         field,
                         mino_before,
