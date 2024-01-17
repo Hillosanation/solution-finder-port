@@ -5,7 +5,7 @@ use crate::sfinder_core::{
     mino::mino::Mino,
 };
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum FromDirection {
     None,
     Left,

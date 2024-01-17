@@ -5,6 +5,7 @@ use crate::{
 use nohash::IntSet;
 
 pub trait Candidate<T = MinimalAction> {
+    /// Porting note: Only canonical actions are returned in the set, but congruent actions are not equal to the canonical.
     fn search(&mut self, field: &dyn Field, piece: Piece, valid_height: u8) -> IntSet<T>;
 }
 
