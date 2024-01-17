@@ -189,3 +189,309 @@ impl Reachable for LockedReachable<'_> {
 }
 
 impl ILockedReachable for LockedReachable<'_> {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        entry::common::kicks::factory::srs_mino_rotation_factory,
+        sfinder_core::{
+            action::reachable::reachable_facade,
+            field::field_factory,
+            mino::piece::Piece::{I, J, L, O, S, T, Z},
+            srs::rotate::Rotate::{Left, Reverse, Right, Spawn},
+        },
+    };
+
+    // Porting note: the test cases seem to actually check for the specific kick, not just if any congruent action are possible.
+    // But the implementation of LockedReachable seems to also check if any congruent action is reachable.
+    fn test_wrapper(marks: String, test_cases: &[(bool, Piece, Rotate, u8, u8)]) {
+        let mino_factory = MinoFactory::new();
+        let mino_shifter = MinoShifter::new();
+        let mino_rotation = srs_mino_rotation_factory::create();
+
+        let field = field_factory::create_field_with_marks(marks);
+
+        let mut reachable = reachable_facade::create_90_locked(
+            &mino_factory,
+            &mino_shifter,
+            mino_rotation.as_ref(),
+            8,
+        );
+
+        for (expected, piece, rotate, x, y) in test_cases {
+            let mino = mino_factory.get(*piece, *rotate);
+            assert!(field.can_put(mino, *x, *y));
+            let mino = mino_factory.get(*piece, *rotate);
+            assert_eq!(reachable.checks(field.as_ref(), mino, *x, *y, 8), *expected)
+        }
+    }
+
+    mod only_90 {
+        use super::*;
+
+        mod with_i {
+            use super::*;
+
+            #[test]
+            fn checks1ok1() {
+                test_wrapper(
+                    String::new()
+                        + "XX________"
+                        + "X_________"
+                        + "X_XXXXXXXX"
+                        + "X_XXXXXXXX"
+                        + "X_XXXXXXXX",
+                    &[(false, I, Left, 1, 1), (true, I, Right, 1, 2)],
+                );
+            }
+
+            #[test]
+            fn checks1ng1() {
+                test_wrapper(
+                    String::new()
+                        + "XX________"
+                        + "X_________"
+                        + "X_X_XXXXXX"
+                        + "X_X_XXXXXX"
+                        + "X_XXXXXXXX",
+                    &[(false, I, Left, 1, 1), (false, I, Right, 1, 2)],
+                );
+            }
+
+            #[test]
+            fn checks1ng2() {
+                test_wrapper(
+                    String::new()
+                        + "XX________"
+                        + "X_________"
+                        + "X_XX_XXXXX"
+                        + "X_XX_XXXXX"
+                        + "X_XXXXXXXX",
+                    &[(false, I, Left, 1, 1), (false, I, Right, 1, 2)],
+                );
+            }
+
+            #[test]
+            fn checks2ok1() {
+                test_wrapper(
+                    String::new()
+                        + "________XX"
+                        + "_________X"
+                        + "XXXXXXXX_X"
+                        + "XXXXXXXX_X"
+                        + "XXXXXXXX_X",
+                    &[(true, I, Right, 8, 2), (false, I, Left, 8, 1)],
+                );
+            }
+
+            #[test]
+            fn checks2ng1() {
+                test_wrapper(
+                    String::new()
+                        + "________XX"
+                        + "_________X"
+                        + "XXXXXXX__X"
+                        + "XXXXXXXX_X"
+                        + "XXXXXXXX_X",
+                    &[(false, I, Right, 8, 2), (false, I, Left, 8, 1)],
+                );
+            }
+
+            #[test]
+            fn checks2ng2() {
+                test_wrapper(
+                    String::new()
+                        + "________XX"
+                        + "_________X"
+                        + "XXXXX_XX_X"
+                        + "XXXXXXXX_X"
+                        + "XXXXXXXX_X",
+                    &[(false, I, Right, 8, 2), (false, I, Left, 8, 1)],
+                );
+            }
+
+            #[test]
+            fn checks3ok1() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "XXX_______"
+                        + "XXX_______"
+                        + "XXX_XXXXXX"
+                        + "XXX____XXX",
+                    &[(true, I, Reverse, 5, 0), (false, I, Spawn, 4, 0)],
+                );
+            }
+
+            #[test]
+            fn checks3ng1() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "__________"
+                        + "XXX_______"
+                        + "XXX_XXXXXX"
+                        + "XXX____XXX",
+                    &[(false, I, Reverse, 5, 0), (false, I, Spawn, 4, 0)],
+                );
+            }
+
+            #[test]
+            fn checks3ok2() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "__________"
+                        + "XXX_______"
+                        + "X____XXXXX"
+                        + "XXX____XXX",
+                    &[
+                        (true, I, Reverse, 3, 1),
+                        (false, I, Spawn, 2, 1), 
+                        (false, I, Reverse, 5, 0),
+                        (false, I, Spawn, 4, 0)
+                    ],
+                );
+            }
+
+            #[test]
+            fn checks3ok3() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "X_________"
+                        + "XXX___XXXX"
+                        + "XXX_XXXXXX"
+                        + "XXX____XXX",
+                    &[(true, I, Reverse, 5, 0), (true, I, Spawn, 4, 0)],
+                );
+            }
+
+            #[test]
+            fn checks3ok4() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "__________"
+                        + "XXX___XXXX"
+                        + "XXX_XXXXXX"
+                        + "XXX____XXX",
+                    &[(true, I, Reverse, 5, 0), (true, I, Spawn, 4, 0)],
+                );
+            }
+
+            #[test]
+            fn checks4ok1() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "_______XXX"
+                        + "_______XXX"
+                        + "XXXXXX_XXX"
+                        + "XXX____XXX",
+                    &[(true, I, Reverse, 5, 0), (false, I, Spawn, 4, 0)],
+                );
+            }
+
+            #[test]
+            fn checks4ok2() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "__________"
+                        + "_______XXX"
+                        + "XXXXXX_XXX"
+                        + "XXX____XXX",
+                    &[(true, I, Reverse, 5, 0), (false, I, Spawn, 4, 0)],
+                );
+            }
+
+            #[test]
+            fn checks4ok3() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "__________"
+                        + "_______XXX"
+                        + "XXXXX____X"
+                        + "XXX____XXX",
+                    &[
+                        (true, I, Reverse, 7, 1),
+                        (false, I, Spawn, 6, 1),
+                        (false, I, Reverse, 5, 0),
+                        (false, I, Spawn, 4, 0)
+                    ],
+                );
+            }
+
+            #[test]
+            fn checks4ok4() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "_______XXX"
+                        + "XXXX___XXX"
+                        + "XXXXXX_XXX"
+                        + "XXX____XXX",
+                    &[(true, I, Reverse, 5, 0), (true, I, Spawn, 4, 0)],
+                );
+            }
+
+            #[test]
+            fn checks4ok5() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "_________X"
+                        + "XXXX___XXX"
+                        + "XXXXXX_XXX"
+                        + "XXX____XXX",
+                    &[(true, I, Reverse, 5, 0), (true, I, Spawn, 4, 0)],
+                );
+            }
+        }
+
+        mod with_o {
+            use super::*;
+
+            #[test]
+            fn checks1ok1() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "X__XXXXXXX"
+                        + "X___XXXXXX"
+                        + "XX__XXXXXX",
+                    &[
+                        (true, O, Spawn, 1, 1),
+                        (false, O, Spawn, 2, 0),
+                        (false, O, Right, 2, 1),
+                        (false, O, Reverse, 3, 1),
+                        (false, O, Left, 3, 0),
+                    ],
+                );
+            }
+        }
+
+        mod with_s {
+            use super::*;
+
+            #[test]
+            fn checks1ok1() {
+                #[rustfmt::skip]
+                test_wrapper(
+                    String::new()
+                        + "XX__XXXXXX"
+                        + "X__XXXXXXX",
+                    &[
+                        (true, S, Reverse, 2, 1),
+                        (false, S, Spawn, 2, 0),
+                    ],
+                );
+            }
+        }
+    }
+}
+
+// add #[rustfmt::skip] to any fields <= 4 lines.
