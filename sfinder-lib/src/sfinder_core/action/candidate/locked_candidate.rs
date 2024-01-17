@@ -130,14 +130,12 @@ impl<'a> LockedCandidate<'a> {
             .get_patterns_from(mino_before, direction)
             .get_offsets()
             .filter_map(|pattern| {
-                if let (Ok(from_x), Ok(from_y)) = (
-                    u8::try_from(x as i8 - pattern.x),
-                    u8::try_from(y as i8 - pattern.y),
-                ) {
-                    Some((pattern, from_x, from_y))
-                } else {
-                    None
-                }
+                Some((
+                    pattern,
+                    // TODO: this filtering should be done in can_put_mino_in_field instead to avoid comparing twice
+                    u8::try_from(x as i8 - pattern.x).ok()?,
+                    u8::try_from(y as i8 - pattern.y).ok()?,
+                ))
             })
             .any(|(pattern, from_x, from_y)| {
                 can_put_mino_in_field(field, mino_before, from_x, from_y)

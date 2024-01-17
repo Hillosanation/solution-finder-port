@@ -1,5 +1,6 @@
 use super::{candidate::ILockedCandidate, locked_candidate::LockedCandidate};
 use crate::sfinder_core::{
+    action::candidate::locked_180_candidate::Locked180Candidate,
     mino::{mino_factory::MinoFactory, mino_shifter::MinoShifter},
     srs::mino_rotation::MinoRotation,
 };
@@ -30,7 +31,12 @@ pub fn create_locked<'a>(
     use_180_rotation: bool,
 ) -> Box<dyn ILockedCandidate + 'a> {
     if use_180_rotation {
-        todo!()
+        Box::new(Locked180Candidate::new(
+            mino_factory,
+            mino_shifter,
+            mino_rotation,
+            max_y,
+        ))
     } else {
         Box::new(LockedCandidate::new(
             mino_factory,
