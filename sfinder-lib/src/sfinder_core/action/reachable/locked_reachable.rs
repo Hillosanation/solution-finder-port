@@ -34,16 +34,6 @@ impl<'a> LockedReachable<'a> {
         }
     }
 
-    fn check(&mut self, field: &dyn Field, piece: Piece, x: u8, y: u8, rotate: Rotate) -> bool {
-        self.check_inner(
-            field,
-            self.mino_factory.get(piece, rotate),
-            x,
-            y,
-            FromDirection::None,
-        )
-    }
-
     fn check_inner(
         &mut self,
         field: &dyn Field,
@@ -177,14 +167,28 @@ impl Reachable for LockedReachable<'_> {
             .congruent_actions(piece, rotate, x, y)
             .iter()
             .any(|action| {
-                self.check(
+                self.check_inner(
                     field,
-                    piece,
+                    self.mino_factory.get(piece, action.get_rotate()),
                     action.get_x(),
                     action.get_y(),
-                    action.get_rotate(),
+                    FromDirection::None,
                 )
             })
+    }
+
+    fn check(
+        &mut self,
+        field: &dyn Field,
+        mino: &'static Mino,
+        x: u8,
+        y: u8,
+        valid_height: u8,
+    ) -> bool {
+        self.appear_y = valid_height;
+        self.locked_cache.clear();
+
+        self.check_inner(field, mino, x, y, FromDirection::None)
     }
 }
 
@@ -230,7 +234,7 @@ mod tests {
             let mino = mino_factory.get(*piece, *rotate);
             assert!(field.can_put(mino, *x, *y));
             let mino = mino_factory.get(*piece, *rotate);
-            assert_eq!(reachable.checks(field.as_ref(), mino, *x, *y, 8), *expected)
+            assert_eq!(reachable.check(field.as_ref(), mino, *x, *y, 8), *expected)
         }
     }
 
