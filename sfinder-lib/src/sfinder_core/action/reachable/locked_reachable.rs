@@ -183,6 +183,8 @@ impl Reachable for LockedReachable<'_> {
         y: u8,
         valid_height: u8,
     ) -> bool {
+        debug_assert!(field.can_put(mino, x, y));
+
         self.appear_y = valid_height;
         self.locked_cache.clear();
 
