@@ -25,7 +25,6 @@ pub trait Reachable {
 
 pub trait ILockedReachable: Reachable {}
 
-// Porting note: replaces ReachableForCoverWrapper
 pub trait ReachableForCover {
     fn checks(
         &mut self,
@@ -34,10 +33,11 @@ pub trait ReachableForCover {
         x: u8,
         y: u8,
         valid_height: u8,
-        _remaining_depth: u8,
+        remaining_depth: u8,
     ) -> bool;
 }
 
+// Porting note: replaces ReachableForCoverWrapper
 impl ReachableForCover for dyn Reachable {
     fn checks(
         &mut self,
