@@ -1,6 +1,6 @@
 use super::reachable::{ILockedReachable, Reachable};
 use crate::{
-    common::datastore::action::{action::Action, cache::locked_cache::LockedCache},
+    common::datastore::action::{action::Action, cache::minimal_locked_cache::MinimalLockedCache},
     sfinder_core::{
         action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
@@ -14,7 +14,7 @@ pub struct LockedReachable<'a> {
     mino_shifter: &'a MinoShifter,
     mino_rotation: &'a dyn MinoRotation,
     // variable during serach:
-    locked_cache: LockedCache,
+    locked_cache: MinimalLockedCache,
     appear_y: u8,
 }
 
@@ -29,7 +29,7 @@ impl<'a> LockedReachable<'a> {
             mino_factory,
             mino_shifter,
             mino_rotation,
-            locked_cache: LockedCache::new(max_y),
+            locked_cache: MinimalLockedCache::new(max_y),
             appear_y: 0,
         }
     }
