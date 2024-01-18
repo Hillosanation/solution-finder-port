@@ -100,10 +100,25 @@ mod tests {
     use super::*;
     use crate::{
         entry::common::kicks::factory::srs_mino_rotation_factory,
-        sfinder_core::field::field_factory, sfinder_core::srs::rotate::Rotate,
+        sfinder_core::{
+            field::field_factory,
+            mino::piece::Piece::{I, J, L, O, S, T, Z},
+            srs::rotate::Rotate::{self, Left, Reverse, Right, Spawn},
+        },
     };
 
     const MAX_Y: u8 = 8;
+
+    fn reachable_wrapper(
+        reachable: &mut TSpinOrHarddropReachable,
+        field: &dyn Field,
+        piece: Piece,
+        rotate: Rotate,
+        x: u8,
+        y: u8,
+    ) -> bool {
+        reachable.checks(field, MinoFactory::new().get(piece, rotate), x, y, MAX_Y)
+    }
 
     #[test]
     fn visualize() {
@@ -153,12 +168,13 @@ mod tests {
                     + "XX_XXXXXXX"
             );
 
-            assert!(!reachable.checks(
+            assert!(!reachable_wrapper(
+                &mut reachable,
                 field_1.as_ref(),
-                MinoFactory::new().get(Piece::T, Rotate::Reverse),
+                T,
+                Reverse,
                 2,
-                1,
-                MAX_Y
+                1
             ));
 
             #[rustfmt::skip]
@@ -170,12 +186,13 @@ mod tests {
                     + "_XXXXXXXXX"
             );
 
-            assert!(!reachable.checks(
+            assert!(!reachable_wrapper(
+                &mut reachable,
                 field_2.as_ref(),
-                MinoFactory::new().get(Piece::T, Rotate::Right),
+                T,
+                Right,
                 0,
-                1,
-                MAX_Y
+                1
             ));
         }
     }
@@ -206,12 +223,13 @@ mod tests {
                     + "XX_XXXXXXX"
             );
 
-            assert!(!reachable.checks(
+            assert!(!reachable_wrapper(
+                &mut reachable,
                 field_1.as_ref(),
-                MinoFactory::new().get(Piece::T, Rotate::Reverse),
+                T,
+                Reverse,
                 2,
-                1,
-                MAX_Y
+                1
             ));
 
             #[rustfmt::skip]
@@ -223,12 +241,13 @@ mod tests {
                     + "XX_XXXXXXX"
             );
 
-            assert!(!reachable.checks(
+            assert!(!reachable_wrapper(
+                &mut reachable,
                 field_2.as_ref(),
-                MinoFactory::new().get(Piece::T, Rotate::Right),
+                T,
+                Right,
                 2,
-                1,
-                MAX_Y
+                1
             ));
         }
     }
@@ -258,13 +277,14 @@ mod tests {
                     + "X__XXXXXXX"
             );
 
-            assert!(!reachable.checks(
+            assert!(!reachable_wrapper(
+                &mut reachable,
                 field_1.as_ref(),
                 // NOTE: made the MinoOperation valid and placable in field
-                MinoFactory::new().get(Piece::S, Rotate::Reverse),
+                S,
+                Reverse,
                 2,
-                1,
-                MAX_Y
+                1
             ));
 
             #[rustfmt::skip]
@@ -275,12 +295,13 @@ mod tests {
                     + "XXXXXXXXX_"
             );
 
-            assert!(reachable.checks(
+            assert!(reachable_wrapper(
+                &mut reachable,
                 field_2.as_ref(),
-                MinoFactory::new().get(Piece::S, Rotate::Right),
+                S,
+                Right,
                 8,
-                1,
-                MAX_Y
+                1
             ));
         }
     }
@@ -311,12 +332,13 @@ mod tests {
                     + "XX_XXXXXX_"
             );
 
-            assert!(!reachable.checks(
+            assert!(!reachable_wrapper(
+                &mut reachable,
                 field_1.as_ref(),
-                MinoFactory::new().get(Piece::T, Rotate::Reverse),
+                T,
+                Reverse,
                 2,
-                1,
-                MAX_Y
+                1
             ));
         }
     }
@@ -364,23 +386,12 @@ mod tests {
         case_tst: [true],
     };
 
-    fn reachable_wrapper(
-        reachable: &mut TSpinOrHarddropReachable,
-        field: &dyn Field,
-        piece: Piece,
-        rotate: Rotate,
-        x: u8,
-        y: u8,
-    ) -> bool {
-        reachable.checks(field, MinoFactory::new().get(piece, rotate), x, y, MAX_Y)
-    }
-
     fn test_thresholds(
         min_rows_cleared: u8,
         regular_only: bool,
         expected: ExpectedThresholdResult,
     ) {
-        println!("testing {min_rows_cleared}, {regular_only}, {expected:?}");
+        // println!("testing {min_rows_cleared}, {regular_only}, {expected:?}");
 
         let mino_factory = MinoFactory::new();
         let mino_shifter = MinoShifter::new();
@@ -407,14 +418,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_1.as_ref(),
-                Piece::T,
-                Rotate::Reverse,
-                4,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_1.as_ref(), T, Reverse, 4, 1),
             expected.case_mini[0]
         );
 
@@ -428,25 +432,11 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_2.as_ref(),
-                Piece::T,
-                Rotate::Right,
-                0,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_2.as_ref(), T, Right, 0, 1),
             expected.case_mini[1]
         );
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_2.as_ref(),
-                Piece::T,
-                Rotate::Left,
-                9,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_2.as_ref(), T, Left, 9, 1),
             expected.case_mini[2]
         );
 
@@ -460,14 +450,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_3.as_ref(),
-                Piece::T,
-                Rotate::Left,
-                9,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_3.as_ref(), T, Left, 9, 1),
             expected.case_mini[3]
         );
 
@@ -481,14 +464,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_4.as_ref(),
-                Piece::T,
-                Rotate::Right,
-                0,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_4.as_ref(), T, Right, 0, 1),
             expected.case_mini[4]
         );
 
@@ -503,14 +479,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_5.as_ref(),
-                Piece::T,
-                Rotate::Right,
-                2,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_5.as_ref(), T, Right, 2, 1),
             expected.case_mini[5]
         );
 
@@ -525,14 +494,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_6.as_ref(),
-                Piece::T,
-                Rotate::Reverse,
-                2,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_6.as_ref(), T, Reverse, 2, 1),
             expected.case_tss[0]
         );
 
@@ -547,14 +509,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_7.as_ref(),
-                Piece::T,
-                Rotate::Reverse,
-                2,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_7.as_ref(), T, Reverse, 2, 1),
             expected.case_tsd[0]
         );
 
@@ -569,14 +524,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_8.as_ref(),
-                Piece::T,
-                Rotate::Right,
-                2,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_8.as_ref(), T, Right, 2, 1),
             expected.case_tsd[1]
         );
 
@@ -591,14 +539,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_9.as_ref(),
-                Piece::T,
-                Rotate::Right,
-                4,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_9.as_ref(), T, Right, 4, 1),
             expected.case_tsd[2]
         );
 
@@ -613,14 +554,7 @@ mod tests {
         );
 
         assert_eq!(
-            reachable_wrapper(
-                &mut reachable,
-                field_10.as_ref(),
-                Piece::T,
-                Rotate::Right,
-                3,
-                1
-            ),
+            reachable_wrapper(&mut reachable, field_10.as_ref(), T, Right, 3, 1),
             expected.case_tst[0]
         );
     }
