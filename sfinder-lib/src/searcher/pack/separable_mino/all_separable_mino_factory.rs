@@ -7,7 +7,12 @@ use crate::{
     },
     sfinder_core::{
         field::key_operators,
-        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
+        mino::{
+            mino::Mino,
+            mino_factory::MinoFactory,
+            mino_shifter::{IMinoShifter, MinoShifter},
+            piece::Piece,
+        },
     },
 };
 

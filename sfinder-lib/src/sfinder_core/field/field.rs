@@ -15,6 +15,10 @@ use std::fmt::Debug;
 // Rather than keeping the unused bits in a board unset, it is at an unknown state and must be masked off before being shifted into VALID_BOARD_RANGE.
 // THe only function in the Field interface that could alter the unused bits is put.
 pub trait Field: Debug + DynClone /* + PartialOrd */ {
+    fn new() -> Self
+    where
+        Self: Sized;
+
     // フィールドの最大高さを返却
     fn get_max_field_height(&self) -> u8;
 
@@ -29,6 +33,9 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
 
     // 指定した位置からブロックを取り除く
     fn remove_block(&mut self, x: u8, y: u8);
+
+    // Porting note: reused by FieldMemory
+    fn clear_all(&mut self);
 
     // 指定した位置にミノの形にブロックをおく
     fn put(&mut self, mino: &Mino, x: u8, y: u8);
@@ -74,6 +81,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
         start_y: u8,
         max_field_height: u8,
     ) -> bool {
+        // TODO: check if masking off columns is faster than checking each y placement
         (start_y + 1..max_field_height + (-mino.get_min_y()) as u8)
             .all(|y| self.can_put(mino, x, y))
     }

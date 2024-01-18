@@ -128,7 +128,7 @@ pub fn create_all_pieces<'a>(
     field_height: u8,
 ) -> Vec<OriginalPiece> {
     // A reference to a Mino in MinoFactory is needed because OriginalPiece stores a reference of a Mino
-    use crate::sfinder_core::mino::piece::Piece;
+    use crate::{sfinder_core::mino::piece::Piece, sfinder_lib::coordinate_walker::get_ranges};
 
     Piece::value_list()
         .iter()
@@ -136,9 +136,12 @@ pub fn create_all_pieces<'a>(
             Rotate::value_list().iter().flat_map(move |rotate| {
                 let mino = mino_factory.get(*piece, *rotate);
 
-                (-mino.get_min_y()..field_height as i8 - mino.get_max_y()).flat_map(move |y| {
-                    (-mino.get_min_x()..FIELD_WIDTH as i8 - mino.get_max_x())
-                        .map(move |x| OriginalPiece::new(mino, x as u8, y as u8, field_height))
+                let (x_range, y_range) = get_ranges(mino, field_height);
+
+                y_range.flat_map(move |y| {
+                    x_range
+                        .clone()
+                        .map(move |x| OriginalPiece::new(mino, x, y, field_height))
                 })
             })
         })

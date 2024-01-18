@@ -6,6 +6,25 @@ use crate::{
     common::datastore::action::minimal_action::MinimalAction, sfinder_core::srs::rotate::Rotate,
 };
 
+pub trait IMinoShifter {
+    // Porting note: replaces createTransformedRotate
+    fn create_canonical_rotate(&self, piece: Piece, rotate: Rotate) -> Rotate;
+
+    // The other version accepting an Action is dropped since it's not used
+    // Used by Candidate
+    // Porting note: replaces createTransformedAction
+    fn create_canonical_action(&self, piece: Piece, rotate: Rotate, x: u8, y: u8) -> MinimalAction;
+
+    // Used by Reachable
+    // Porting note: replaces enumerateSameOtherActions
+    /// Porting note: Note that this also adds the current action into the result, see #17.
+    fn congruent_actions(&self, piece: Piece, rotate: Rotate, x: u8, y: u8) -> Vec<MinimalAction>;
+
+    // Porting note: this is usually iterated over immediately anyways, so just return a Vec instead of HashSet.
+    // Note that this also gives all canonical rotations of the piece.
+    fn get_unique_rotates(&self, piece: Piece) -> Vec<Rotate>;
+}
+
 #[derive(Debug)]
 pub struct MinoShifter {
     transformers: [MinoTransform; Piece::get_size()],
@@ -42,41 +61,22 @@ impl MinoShifter {
             ],
         }
     }
+}
 
-    // Porting note: replaces createTransformedRotate
-    pub fn create_canonical_rotate(&self, piece: Piece, rotate: Rotate) -> Rotate {
+impl IMinoShifter for MinoShifter {
+    fn create_canonical_rotate(&self, piece: Piece, rotate: Rotate) -> Rotate {
         self.transformers[piece as usize].transform_rotate(rotate)
     }
 
-    // The other version accepting an Action is dropped since it's not used
-    // Used by Candidate
-    // Porting note: replaces createTransformedAction
-    pub fn create_canonical_action(
-        &self,
-        piece: Piece,
-        rotate: Rotate,
-        x: u8,
-        y: u8,
-    ) -> MinimalAction {
+    fn create_canonical_action(&self, piece: Piece, rotate: Rotate, x: u8, y: u8) -> MinimalAction {
         self.transformers[piece as usize].transform(x, y, rotate)
     }
 
-    // Used by Reachable
-    // TODO(#17): it's more convenient if this also returns the action itself, since we loop over all congruent actions later.
-    // Porting note: replaces enumerateSameOtherActions
-    pub fn enumerate_other_congruent_actions(
-        &self,
-        piece: Piece,
-        rotate: Rotate,
-        x: u8,
-        y: u8,
-    ) -> Vec<MinimalAction> {
-        self.transformers[piece as usize].enumerate_others(x, y, rotate)
+    fn congruent_actions(&self, piece: Piece, rotate: Rotate, x: u8, y: u8) -> Vec<MinimalAction> {
+        self.transformers[piece as usize].congruent_actions(x, y, rotate)
     }
 
-    // Porting note: this is usually iterated over immediately anyways, so just return a Vec instead of HashSet.
-    // Note that this also gives all canonical rotations of the piece.
-    pub fn get_unique_rotates(&self, piece: Piece) -> Vec<Rotate> {
+    fn get_unique_rotates(&self, piece: Piece) -> Vec<Rotate> {
         self.transformers[piece as usize].get_unique_rotates()
     }
 }
@@ -125,12 +125,20 @@ mod tests {
     fn check_same_other_actions(input: Vec<((Piece, Rotate, u8, u8), Vec<MinimalAction>)>) {
         let shifter = MinoShifter::new();
 
-        for ((piece, rotate, x, y), expected) in input {
-            let result = shifter.enumerate_other_congruent_actions(piece, rotate, x, y);
-            assert!(
-                expected.iter().all(|action| result.contains(action)),
-                "{result:?} does not contain all of {expected:?}",
+        for ((piece, rotate, x, y), expected_others) in input {
+            let result = shifter.congruent_actions(piece, rotate, x, y);
+
+            // dbg!(piece, rotate, x, y, &result, &expected_others);
+            assert_eq!(
+                expected_others.len() + 1,
+                result.len(),
+                "expected: {expected_others:?}, result: {result:?}",
             );
+            assert!(
+                expected_others.iter().all(|action| result.contains(action)),
+                "{result:?} does not contain all of {expected_others:?}",
+            );
+            assert!(result.contains(&MinimalAction::new(x, y, rotate)));
         }
     }
 

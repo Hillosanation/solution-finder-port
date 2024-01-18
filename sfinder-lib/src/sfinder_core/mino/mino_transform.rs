@@ -9,6 +9,7 @@ use crate::{
 pub struct MinoTransform {
     offsets: Vec<Coordinate>,
     rotates: Vec<Rotate>,
+    // Porting note: reverse_map now also includes the same rotate as the current index
     reverse_map: Vec<Vec<Rotate>>,
 }
 
@@ -18,7 +19,11 @@ impl MinoTransform {
         Self {
             offsets: vec![Coordinate::new(0, 0); Rotate::get_size()],
             rotates: Rotate::value_list().to_vec(),
-            reverse_map: vec![Vec::new(); Rotate::get_size()],
+            reverse_map: Rotate::value_list()
+                .iter()
+                .cloned()
+                .map(|r| vec![r])
+                .collect(),
         }
     }
 
@@ -61,6 +66,11 @@ impl MinoTransform {
             }
         }
 
+        // add the same rotate for #17
+        for &rotate in Rotate::value_list() {
+            reverse_map[rotate as usize].push(rotate);
+        }
+
         reverse_map
     }
 
@@ -73,7 +83,7 @@ impl MinoTransform {
         )
     }
 
-    pub fn enumerate_others(&self, x: u8, y: u8, rotate: Rotate) -> Vec<MinimalAction> {
+    pub fn congruent_actions(&self, x: u8, y: u8, rotate: Rotate) -> Vec<MinimalAction> {
         let index = rotate as usize;
         let new_x = x as i8 + self.offsets[index].x;
         let new_y = y as i8 + self.offsets[index].y;

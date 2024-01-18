@@ -42,7 +42,7 @@ impl Rotate {
     }
 
     /// Porting note: replaces get
-    /// TODO: This seems to only be used once, and is used before RotateDirection was reversed.
+    /// TODO: This seems to only be used once in non-tests, and is used before RotateDirection was reversed.
     ///       Implement unapply instead?
     pub fn apply(self, rotation: RotateDirection) -> Self {
         match rotation {
