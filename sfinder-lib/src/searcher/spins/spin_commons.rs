@@ -1,3 +1,5 @@
+//! Porting note: getTSpin and getTSpinName is moved to constructors of TSpins and TSpinNames
+
 use super::spin::{Spin, TSpinNames, TSpins};
 use crate::{
     common::datastore::{
@@ -107,12 +109,16 @@ fn get_spins(before: &dyn Field, spin_result: &SpinResult, cleared_rows: u8) -> 
 
     let filled_t_front = is_filled_t_front(before, to_rotate, to_x, to_y);
 
-    let direction = spin_result.direction;
-    let name = get_t_spin_name(spin_result, to_rotate, filled_t_front, direction);
-
-    let spin = get_t_spin(spin_result, filled_t_front);
-
-    Spin::new(spin, name, cleared_rows)
+    Spin::new(
+        TSpins::new(filled_t_front, spin_result.is_privilege_spins),
+        TSpinNames::new(
+            to_rotate,
+            spin_result.test_pattern_index,
+            filled_t_front,
+            spin_result.direction,
+        ),
+        cleared_rows,
+    )
 }
 
 // Tの凸側のブロックが両方とも埋まっているか
@@ -136,40 +142,5 @@ fn is_filled_t_front(before: &dyn Field, rotate: Rotate, to_x: u8, to_y: u8) -> 
             is_block(before, to_x as i8 - 1, to_y as i8 - 1)
                 && is_block(before, to_x as i8 - 1, to_y as i8 + 1)
         }
-    }
-}
-
-fn get_t_spin(spin_result: &SpinResult, filled_t_front: bool) -> TSpins {
-    // 前提: Tスピンとなる条件（Tの隅に3つ以上ブロックが存在している）はこの時点で満たしている
-
-    // Tの凸側のブロックが両方揃っている
-    // or
-    // TSTフォームのような特権がある場合はRegularと判定する
-    // e.g. SRSでは「接着時にTが横向き and 回転テストパターンが最後のケース」の場合はRegular
-    if filled_t_front || spin_result.is_privilege_spins {
-        TSpins::Regular
-    } else {
-        TSpins::Mini
-    }
-}
-
-fn get_t_spin_name(
-    spin_result: &SpinResult,
-    to_rotate: Rotate,
-    filled_t_front: bool,
-    direction: RotateDirection,
-) -> TSpinNames {
-    if (direction == RotateDirection::CounterClockwise && to_rotate == Rotate::Right)
-        || (direction == RotateDirection::Clockwise && to_rotate == Rotate::Left)
-    {
-        match spin_result.test_pattern_index {
-            // 正面側に2つブロックがある
-            3 if filled_t_front => TSpinNames::Iso,
-            3 => TSpinNames::Neo,
-            4 => TSpinNames::Fin,
-            _ => TSpinNames::NoName,
-        }
-    } else {
-        TSpinNames::NoName
     }
 }
