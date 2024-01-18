@@ -3,9 +3,9 @@
 use super::reachable::Reachable;
 use crate::sfinder_core::{field::field::Field, mino::mino::Mino};
 
-pub struct HarddropReachable {}
+pub struct DeepdropReachable {}
 
-impl Reachable for HarddropReachable {
+impl Reachable for DeepdropReachable {
     fn checks(
         &mut self,
         field: &dyn Field,
