@@ -1,10 +1,14 @@
 use super::reachable::{ILockedReachable, Reachable};
 use crate::{
-    common::datastore::action::{action::Action, cache::minimal_locked_cache::MinimalLockedCache},
+    common::datastore::action::cache::minimal_locked_cache::MinimalLockedCache,
     sfinder_core::{
         action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
-        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter},
+        mino::{
+            mino::Mino,
+            mino_factory::MinoFactory,
+            mino_shifter::{IMinoShifter, MinoShifter},
+        },
         srs::{mino_rotation::MinoRotation, rotate_direction::RotateDirection},
     },
 };
@@ -202,7 +206,10 @@ mod tests {
         sfinder_core::{
             action::reachable::reachable_facade,
             field::{field_factory, field_view},
-            mino::piece::Piece::{self, I, J, L, O, S, T, Z},
+            mino::{
+                passed_mino_shifter::PassedMinoShifter,
+                piece::Piece::{self, I, J, L, O, S, T, Z},
+            },
             srs::rotate::Rotate::{self, Left, Reverse, Right, Spawn},
         },
     };

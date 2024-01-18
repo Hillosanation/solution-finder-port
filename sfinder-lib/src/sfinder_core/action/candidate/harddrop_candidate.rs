@@ -5,7 +5,11 @@ use crate::{
     common::datastore::action::minimal_action::MinimalAction,
     sfinder_core::{
         field::{field::Field, field_constants::FIELD_WIDTH},
-        mino::{mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
+        mino::{
+            mino_factory::MinoFactory,
+            mino_shifter::{IMinoShifter, MinoShifter},
+            piece::Piece,
+        },
         srs::rotate::Rotate,
     },
     sfinder_lib::coordinate_walker::get_ranges,

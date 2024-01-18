@@ -4,7 +4,12 @@ use crate::{
     sfinder_core::{
         action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
-        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
+        mino::{
+            mino::Mino,
+            mino_factory::MinoFactory,
+            mino_shifter::{IMinoShifter, MinoShifter},
+            piece::Piece,
+        },
         srs::{mino_rotation::MinoRotation, rotate::Rotate, rotate_direction::RotateDirection},
     },
     sfinder_lib::coordinate_walker::get_ranges,
