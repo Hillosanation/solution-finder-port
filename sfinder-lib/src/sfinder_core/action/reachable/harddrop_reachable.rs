@@ -1,9 +1,6 @@
-use crate::{
-    common::datastore::action::action::Action,
-    sfinder_core::{
-        field::field::Field,
-        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter},
-    },
+use crate::sfinder_core::{
+    field::field::Field,
+    mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter},
 };
 
 use super::reachable::Reachable;
@@ -41,24 +38,8 @@ impl Reachable for HarddropReachable<'_> {
         y: u8,
         valid_height: u8,
     ) -> bool {
-        debug_assert!(field.can_put(mino, x, y));
-
-        self.appear_y = valid_height;
-
-        let piece = mino.get_piece();
-        let rotate = mino.get_rotate();
-
-        self.mino_shifter
-            .congruent_actions(piece, rotate, x, y)
-            .iter()
-            .any(|action| {
-                self.check_inner(
-                    field,
-                    self.mino_factory.get(piece, action.get_rotate()),
-                    action.get_x(),
-                    action.get_y(),
-                )
-            })
+        // Porting note: congruent actions do not matter, since we are only harddropping
+        self.check(field, mino, x, y, valid_height)
     }
 
     fn check(
@@ -79,7 +60,12 @@ impl Reachable for HarddropReachable<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sfinder_core::{field::field_factory, mino::piece::Piece, srs::rotate::Rotate};
+    use crate::{
+        common::datastore::action::action::Action,
+        sfinder_core::{field::field_factory, mino::piece::Piece, srs::rotate::Rotate},
+        sfinder_lib::{coordinate_walker::get_ranges, randoms},
+    };
+    use rand::thread_rng;
 
     #[test]
     fn checks() {
@@ -95,16 +81,49 @@ mod tests {
                 + "XXXXX___XX"
         );
 
-        // assertThat(reachable.checks(field, minoFactory.create(Piece.I, Rotate.Spawn), 5, 1, 4)).isTrue();
-        // assertThat(reachable.checks(field, minoFactory.create(Piece.I, Rotate.Spawn), 5, 2, 4)).isFalse();
-
-        // assertThat(reachable.checks(field, minoFactory.create(Piece.S, Rotate.Left), 1, 2, 4)).isFalse();
-
         #[rustfmt::skip]
         {
             assert!(reachable.checks(field.as_ref(), mino_factory.get(Piece::I, Rotate::Spawn), 5, 1, 4));
             assert!(!reachable.checks(field.as_ref(), mino_factory.get(Piece::I, Rotate::Spawn), 5, 2, 4));
             assert!(!reachable.checks(field.as_ref(), mino_factory.get(Piece::S, Rotate::Left), 1, 2, 4));
         };
+    }
+
+    #[test]
+    fn congruents() {
+        let mino_factory = MinoFactory::new();
+        let mino_shifter = MinoShifter::new();
+        let mut reachable = HarddropReachable::new(&mino_factory, &mino_shifter, 4);
+
+        let mut rngs = thread_rng();
+        let field = randoms::gen_field(&mut rngs, 4, 5);
+
+        let piece = randoms::gen_piece(&mut rngs);
+        let rotate = randoms::gen_rotate(&mut rngs);
+        let mino = mino_factory.get(piece, rotate);
+
+        let (x_range, y_range) = get_ranges(mino, 4);
+
+        for x in x_range {
+            for y in y_range.clone() {
+                if field.can_put(mino, x, y) && reachable.checks(field.as_ref(), mino, x, y, 4) {
+                    for congruent in mino_shifter.congruent_actions(piece, rotate, x, y) {
+                        assert!(
+                            reachable.checks(
+                                field.as_ref(),
+                                mino_factory.get(piece, congruent.get_rotate()),
+                                congruent.get_x(),
+                                congruent.get_y(),
+                                4
+                            ),
+                            "{piece} {rotate} {x} {y} -> {} {} {}",
+                            congruent.get_rotate(),
+                            congruent.get_x(),
+                            congruent.get_y()
+                        );
+                    }
+                }
+            }
+        }
     }
 }
