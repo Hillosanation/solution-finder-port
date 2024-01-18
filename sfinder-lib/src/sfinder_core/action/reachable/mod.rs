@@ -6,3 +6,4 @@ pub mod reachable;
 pub mod reachable_facade;
 pub mod rotate_reachable;
 pub mod softdrop_t_only_reachable;
+pub mod t_spin_or_harddrop_reachable;
