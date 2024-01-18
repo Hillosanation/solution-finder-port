@@ -1,21 +1,17 @@
 use super::reachable::{ILockedReachable, Reachable};
 use crate::{
-    common::datastore::action::cache::minimal_locked_cache::MinimalLockedCache,
+    common::datastore::action::{action::Action, cache::minimal_locked_cache::MinimalLockedCache},
     sfinder_core::{
         action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
-        mino::{
-            mino::Mino,
-            mino_factory::MinoFactory,
-            mino_shifter::{IMinoShifter, MinoShifter},
-        },
+        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::IMinoShifter},
         srs::{mino_rotation::MinoRotation, rotate_direction::RotateDirection},
     },
 };
 
 pub struct LockedReachable<'a> {
     mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+    mino_shifter: &'a dyn IMinoShifter,
     mino_rotation: &'a dyn MinoRotation,
     // variable during serach:
     locked_cache: MinimalLockedCache,
@@ -25,7 +21,7 @@ pub struct LockedReachable<'a> {
 impl<'a> LockedReachable<'a> {
     pub fn new(
         mino_factory: &'a MinoFactory,
-        mino_shifter: &'a MinoShifter,
+        mino_shifter: &'a dyn IMinoShifter,
         mino_rotation: &'a dyn MinoRotation,
         max_y: u8,
     ) -> Self {
@@ -221,11 +217,9 @@ mod tests {
         println!("{}", field_view::to_string(field.as_ref()));
     }
 
-    // Porting note: the test cases seem to actually check for the specific kick, not just if any congruent action are possible.
-    // But the implementation of LockedReachable seems to also check if any congruent action is reachable.
     fn test_wrapper(marks: String, test_cases: &[(bool, Piece, Rotate, u8, u8)]) {
         let mino_factory = MinoFactory::new();
-        let mino_shifter = MinoShifter::new();
+        let mino_shifter = PassedMinoShifter::new();
         let mino_rotation = srs_mino_rotation_factory::create();
 
         let field = field_factory::create_field_with_marks(marks);
@@ -241,7 +235,7 @@ mod tests {
             let mino = mino_factory.get(*piece, *rotate);
             assert!(field.can_put(mino, *x, *y));
             let mino = mino_factory.get(*piece, *rotate);
-            assert_eq!(reachable.check(field.as_ref(), mino, *x, *y, 8), *expected)
+            assert_eq!(reachable.checks(field.as_ref(), mino, *x, *y, 8), *expected)
         }
     }
 

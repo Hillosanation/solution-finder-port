@@ -3,16 +3,16 @@ use crate::{
     sfinder_core::{
         action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
-        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter},
+        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::IMinoShifter},
         srs::{mino_rotation::MinoRotation, rotate_direction::RotateDirection},
     },
 };
 
-use super::reachable::Reachable;
+use super::reachable::{ILockedReachable, Reachable};
 
 pub struct Locked180Reachable<'a> {
     mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+    mino_shifter: &'a dyn IMinoShifter,
     mino_rotation: &'a dyn MinoRotation,
     // variable during search:
     locked_cache: MinimalLockedCache,
@@ -22,7 +22,7 @@ pub struct Locked180Reachable<'a> {
 impl<'a> Locked180Reachable<'a> {
     pub fn new(
         mino_factory: &'a MinoFactory,
-        mino_shifter: &'a MinoShifter,
+        mino_shifter: &'a dyn IMinoShifter,
         mino_rotation: &'a dyn MinoRotation,
         max_y: u8,
     ) -> Self {

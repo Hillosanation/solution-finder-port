@@ -56,7 +56,11 @@ mod tests {
     use super::*;
     use crate::{
         common::datastore::action::action::Action,
-        sfinder_core::{field::field_factory, mino::piece::Piece, srs::rotate::Rotate},
+        sfinder_core::{
+            field::field_factory,
+            mino::{mino_shifter::IMinoShifter, piece::Piece},
+            srs::rotate::Rotate,
+        },
         sfinder_lib::{coordinate_walker::get_ranges, randoms},
     };
     use rand::thread_rng;

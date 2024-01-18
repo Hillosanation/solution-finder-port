@@ -1,13 +1,16 @@
 use crate::sfinder_core::{
-    mino::{mino_factory::MinoFactory, mino_shifter::MinoShifter},
+    mino::{mino_factory::MinoFactory, mino_shifter::IMinoShifter},
     srs::mino_rotation::MinoRotation,
 };
 
-use super::{locked_reachable::LockedReachable, reachable::ILockedReachable};
+use super::{
+    locked_180_reachable::Locked180Reachable, locked_reachable::LockedReachable,
+    reachable::ILockedReachable,
+};
 
 pub fn create_90_locked<'a>(
     mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+    mino_shifter: &'a dyn IMinoShifter,
     mino_rotation: &'a dyn MinoRotation,
     max_y: u8,
 ) -> Box<dyn ILockedReachable + 'a> {
@@ -16,7 +19,7 @@ pub fn create_90_locked<'a>(
 
 pub fn create_180_locked<'a>(
     mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+    mino_shifter: &'a dyn IMinoShifter,
     mino_rotation: &'a dyn MinoRotation,
     max_y: u8,
 ) -> Box<dyn ILockedReachable + 'a> {
@@ -25,7 +28,7 @@ pub fn create_180_locked<'a>(
 
 pub fn create_locked<'a>(
     mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+    mino_shifter: &'a dyn IMinoShifter,
     mino_rotation: &'a dyn MinoRotation,
     max_y: u8,
     use_180_rotation: bool,
