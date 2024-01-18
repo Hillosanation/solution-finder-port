@@ -12,7 +12,7 @@ use crate::{
     },
 };
 
-fn exists_on_ground(
+pub fn exists_on_ground(
     init_field: &dyn Field,
     all_merged_field: &dyn Field,
     all_merged_filled_rows: u64,
@@ -63,7 +63,7 @@ fn exists_on_ground(
 }
 
 // Tスピンか判定
-fn can_t_spin_with_filled_rows(
+pub fn can_t_spin_with_filled_rows(
     field_without_t: &dyn Field,
     operation_t: SimpleOriginalPiece,
 ) -> bool {
@@ -84,7 +84,7 @@ fn can_t_spin_with_filled_rows(
     can_t_spin(freeze.as_ref(), operation_t.get_x(), y - slide_y)
 }
 
-fn can_t_spin(field: &dyn Field, x: u8, y: u8) -> bool {
+pub fn can_t_spin(field: &dyn Field, x: u8, y: u8) -> bool {
     [
         (x as i8 - 1, y as i8 - 1),
         (x as i8 - 1, y as i8 + 1),
@@ -106,7 +106,7 @@ fn is_block(field: &dyn Field, x: i8, y: i8) -> bool {
     }
 }
 
-fn get_spins(before: &dyn Field, spin_result: &SpinResult, cleared_rows: u8) -> Spin {
+pub fn get_spins(before: &dyn Field, spin_result: &SpinResult, cleared_rows: u8) -> Spin {
     let to_rotate = spin_result.get_to_rotate();
     let to_x = spin_result.x;
     let to_y = spin_result.y;
@@ -128,7 +128,7 @@ fn get_spins(before: &dyn Field, spin_result: &SpinResult, cleared_rows: u8) -> 
 // Tの凸側のブロックが両方とも埋まっているか
 // `true`のとき、T-SpinはRegularになる。
 // `false`のとき、MiniかRegularか判別するにはさらに条件が必要
-fn is_filled_t_front(before: &dyn Field, rotate: Rotate, to_x: u8, to_y: u8) -> bool {
+pub fn is_filled_t_front(before: &dyn Field, rotate: Rotate, to_x: u8, to_y: u8) -> bool {
     match rotate {
         Rotate::Spawn => {
             is_block(before, to_x as i8 - 1, to_y as i8 + 1)

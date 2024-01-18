@@ -1,9 +1,12 @@
 use super::{
     mino_rotation::MinoRotation, rotate_direction::RotateDirection, spin_result::SpinResult,
 };
-use crate::sfinder_core::{
-    field::{field::Field, field_constants::FIELD_WIDTH},
-    mino::{mino::Mino, mino_factory::MinoFactory},
+use crate::{
+    common::datastore::coordinate::Coordinate,
+    sfinder_core::{
+        field::{field::Field, field_constants::FIELD_WIDTH},
+        mino::{mino::Mino, mino_factory::MinoFactory},
+    },
 };
 
 pub struct MinoRotationDetail<'a> {
@@ -17,6 +20,17 @@ impl<'a> MinoRotationDetail<'a> {
             mino_factory,
             mino_rotation,
         }
+    }
+
+    // pass-through for SpinChecker to access the offsets
+    pub fn get_patterns_from(
+        &self,
+        before: &'static Mino,
+        direction: RotateDirection,
+    ) -> impl Iterator<Item = &Coordinate> {
+        self.mino_rotation
+            .get_patterns_from(before, direction)
+            .get_offsets()
     }
 
     pub fn get_kicks(
