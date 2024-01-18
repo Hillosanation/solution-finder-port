@@ -1,6 +1,7 @@
 use crate::sfinder_core::srs::{rotate::Rotate, rotate_direction::RotateDirection};
 
-#[derive(PartialEq, PartialOrd)]
+// Porting note: struct members are ordered so that the Ord implementation implements SpinDefaultPriority
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Spin {
     cleared_rows: ClearedRows,
     spin: TSpins,
@@ -22,7 +23,7 @@ impl Spin {
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum TSpins {
     Regular,
     Mini,
@@ -44,7 +45,7 @@ impl TSpins {
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum TSpinNames {
     NoName,
     Fin,
@@ -75,7 +76,7 @@ impl TSpinNames {
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum ClearedRows {
     Zero = 0,
