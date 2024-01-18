@@ -81,6 +81,7 @@ pub trait Field: Debug + DynClone /* + PartialOrd */ {
         start_y: u8,
         max_field_height: u8,
     ) -> bool {
+        // TODO: check if masking off columns is faster than checking each y placement
         (start_y + 1..max_field_height + (-mino.get_min_y()) as u8)
             .all(|y| self.can_put(mino, x, y))
     }
