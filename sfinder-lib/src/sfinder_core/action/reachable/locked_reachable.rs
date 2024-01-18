@@ -57,52 +57,32 @@ impl<'a> LockedReachable<'a> {
 
         self.locked_cache.visit(x, y, rotate);
 
-        // harddropでたどりつけるとき
-        if field.can_reach_on_harddrop(mino, x, y) {
-            return true;
-        }
+        // same as LockedCandidate
 
-        // 上に移動
-        let up_y = y + 1;
-        if up_y < self.appear_y
-            && field.can_put(mino, x, up_y)
-            && self.check_inner(field, mino, x, up_y, FromDirection::None)
-        {
-            return true;
-        }
-
-        // 左に移動
-        if let Some(left_x) = x.checked_sub(1) {
-            if direction != FromDirection::Left
-                && -mino.get_min_x() <= left_x as i8
-                && field.can_put(mino, left_x, y)
-                && self.check_inner(field, mino, left_x, y, FromDirection::Right)
-            {
-                return true;
+        field.can_reach_on_harddrop(mino, x, y)
+            || {
+                let up_y = y + 1;
+                up_y < self.appear_y
+                    && field.can_put(mino, x, up_y)
+                    && self.check_inner(field, mino, x, up_y, FromDirection::None)
             }
-        }
-
-        // 右に移動
-        let right_x = x + 1;
-        if direction != FromDirection::Right
-            && (right_x as i8) < FIELD_WIDTH as i8 - mino.get_max_x()
-            && field.can_put(mino, right_x, y)
-            && self.check_inner(field, mino, right_x, y, FromDirection::Left)
-        {
-            return true;
-        }
-
-        // 右回転でくる可能性がある場所を移動
-        if self.check_rotation(field, mino, x, y, RotateDirection::Clockwise) {
-            return true;
-        }
-
-        // 左回転でくる可能性がある場所を移動
-        if self.check_rotation(field, mino, x, y, RotateDirection::CounterClockwise) {
-            return true;
-        }
-
-        false
+            || {
+                x.checked_sub(1).map_or(false, |left_x| {
+                    direction != FromDirection::Left
+                        && -mino.get_min_x() <= left_x as i8
+                        && field.can_put(mino, left_x, y)
+                        && self.check_inner(field, mino, left_x, y, FromDirection::Right)
+                })
+            }
+            || {
+                let right_x = x + 1;
+                direction != FromDirection::Right
+                    && (right_x as i8) < FIELD_WIDTH as i8 - mino.get_max_x()
+                    && field.can_put(mino, right_x, y)
+                    && self.check_inner(field, mino, right_x, y, FromDirection::Left)
+            }
+            || self.check_rotation(field, mino, x, y, RotateDirection::Clockwise)
+            || self.check_rotation(field, mino, x, y, RotateDirection::CounterClockwise)
     }
 
     fn check_rotation(

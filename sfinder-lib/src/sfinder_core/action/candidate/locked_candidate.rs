@@ -64,58 +64,44 @@ impl<'a> LockedCandidate<'a> {
 
         self.locked_cache.visit(x, y, rotate);
 
-        // harddropでたどりつけるとき
-        if field.can_reach_on_harddrop(mino, x, y) {
+        let result = {
+            // harddropでたどりつけるとき
+            field.can_reach_on_harddrop(mino, x, y)
+                || {
+                    // 上に移動
+                    let up_y = y + 1;
+
+                    up_y < self.appear_y
+                        && field.can_put(mino, x, up_y)
+                        && self.check(field, mino, x, up_y, FromDirection::None)
+                }
+                // 左に移動
+                || x.checked_sub(1).map_or(false, |left_x| {
+                    direction != FromDirection::Left
+                        && -mino.get_min_x() <= left_x as i8
+                        && field.can_put(mino, left_x, y)
+                        && self.check(field, mino, left_x, y, FromDirection::Right)
+                    })
+                || {
+                    // 右に移動
+                    let right_x = x + 1;
+
+                    direction != FromDirection::Right
+                        && (right_x as i8) < FIELD_WIDTH as i8 - mino.get_max_x()
+                        && field.can_put(mino, right_x, y)
+                        && self.check(field, mino, right_x, y, FromDirection::Left)
+                }
+                // 右回転でくる可能性がある場所を移動
+                || self.check_rotation(field, mino, x, y, RotateDirection::Clockwise)
+                // 左回転でくる可能性がある場所を移動
+                || self.check_rotation(field, mino, x, y, RotateDirection::CounterClockwise)
+        };
+
+        if result {
             self.locked_cache.found(x, y, rotate);
-            return true;
         }
 
-        // 上に移動
-        let up_y = y + 1;
-        if up_y < self.appear_y
-            && field.can_put(mino, x, up_y)
-            && self.check(field, mino, x, up_y, FromDirection::None)
-        {
-            self.locked_cache.found(x, y, rotate);
-            return true;
-        }
-
-        // 左に移動
-        if let Some(left_x) = x.checked_sub(1) {
-            if direction != FromDirection::Left
-                && -mino.get_min_x() <= left_x as i8
-                && field.can_put(mino, left_x, y)
-                && self.check(field, mino, left_x, y, FromDirection::Right)
-            {
-                self.locked_cache.found(x, y, rotate);
-                return true;
-            }
-        }
-
-        // 右に移動
-        let right_x = x + 1;
-        if direction != FromDirection::Right
-            && (right_x as i8) < FIELD_WIDTH as i8 - mino.get_max_x()
-            && field.can_put(mino, right_x, y)
-            && self.check(field, mino, right_x, y, FromDirection::Left)
-        {
-            self.locked_cache.found(x, y, rotate);
-            return true;
-        }
-
-        // 右回転でくる可能性がある場所を移動
-        if self.check_rotation(field, mino, x, y, RotateDirection::Clockwise) {
-            self.locked_cache.found(x, y, rotate);
-            return true;
-        }
-
-        // 左回転でくる可能性がある場所を移動
-        if self.check_rotation(field, mino, x, y, RotateDirection::CounterClockwise) {
-            self.locked_cache.found(x, y, rotate);
-            return true;
-        }
-
-        return false;
+        result
     }
 
     fn check_rotation(
