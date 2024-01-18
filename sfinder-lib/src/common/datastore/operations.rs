@@ -5,7 +5,7 @@ use std::{convert::Infallible, fmt::Display, str::FromStr};
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Operations<O: Operation> {
     // Porting note: I don't think you need to accomodate for each operation being a different concrete type.
-    // In practive, Operations should be getting a vec of operations that are of the same concrete type, we just don't know which one.
+    // In practice, Operations should be getting a vec of operations that are of the same concrete type, we just don't know which one.
     // TODO: check this
     operations: Vec<O>,
 }
