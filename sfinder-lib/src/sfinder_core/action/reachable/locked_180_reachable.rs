@@ -192,3 +192,56 @@ impl Reachable for Locked180Reachable<'_> {
         self.check_inner(field, mino, x, y, FromDirection::None)
     }
 }
+
+impl ILockedReachable for Locked180Reachable<'_> {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use crate::{
+        entry::common::kicks::factory::file_mino_rotation_factory,
+        sfinder_core::{
+            action::reachable::reachable_facade,
+            field::field_factory,
+            mino::{mino_shifter::MinoShifter, piece::Piece},
+            srs::rotate::Rotate,
+        },
+    };
+
+    use super::*;
+
+    #[test]
+    fn test_search1() {
+        let mino_factory = MinoFactory::new();
+        let mino_shifter = MinoShifter::new();
+        let mino_rotation = file_mino_rotation_factory::create(PathBuf::from(
+            std::env::var("CARGO_MANIFEST_DIR").unwrap() + "/kicks/nullpomino180.properties",
+        ))
+        .unwrap();
+        let mut reachable = reachable_facade::create_180_locked(
+            &mino_factory,
+            &mino_shifter,
+            mino_rotation.as_ref(),
+            6,
+        );
+
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "__________"
+                + "XXX__XXXXX"
+                + "XXX___XXXX"
+                + "X___XXXXXX"
+                + "XX_XXXXXXX",
+        );
+
+        let checks = reachable.checks(
+            field.as_ref(),
+            mino_factory.get(Piece::T, Rotate::Reverse),
+            2,
+            1,
+            6,
+        );
+        assert!(checks);
+    }
+}
