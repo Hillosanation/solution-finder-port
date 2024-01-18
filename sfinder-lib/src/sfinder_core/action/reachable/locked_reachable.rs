@@ -1479,25 +1479,44 @@ mod tests {
                 );
             }
         }
+    }
 
-        mod other {
-            use super::*;
+    mod other {
+        use super::*;
 
-            #[test]
-            fn checksLimit() {
-                test_wrapper(
-                    String::new()
-                        + "XX_XXXXXXX"
-                        + "X__XXXXXXX"
-                        + "___XXXXXXX"
-                        + "___XXXXXXX"
-                        + "__XXXXXXXX"
-                        + "_XXXXXXXXX",
-                    &[(false, T, Right, 1, 2)],
-                );
-            }
+        #[test]
+        fn checks_limit() {
+            let mino_factory = MinoFactory::new();
+            let mino_shifter = PassedMinoShifter::new();
+            let mino_rotation = srs_mino_rotation_factory::create();
+
+            let field = field_factory::create_field_with_marks(
+                String::new()
+                    + "XX_XXXXXXX"
+                    + "X__XXXXXXX"
+                    + "___XXXXXXX"
+                    + "___XXXXXXX"
+                    + "__XXXXXXXX"
+                    + "_XXXXXXXXX",
+            );
+
+            let mut reachable = reachable_facade::create_90_locked(
+                &mino_factory,
+                &mino_shifter,
+                mino_rotation.as_ref(),
+                6,
+            );
+
+            let expected = false;
+            let piece = T;
+            let rotate = Right;
+            let x = 1;
+            let y = 2;
+
+            let mino = mino_factory.get(piece, rotate);
+            assert!(field.can_put(mino, x, y));
+            let mino = mino_factory.get(piece, rotate);
+            assert_eq!(reachable.checks(field.as_ref(), mino, x, y, 6), expected)
         }
     }
 }
-
-// add #[rustfmt::skip] to any fields <= 4 lines.
