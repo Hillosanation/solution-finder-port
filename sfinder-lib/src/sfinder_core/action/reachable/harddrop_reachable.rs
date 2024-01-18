@@ -5,21 +5,15 @@ use crate::sfinder_core::{
 
 use super::reachable::Reachable;
 
-pub struct HarddropReachable<'a> {
-    mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+pub struct HarddropReachable {
     // variable during search:
     appear_y: u8,
 }
 
-impl<'a> HarddropReachable<'a> {
+impl HarddropReachable {
     // TODO: max_y is not used
-    pub fn new(mino_factory: &'a MinoFactory, mino_shifter: &'a MinoShifter, _max_y: u8) -> Self {
-        Self {
-            mino_factory,
-            mino_shifter,
-            appear_y: 0,
-        }
+    pub fn new(max_y: u8) -> Self {
+        Self { appear_y: 0 }
     }
 
     fn check_inner(&self, field: &dyn Field, mino: &Mino, x: u8, y: u8) -> bool {
@@ -29,7 +23,7 @@ impl<'a> HarddropReachable<'a> {
     }
 }
 
-impl Reachable for HarddropReachable<'_> {
+impl Reachable for HarddropReachable {
     fn checks(
         &mut self,
         field: &dyn Field,
@@ -70,8 +64,7 @@ mod tests {
     #[test]
     fn checks() {
         let mino_factory = MinoFactory::new();
-        let mino_shifter = MinoShifter::new();
-        let mut reachable = HarddropReachable::new(&mino_factory, &mino_shifter, 4);
+        let mut reachable = HarddropReachable::new(4);
         #[rustfmt::skip]
         let field = field_factory::create_field_with_marks(
             String::new()
@@ -93,7 +86,7 @@ mod tests {
     fn congruents() {
         let mino_factory = MinoFactory::new();
         let mino_shifter = MinoShifter::new();
-        let mut reachable = HarddropReachable::new(&mino_factory, &mino_shifter, 4);
+        let mut reachable = HarddropReachable::new(4);
 
         let mut rngs = thread_rng();
         let field = randoms::gen_field(&mut rngs, 4, 5);
