@@ -15,7 +15,6 @@ pub fn walk(mino: &'static Mino, max_y: u8) -> impl Iterator<Item = (u8, u8)> {
 }
 
 // (x_range, y_range)
-// TODO: refactor ranges of a mino over a field with this
 #[inline]
 pub fn get_ranges(mino: &'static Mino, max_y: u8) -> (std::ops::Range<u8>, std::ops::Range<u8>) {
     (

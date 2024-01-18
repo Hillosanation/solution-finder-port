@@ -7,6 +7,7 @@ use crate::{
         mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
         srs::{mino_rotation::MinoRotation, rotate::Rotate, rotate_direction::RotateDirection},
     },
+    sfinder_lib::coordinate_walker::get_ranges,
 };
 use nohash::{BuildNoHashHasher, IntSet};
 
@@ -172,13 +173,11 @@ impl Candidate for LockedCandidate<'_> {
 
         for &rotate in Rotate::value_list() {
             let mino = self.mino_factory.get(piece, rotate);
-            for x in u8::try_from(-mino.get_min_x()).unwrap()
-                ..u8::try_from(FIELD_WIDTH as i8 - mino.get_max_x()).unwrap()
-            {
-                for y in (u8::try_from(-mino.get_min_y()).unwrap()
-                    ..u8::try_from(valid_height as i8 - mino.get_max_y()).unwrap())
-                    .rev()
-                {
+
+            let (x_range, y_range) = get_ranges(mino, valid_height);
+
+            for x in x_range {
+                for y in y_range.clone().rev() {
                     if field.can_put(mino, x, y) && field.is_on_ground(mino, x, y) {
                         if self.check(field, mino, x, y, FromDirection::None) {
                             // println!("passed, {:?}", (piece, rotate, x, y));

@@ -8,6 +8,7 @@ use crate::{
         mino::{mino_factory::MinoFactory, mino_shifter::MinoShifter, piece::Piece},
         srs::rotate::Rotate,
     },
+    sfinder_lib::coordinate_walker::get_ranges,
 };
 
 pub struct HarddropCandidate<'a> {
@@ -39,9 +40,9 @@ impl Candidate for HarddropCandidate<'_> {
             let y = u8::try_from(valid_height as i8 - mino.get_min_y()).unwrap();
             let max_y = u8::try_from(valid_height as i8 - mino.get_max_y()).unwrap();
 
-            for x in u8::try_from(-mino.get_min_x()).unwrap()
-                ..u8::try_from(FIELD_WIDTH as i8 - mino.get_max_x()).unwrap()
-            {
+            let (x_range, _) = get_ranges(mino, max_y);
+
+            for x in x_range {
                 let harddrop_y = field.get_y_on_harddrop(mino, x, y);
                 if harddrop_y < max_y {
                     // Porting note: since rotations are already canonical, there is no need to convert them to canonical form
