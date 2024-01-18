@@ -124,3 +124,88 @@ impl SpinChecker<'_> {
             .collect()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        common::datastore::simple_operation::SimpleOperation,
+        entry::common::kicks::factory::{file_mino_rotation_factory, srs_mino_rotation_factory},
+        searcher::spins::spin::{ClearedRows, TSpins},
+        sfinder_core::{
+            action::reachable::reachable_facade, field::field_factory,
+            mino::mino_shifter::MinoShifter, srs::rotate::Rotate,
+        },
+    };
+    use std::path::PathBuf;
+
+    #[test]
+    fn spin() {
+        let max_y = 24;
+        let mino_factory = MinoFactory::new();
+        let mino_shifter = MinoShifter::new();
+        let mino_rotation = srs_mino_rotation_factory::create();
+        let mino_rotation_detail = MinoRotationDetail::new(&mino_factory, mino_rotation.as_ref());
+        let locked_reachable = reachable_facade::create_90_locked(
+            &mino_factory,
+            &mino_shifter,
+            mino_rotation.as_ref(),
+            max_y,
+        );
+        let mut spin_checker =
+            SpinChecker::new(&mino_factory, mino_rotation_detail, locked_reachable, false);
+
+        #[rustfmt::skip]
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "X__XX_X___"
+                + "X___XXXXXX"
+                + "XX_XXXXXXX"
+        );
+
+        let operation = SimpleOperation::new(Piece::T, Rotate::Reverse, 2, 1);
+        let spin = spin_checker
+            .check(field.as_ref(), &operation, max_y, 2)
+            .unwrap();
+
+        assert_eq!(spin.spin, TSpins::Regular);
+        assert_eq!(spin.cleared_rows, ClearedRows::Double);
+    }
+
+    #[test]
+    fn spin_180() {
+        let max_y = 24;
+        let mino_factory = MinoFactory::new();
+        let mino_shifter = MinoShifter::new();
+        let mino_rotation = file_mino_rotation_factory::create(PathBuf::from(
+            std::env::var("CARGO_MANIFEST_DIR").unwrap() + "/kicks/jstris180.properties",
+        ))
+        .unwrap();
+        let mino_rotation_detail = MinoRotationDetail::new(&mino_factory, mino_rotation.as_ref());
+        let locked_reachable = reachable_facade::create_180_locked(
+            &mino_factory,
+            &mino_shifter,
+            mino_rotation.as_ref(),
+            max_y,
+        );
+        let mut spin_checker =
+            SpinChecker::new(&mino_factory, mino_rotation_detail, locked_reachable, false);
+
+        let field = field_factory::create_field_with_marks(
+            String::new()
+                + "____X_____"
+                + "__XXXXX__X"
+                + "_XXXX____X"
+                + "XXXXX___XX"
+                + "XXXXX_XXXX",
+        );
+
+        let operation = SimpleOperation::new(Piece::T, Rotate::Right, 5, 1);
+        let spin = spin_checker
+            .check(field.as_ref(), &operation, max_y, 1)
+            .unwrap();
+
+        assert_eq!(spin.spin, TSpins::Mini);
+        assert_eq!(spin.cleared_rows, ClearedRows::Single);
+    }
+}
