@@ -148,3 +148,154 @@ fn is_filled_t_front(before: &dyn Field, rotate: Rotate, to_x: u8, to_y: u8) -> 
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        common::parser::operation_transform,
+        searcher::spins::spin_commons,
+        sfinder_core::{
+            field::field_factory,
+            mino::{mino_factory::MinoFactory, piece::Piece},
+        },
+    };
+
+    fn to(
+        piece: Piece,
+        rotate: Rotate,
+        x: u8,
+        y: u8,
+        delete_key: u64,
+        field_height: u8,
+    ) -> SimpleOriginalPiece {
+        SimpleOriginalPiece::new(
+            operation_transform::to_full_operation_with_key(
+                MinoFactory::new().get(piece, rotate),
+                x,
+                y,
+                delete_key,
+                field_height,
+            ),
+            field_height,
+        )
+    }
+
+    fn test_wrapper(
+        init_field: &dyn Field,
+        field: &dyn Field,
+        all_merged_filled_rows: u64,
+        one_piece_filled_rows: u64,
+        test_cases: Vec<(Piece, Rotate, u8, u8, u64, bool)>,
+        field_height: u8,
+    ) {
+        for (piece, rotate, x, y, delete_key, expected) in test_cases {
+            // println!("{:?}", (piece, rotate, x, y, delete_key, expected));
+            assert_eq!(
+                spin_commons::exists_on_ground(
+                    init_field,
+                    field,
+                    all_merged_filled_rows,
+                    one_piece_filled_rows,
+                    to(piece, rotate, x, y, delete_key, field_height)
+                ),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn exists_on_ground1() {
+        let field_height = 4;
+        let field = field_factory::create_field_with_marks_and_height(
+            String::new() + "X_________",
+            field_height,
+        );
+
+        test_wrapper(
+            field.as_ref(),
+            field.as_ref(),
+            0,
+            0,
+            vec![
+                (Piece::O, Rotate::Spawn, 3, 0, 0, true),
+                (Piece::O, Rotate::Spawn, 0, 1, 0, true),
+                (Piece::O, Rotate::Spawn, 3, 1, 0, false),
+            ],
+            field_height,
+        );
+    }
+
+    #[test]
+    fn exists_on_ground2() {
+        // 揃っているラインがすぐに消えないケース
+        let field_height = 6;
+        let field = field_factory::create_field_with_marks_and_height(
+            String::new()
+                + "_____XXXXX"
+                + "XXXXXXXXXX"
+                + "_____XXXXX"
+                + "X____XXXXX"
+                + "XX___XXXXX",
+            field_height,
+        );
+        let filled_rows = key_operators::get_bit_key(3);
+
+        test_wrapper(
+            field.as_ref(),
+            field.as_ref(),
+            filled_rows,
+            0,
+            vec![
+                (Piece::O, Rotate::Spawn, 2, 0, 0, true),
+                (Piece::O, Rotate::Spawn, 2, 1, 0, false),
+                (Piece::O, Rotate::Spawn, 1, 1, 0, true),
+                (Piece::O, Rotate::Spawn, 1, 2, filled_rows, false),
+                (Piece::O, Rotate::Spawn, 0, 2, filled_rows, true),
+                (Piece::O, Rotate::Spawn, 0, 4, 0, true),
+            ],
+            field_height,
+        );
+    }
+
+    #[test]
+    fn exists_on_ground3() {
+        // 揃っているラインがすぐに消えるケース
+        let field_height = 6;
+        let init_field = field_factory::create_field_with_marks_and_height(
+            String::new()
+                + "_____XXXXX"
+                + "____XXXXXX"
+                + "_____XXXXX"
+                + "X____XXXXX"
+                + "XX___XXXXX",
+            field_height,
+        );
+        let field = field_factory::create_field_with_marks_and_height(
+            String::new()
+                + "_____XXXXX"
+                + "XXXXXXXXXX"
+                + "_____XXXXX"
+                + "X____XXXXX"
+                + "XX___XXXXX",
+            field_height,
+        );
+        let filled_rows = key_operators::get_bit_key(3);
+
+        test_wrapper(
+            init_field.as_ref(),
+            field.as_ref(),
+            filled_rows,
+            filled_rows,
+            vec![
+                (Piece::O, Rotate::Spawn, 2, 0, 0, true),
+                (Piece::O, Rotate::Spawn, 2, 1, 0, false),
+                (Piece::O, Rotate::Spawn, 1, 1, 0, true),
+                (Piece::O, Rotate::Spawn, 1, 2, filled_rows, false),
+                (Piece::O, Rotate::Spawn, 0, 2, filled_rows, true),
+                (Piece::O, Rotate::Spawn, 0, 4, 0, false),
+            ],
+            field_height,
+        );
+    }
+}
