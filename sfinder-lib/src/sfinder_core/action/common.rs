@@ -1,4 +1,6 @@
 //! Refactors common logic used in Candidate and Reachable
+//! TODO: use interior mutability to avoid &mut self in checks/search?
+//! TODO: replace early returns with chaining boolean expressions in Candidate/Reachable
 
 use crate::sfinder_core::{
     field::{field::Field, field_constants::FIELD_WIDTH},

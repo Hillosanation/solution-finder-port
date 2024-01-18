@@ -43,7 +43,7 @@ impl SpinChecker<'_> {
     pub fn check(
         &mut self,
         field: &dyn Field,
-        operation: &dyn Operation,
+        operation: &dyn Operation, // TODO: seems like this is always constructed right before calling this function. Is replacing the bound with Action sufficient?
         field_height: u8,
         cleared_rows: u8,
     ) -> Option<Spin> {
