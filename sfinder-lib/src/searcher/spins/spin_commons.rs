@@ -173,10 +173,11 @@ fn get_t_spin_name(
     }
 }
 
+#[derive(PartialEq, PartialOrd)]
 struct Spin {
+    cleared_rows: ClearedRows,
     spin: TSpins,
     name: TSpinNames,
-    cleared_rows: ClearedRows,
 }
 
 impl Spin {
@@ -194,20 +195,22 @@ impl Spin {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum TSpins {
     Regular,
     Mini,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum TSpinNames {
+    NoName,
+    Fin,
     Iso,
     Neo,
-    Fin,
-    NoName,
 }
 
+#[derive(Debug, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum ClearedRows {
     Zero = 0,
     Single,
