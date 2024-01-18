@@ -4,18 +4,14 @@ use crate::{
     sfinder_core::{
         action::common::{can_put_mino_in_field, FromDirection},
         field::{field::Field, field_constants::FIELD_WIDTH},
-        mino::{
-            mino::Mino,
-            mino_factory::MinoFactory,
-            mino_shifter::{IMinoShifter, MinoShifter},
-        },
+        mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::IMinoShifter},
         srs::{mino_rotation::MinoRotation, rotate_direction::RotateDirection},
     },
 };
 
 pub struct RotateReachable<'a> {
     mino_factory: &'a MinoFactory,
-    mino_shifter: &'a MinoShifter,
+    mino_shifter: &'a dyn IMinoShifter,
     mino_rotation: &'a dyn MinoRotation,
     // variable during search:
     locked_cache: MinimalLockedCache,
@@ -25,7 +21,7 @@ pub struct RotateReachable<'a> {
 impl<'a> RotateReachable<'a> {
     pub fn new(
         mino_factory: &'a MinoFactory,
-        mino_shifter: &'a MinoShifter,
+        mino_shifter: &'a dyn IMinoShifter,
         mino_rotation: &'a dyn MinoRotation,
         max_y: u8,
     ) -> Self {
@@ -222,14 +218,11 @@ mod tests {
 
         let field = field_factory::create_field_with_marks(marks);
 
-        let mut reachable = reachable_facade::create_90_locked(
-            &mino_factory,
-            &mino_shifter,
-            mino_rotation.as_ref(),
-            8,
-        );
+        let mut reachable =
+            RotateReachable::new(&mino_factory, &mino_shifter, mino_rotation.as_ref(), 8);
 
         for (expected, piece, rotate, x, y) in test_cases {
+            println!("{:?}", (expected, piece, rotate, x, y));
             let mino = mino_factory.get(*piece, *rotate);
             assert!(field.can_put(mino, *x, *y));
             let mino = mino_factory.get(*piece, *rotate);
@@ -1598,7 +1591,7 @@ mod tests {
                         (true, T, Right, 8, 1),
                         (true, T, Left, 1, 1),
                         (true, T, Left, 9, 1),
-                        (false, T, Reverse, 5, 1),
+                        (true, T, Reverse, 5, 1),
                         (false, T, Spawn, 4, 0),
                     ],
                 );
