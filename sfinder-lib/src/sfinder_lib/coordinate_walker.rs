@@ -4,14 +4,7 @@ use crate::sfinder_core::{field::field_constants::FIELD_WIDTH, mino::mino::Mino}
 #[cfg(test)]
 pub fn walk(mino: &'static Mino, max_y: u8) -> impl Iterator<Item = (u8, u8)> {
     let (x_range, y_range) = get_ranges(mino, max_y);
-    let a = y_range.flat_map(move |y| x_range.clone().map(move |x| (x, y)));
-    (u8::try_from(-mino.get_min_y()).unwrap()
-        ..u8::try_from(max_y as i8 - mino.get_max_y()).unwrap())
-        .flat_map(move |y| {
-            (u8::try_from(-mino.get_min_x()).unwrap()
-                ..u8::try_from(FIELD_WIDTH as i8 - mino.get_max_x()).unwrap())
-                .map(move |x| (x, y))
-        })
+    y_range.flat_map(move |y| x_range.clone().map(move |x| (x, y)))
 }
 
 // (x_range, y_range)

@@ -1,19 +1,17 @@
-use nohash::{BuildNoHashHasher, IntSet};
-
 use super::candidate::Candidate;
 use crate::{
     common::datastore::action::minimal_action::MinimalAction,
     sfinder_core::{
-        field::{field::Field, field_constants::FIELD_WIDTH},
+        field::field::Field,
         mino::{
             mino_factory::MinoFactory,
             mino_shifter::{IMinoShifter, MinoShifter},
             piece::Piece,
         },
-        srs::rotate::Rotate,
     },
     sfinder_lib::coordinate_walker::get_ranges,
 };
+use nohash::{BuildNoHashHasher, IntSet};
 
 pub struct HarddropCandidate<'a> {
     mino_factory: &'a MinoFactory,
@@ -41,10 +39,10 @@ impl Candidate for HarddropCandidate<'_> {
         for rotate in self.mino_shifter.get_unique_rotates(piece) {
             let mino = self.mino_factory.get(piece, rotate);
 
-            let y = u8::try_from(valid_height as i8 - mino.get_min_y()).unwrap();
-            let max_y = u8::try_from(valid_height as i8 - mino.get_max_y()).unwrap();
+            let (x_range, y_range) = get_ranges(mino, valid_height);
 
-            let (x_range, _) = get_ranges(mino, max_y);
+            let y = valid_height + y_range.start;
+            let max_y = y_range.end;
 
             for x in x_range {
                 let harddrop_y = field.get_y_on_harddrop(mino, x, y);

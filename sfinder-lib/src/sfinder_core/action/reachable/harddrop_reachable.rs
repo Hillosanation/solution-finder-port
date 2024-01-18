@@ -1,9 +1,5 @@
-use crate::sfinder_core::{
-    field::field::Field,
-    mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter},
-};
-
 use super::reachable::Reachable;
+use crate::sfinder_core::{field::field::Field, mino::mino::Mino};
 
 pub struct HarddropReachable {
     // variable during search:
@@ -12,7 +8,7 @@ pub struct HarddropReachable {
 
 impl HarddropReachable {
     // TODO: max_y is not used
-    pub fn new(max_y: u8) -> Self {
+    pub fn new(_max_y: u8) -> Self {
         Self { appear_y: 0 }
     }
 
@@ -58,7 +54,11 @@ mod tests {
         common::datastore::action::action::Action,
         sfinder_core::{
             field::field_factory,
-            mino::{mino_shifter::IMinoShifter, piece::Piece},
+            mino::{
+                mino_factory::MinoFactory,
+                mino_shifter::{IMinoShifter, MinoShifter},
+                piece::Piece,
+            },
             srs::rotate::Rotate,
         },
         sfinder_lib::{coordinate_walker::get_ranges, randoms},
