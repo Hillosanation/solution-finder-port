@@ -34,7 +34,12 @@ pub fn create_locked<'a>(
     use_180_rotation: bool,
 ) -> Box<dyn ILockedReachable + 'a> {
     if use_180_rotation {
-        todo!()
+        Box::new(Locked180Reachable::new(
+            mino_factory,
+            mino_shifter,
+            mino_rotation,
+            max_y,
+        ))
     } else {
         Box::new(LockedReachable::new(
             mino_factory,
