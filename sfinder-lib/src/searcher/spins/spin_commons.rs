@@ -8,7 +8,7 @@ use crate::{
     sfinder_core::{
         field::{field::Field, field_constants::FIELD_WIDTH, key_operators},
         neighbor::simple_original_piece::SimpleOriginalPiece,
-        srs::{rotate::Rotate, rotate_direction::RotateDirection, spin_result::SpinResult},
+        srs::{rotate::Rotate, spin_result::SpinResult},
     },
 };
 
@@ -99,7 +99,11 @@ fn can_t_spin(field: &dyn Field, x: u8, y: u8) -> bool {
 
 // out of bounds or exists block
 fn is_block(field: &dyn Field, x: i8, y: i8) -> bool {
-    x < 0 || x >= FIELD_WIDTH as i8 || y < 0 || field.exists_block(x as u8, y as u8)
+    const RIGHT_BOUND: i8 = FIELD_WIDTH as i8 - 1;
+    match (x, y) {
+        (x @ 0..=RIGHT_BOUND, y @ 0..) => field.exists_block(x as u8, y as u8),
+        _ => true,
+    }
 }
 
 fn get_spins(before: &dyn Field, spin_result: &SpinResult, cleared_rows: u8) -> Spin {
