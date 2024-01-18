@@ -1,11 +1,13 @@
+use super::reachable_for_cover::ReachableForCover;
 use crate::sfinder_core::{
-    action::reachable::reachable_facade,
+    action::reachable::{
+        reachable::{ILockedReachable, Reachable},
+        reachable_facade,
+    },
     field::field::Field,
     mino::{mino::Mino, mino_factory::MinoFactory, mino_shifter::MinoShifter},
     srs::mino_rotation::MinoRotation,
 };
-
-use super::reachable::{ILockedReachable, Reachable, ReachableForCover};
 
 pub struct LastSoftdropReachable<'a> {
     reachable: Box<dyn Reachable>,

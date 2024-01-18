@@ -1,6 +1,5 @@
 pub mod deepdrop_reachable;
 pub mod harddrop_reachable;
-pub mod last_softdrop_reachable;
 pub mod locked_180_reachable;
 pub mod locked_reachable;
 pub mod reachable;
